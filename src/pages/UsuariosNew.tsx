@@ -30,7 +30,6 @@ import { UserRole, User } from '../types';
 export const Usuarios: React.FC = () => {
   const { logAction } = useNavigationLog();
   const [searchTerm, setSearchTerm] = useState('');
-  const [loading, setLoading] = useState(false);
 
   const [users] = useState<User[]>([
     {
@@ -137,11 +136,7 @@ export const Usuarios: React.FC = () => {
             />
           </Box>
 
-          {loading ? (
-            <SkeletonTable rows={5} columns={6} />
-          ) : (
-            <>
-              <TableContainer component={Paper} elevation={0}>
+          <TableContainer component={Paper} elevation={0}>
                 <Table>
                   <TableHead>
                     <TableRow>
@@ -235,8 +230,6 @@ export const Usuarios: React.FC = () => {
                   </GradientButton>
                 </Box>
               </Box>
-            </>
-          )}
         </CardContent>
       </AnimatedCard>
     </Box>

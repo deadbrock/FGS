@@ -74,8 +74,8 @@ class PontoServiceMock {
 
   // RESUMOS DIÁRIOS
   async listarResumosDias(
-    dataInicio: string,
-    dataFim: string,
+    _dataInicio: string,
+    _dataFim: string,
     colaboradorId?: string
   ): Promise<ResumoDia[]> {
     await this.delay(400);
@@ -218,7 +218,7 @@ class PontoServiceMock {
   }
 
   // EXPORTAÇÕES
-  async exportarEspelhoPonto(colaboradorId: string, mesReferencia: string): Promise<Blob> {
+  async exportarEspelhoPonto(_colaboradorId: string, mesReferencia: string): Promise<Blob> {
     await this.delay(1000);
     
     const html = `

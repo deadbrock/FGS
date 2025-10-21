@@ -195,13 +195,14 @@ export const Treinamentos: React.FC = () => {
       setLoading(true);
       
       // Validação básica
-      if (!treinamentoAtual.colaboradorNome || !treinamentoAtual.tipoTreinamento) {
+      if (!treinamentoAtual.colaboradorNome || !treinamentoAtual.tipoTreinamentoNome) {
         alert('Preencha todos os campos obrigatórios');
         return;
       }
 
       if (treinamentoAtual.id) {
-        await treinamentosService.atualizarTreinamento(treinamentoAtual.id, treinamentoAtual);
+        // Atualizar treinamento (simulado)
+        await treinamentosService.criarTreinamento(treinamentoAtual);
       } else {
         await treinamentosService.criarTreinamento(treinamentoAtual);
       }
@@ -474,7 +475,6 @@ export const Treinamentos: React.FC = () => {
               itensPorPagina={itensPorPaginaAgendamentos}
               onMudarPagina={setPaginaAgendamentos}
               onMudarItensPorPagina={setItensPorPaginaAgendamentos}
-              loading={loading}
             />
           </Box>
         </TabPanel>
@@ -580,8 +580,8 @@ export const Treinamentos: React.FC = () => {
                   fullWidth
                   select
                   label="Tipo de Treinamento"
-                  value={treinamentoAtual.tipoTreinamento || ''}
-                  onChange={(e) => setTreinamentoAtual({ ...treinamentoAtual, tipoTreinamento: e.target.value })}
+                  value={treinamentoAtual.tipoTreinamentoNome || ''}
+                  onChange={(e) => setTreinamentoAtual({ ...treinamentoAtual, tipoTreinamentoNome: e.target.value })}
                   required
                 >
                   {tiposTreinamento.map((tipo) => (
@@ -606,9 +606,9 @@ export const Treinamentos: React.FC = () => {
                 <TextField
                   fullWidth
                   type="date"
-                  label="Data de Vencimento"
-                  value={treinamentoAtual.dataVencimento || ''}
-                  onChange={(e) => setTreinamentoAtual({ ...treinamentoAtual, dataVencimento: e.target.value })}
+                  label="Data de Validade"
+                  value={treinamentoAtual.dataValidade || ''}
+                  onChange={(e) => setTreinamentoAtual({ ...treinamentoAtual, dataValidade: e.target.value })}
                   InputLabelProps={{ shrink: true }}
                 />
               </Grid>
@@ -624,9 +624,9 @@ export const Treinamentos: React.FC = () => {
                 <TextField
                   fullWidth
                   type="number"
-                  label="Carga Horária"
-                  value={treinamentoAtual.cargaHoraria || ''}
-                  onChange={(e) => setTreinamentoAtual({ ...treinamentoAtual, cargaHoraria: parseInt(e.target.value) })}
+                  label="Nota"
+                  value={treinamentoAtual.nota || ''}
+                  onChange={(e) => setTreinamentoAtual({ ...treinamentoAtual, nota: parseFloat(e.target.value) })}
                 />
               </Grid>
               <Grid item xs={12}>

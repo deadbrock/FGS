@@ -1,4 +1,3 @@
-import { FormatoExportacao } from '../types/relatorios';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 

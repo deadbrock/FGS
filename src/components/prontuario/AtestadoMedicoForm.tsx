@@ -99,8 +99,8 @@ export const AtestadoMedicoForm: React.FC<AtestadoMedicoFormProps> = ({
         <TextField
           fullWidth
           label="Descrição / Observações"
-          value={dados.descricao || ''}
-          onChange={(e) => handleChange('descricao', e.target.value)}
+          value={dados.observacoes || ''}
+          onChange={(e) => handleChange('observacoes', e.target.value)}
           multiline
           rows={4}
           placeholder="Descreva os detalhes do atestado médico..."

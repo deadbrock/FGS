@@ -340,7 +340,7 @@ class TreinamentosServiceMock {
     return treinamentosMock.filter((t) => t.status === StatusTreinamento.VENCIDO);
   }
 
-  async listarAVencer(dias: number = 30): Promise<TreinamentoColaborador[]> {
+  async listarAVencer(_dias: number = 30): Promise<TreinamentoColaborador[]> {
     await this.delay(300);
     return treinamentosMock.filter((t) => t.status === StatusTreinamento.A_VENCER);
   }

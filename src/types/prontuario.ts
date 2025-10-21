@@ -127,6 +127,9 @@ export interface Advertencia {
   motivo: string;
   descricao: string;
   aplicadoPor: string;
+  cargoResponsavel?: string;
+  medidasCorretivas?: string;
+  observacoes?: string;
   status: StatusProntuario;
   anexo?: Anexo;
 }

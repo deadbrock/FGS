@@ -57,7 +57,7 @@ export const Configuracoes: React.FC = () => {
   const [tabValue, setTabValue] = useState(0);
 
   const [perfil, setPerfil] = useState({
-    nome: user?.name || '',
+    nome: user?.nome || '',
     email: user?.email || '',
     telefone: '(11) 98765-4321',
     cargo: 'Administrador do Sistema',
@@ -140,11 +140,11 @@ export const Configuracoes: React.FC = () => {
                       fontWeight: 700,
                     }}
                   >
-                    {user?.name?.charAt(0).toUpperCase() || 'U'}
+                    {user?.nome?.charAt(0).toUpperCase() || 'U'}
                   </Avatar>
                   <Box textAlign="center">
                     <Typography variant="h6" fontWeight={600}>
-                      {user?.name || 'Usuário'}
+                      {user?.nome || 'Usuário'}
                     </Typography>
                     <Typography variant="body2" color="text.secondary" gutterBottom>
                       {user?.email || 'email@exemplo.com'}

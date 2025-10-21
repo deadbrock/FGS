@@ -103,7 +103,7 @@ export const Dashboard: React.FC = () => {
             WebkitTextFillColor: 'transparent',
           }}
         >
-          Olá, {user?.name}! 👋
+          Olá, {user?.nome}! 👋
         </Typography>
         <Typography variant="h6" color="text.secondary" fontWeight={400}>
           Bem-vindo ao painel de controle do FGS

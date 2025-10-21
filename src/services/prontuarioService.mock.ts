@@ -46,7 +46,7 @@ const cidades = [
   'Brasília - DF', 'Fortaleza - CE', 'Recife - PE',
 ];
 
-const tiposExame = [
+const tiposExame: Array<'Admissional' | 'Periódico' | 'Demissional' | 'Retorno ao Trabalho' | 'Mudança de Função'> = [
   'Admissional', 'Periódico', 'Retorno ao Trabalho', 'Mudança de Função', 'Demissional',
 ];
 
@@ -133,13 +133,11 @@ function gerarProntuarioMock(colaboradorId: string): ProntuarioColaborador {
     dataFim.setDate(dataFim.getDate() + 10 + (i * 5));
     
     const temValidade = i % 2 === 0;
-    let dataValidade: string | undefined;
     let status: StatusProntuario;
     
     if (temValidade) {
       const validade = new Date(dataFim);
       validade.setFullYear(validade.getFullYear() + 1);
-      dataValidade = validade.toISOString().split('T')[0];
       
       const hoje = new Date();
       if (validade < hoje) {
@@ -156,13 +154,10 @@ function gerarProntuarioMock(colaboradorId: string): ProntuarioColaborador {
     treinamentos.push({
       id: `${colaboradorId}-train-${i + 1}`,
       colaboradorId,
-      nome: tiposTreinamento[i % tiposTreinamento.length],
       titulo: tiposTreinamento[i % tiposTreinamento.length],
       descricao: `Treinamento completo sobre ${tiposTreinamento[i % tiposTreinamento.length]}`,
       dataInicio: dataInicio.toISOString().split('T')[0],
       dataFim: dataFim.toISOString().split('T')[0],
-      dataRealizacao: dataInicio.toISOString().split('T')[0],
-      dataValidade,
       cargaHoraria: 20 + (i * 10),
       instrutor: `${['Maria', 'Pedro', 'Ana', 'Carlos'][i % 4]} Instrutor`,
       instituicao: instituicoes[i % instituicoes.length],
@@ -185,7 +180,7 @@ function gerarProntuarioMock(colaboradorId: string): ProntuarioColaborador {
       medico: 'Dra. Ana Paula Silva',
       crm: '789012-SP',
       cid: 'J00',
-      descricao: 'Resfriado comum',
+      observacoes: 'Resfriado comum',
       status: StatusProntuario.APROVADO,
     });
   }
@@ -264,7 +259,6 @@ function gerarProntuarioMock(colaboradorId: string): ProntuarioColaborador {
       horarioEntrada: id % 2 === 0 ? '08:00' : '09:00',
       horarioSaida: id % 2 === 0 ? '17:00' : '18:00',
       status: StatusProntuario.APROVADO,
-      gestorImediato: id % 5 === 0 ? undefined : 'Gerente da Área',
     },
     examesMedicos,
     atestados,
@@ -342,8 +336,7 @@ class ProntuarioServiceMock {
 
     if (busca) {
       dados = dados.filter((t) =>
-        t.titulo?.toLowerCase().includes(busca.toLowerCase()) ||
-        t.nome?.toLowerCase().includes(busca.toLowerCase())
+        t.titulo?.toLowerCase().includes(busca.toLowerCase())
       );
     }
 

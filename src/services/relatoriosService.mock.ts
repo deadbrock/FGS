@@ -2,10 +2,6 @@ import {
   DashboardGeral,
   IndicadoresPrincipais,
   RelatorioFuncionarios,
-  RelatorioTurnover,
-  RelatorioAtestados,
-  RelatorioTreinamentos,
-  RelatorioBeneficiosCustos,
 } from '../types/relatorios';
 
 class RelatoriosServiceMock {

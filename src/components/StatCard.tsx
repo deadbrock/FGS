@@ -6,6 +6,7 @@ import TrendingDownIcon from '@mui/icons-material/TrendingDown';
 interface StatCardProps {
   title: string;
   value: string | number;
+  subtitle?: string;
   icon: React.ReactNode;
   trend?: {
     value: number;

@@ -747,19 +747,19 @@ export const Prontuario: React.FC = () => {
   // Colunas da tabela de treinamentos
   const colunasTreinamentos: Coluna<Treinamento>[] = [
     {
-      id: 'nome',
+      id: 'titulo',
       label: 'Treinamento',
-      format: (_valor: any, t: Treinamento) => t.nome,
+      format: (_valor: any, t: Treinamento) => t.titulo,
     },
     {
-      id: 'dataRealizacao',
-      label: 'Data de Realização',
-      format: (_valor: any, t: Treinamento) => formatarData(t.dataRealizacao),
+      id: 'dataInicio',
+      label: 'Data de Início',
+      format: (_valor: any, t: Treinamento) => formatarData(t.dataInicio),
     },
     {
-      id: 'dataValidade',
-      label: 'Validade',
-      format: (_valor: any, t: Treinamento) => t.dataValidade ? formatarData(t.dataValidade) : 'Sem validade',
+      id: 'dataFim',
+      label: 'Data Fim',
+      format: (_valor: any, t: Treinamento) => formatarData(t.dataFim),
     },
     {
       id: 'cargaHoraria',

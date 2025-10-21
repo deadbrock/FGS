@@ -78,28 +78,6 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({
         warning: <WarningIcon sx={{ mr: 1 }} />,
         info: <InfoIcon sx={{ mr: 1 }} />,
       }}
-      sx={{
-        '&.SnackbarItem-variantSuccess': {
-          background: 'linear-gradient(135deg, #388e3c 0%, #66bb6a 100%)',
-          borderRadius: 2,
-          boxShadow: '0 4px 12px rgba(56, 142, 60, 0.3)',
-        },
-        '&.SnackbarItem-variantError': {
-          background: 'linear-gradient(135deg, #d32f2f 0%, #f44336 100%)',
-          borderRadius: 2,
-          boxShadow: '0 4px 12px rgba(211, 47, 47, 0.3)',
-        },
-        '&.SnackbarItem-variantWarning': {
-          background: 'linear-gradient(135deg, #f57c00 0%, #ff9800 100%)',
-          borderRadius: 2,
-          boxShadow: '0 4px 12px rgba(245, 124, 0, 0.3)',
-        },
-        '&.SnackbarItem-variantInfo': {
-          background: 'linear-gradient(135deg, #1976d2 0%, #42a5f5 100%)',
-          borderRadius: 2,
-          boxShadow: '0 4px 12px rgba(25, 118, 210, 0.3)',
-        },
-      }}
     >
       <NotificationProviderContent>{children}</NotificationProviderContent>
     </SnackbarProvider>

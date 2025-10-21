@@ -275,7 +275,7 @@ export const DashboardLayout: React.FC = () => {
                     borderColor: 'divider',
                   }}
                 >
-                  {user?.name?.charAt(0).toUpperCase() || 'U'}
+                  {user?.nome?.charAt(0).toUpperCase() || 'U'}
                 </Avatar>
               </IconButton>
             </Tooltip>
@@ -297,7 +297,7 @@ export const DashboardLayout: React.FC = () => {
           >
             <Box sx={{ px: 2, py: 1.5 }}>
               <Typography variant="subtitle1" fontWeight={600}>
-                {user?.name || 'Usuário'}
+                {user?.nome || 'Usuário'}
               </Typography>
               <Typography variant="body2" color="text.secondary">
                 {user?.email || 'email@exemplo.com'}

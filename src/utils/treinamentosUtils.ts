@@ -1,4 +1,4 @@
-import { StatusTreinamento, TreinamentoColaborador } from '../types/treinamentos';
+import { StatusTreinamento } from '../types/treinamentos';
 
 // Calcula a data de validade baseada na data de realização e dias de validade
 export const calcularDataValidade = (dataRealizacao: string, validadeDias: number): string | undefined => {

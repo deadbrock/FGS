@@ -172,7 +172,7 @@ export const Dashboard: React.FC = () => {
   return (
     <Box>
       <PageHeader
-        title={`Olá, ${user?.name}! 👋`}
+        title={`Olá, ${user?.nome}! 👋`}
         subtitle="Bem-vindo ao painel de controle do FGS"
       />
 

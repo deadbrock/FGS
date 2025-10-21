@@ -13,7 +13,6 @@ import {
   Avatar,
   Typography,
   CardContent,
-  Dialog,
   DialogTitle,
   DialogContent,
   DialogActions,

@@ -30,6 +30,7 @@ import {
   Integracao,
   StatusIntegracao,
   TipoIntegracao,
+  TipoAutenticacao,
 } from '../types/integracoes';
 import { formatarData } from '../utils/statusUtils';
 import ApiIcon from '@mui/icons-material/Api';
@@ -98,7 +99,7 @@ const integracoesMock: Integracao[] = [
     icone: 'access_time',
     cor: '#1976d2',
     configuracoes: {
-      tipoAutenticacao: 'API_KEY',
+      tipoAutenticacao: TipoAutenticacao.API_KEY,
     },
     ultimaSincronizacao: '2024-10-19T14:30:00',
     proximaSincronizacao: '2024-10-19T14:45:00',
@@ -120,7 +121,7 @@ const integracoesMock: Integracao[] = [
     icone: 'email',
     cor: '#d32f2f',
     configuracoes: {
-      tipoAutenticacao: 'BASIC',
+      tipoAutenticacao: TipoAutenticacao.BASIC,
     },
     totalRegistros: 3500,
     registrosHoje: 85,
@@ -140,7 +141,7 @@ const integracoesMock: Integracao[] = [
     icone: 'whatsapp',
     cor: '#25D366',
     configuracoes: {
-      tipoAutenticacao: 'TOKEN',
+      tipoAutenticacao: TipoAutenticacao.TOKEN,
     },
     totalRegistros: 0,
     registrosHoje: 0,
@@ -159,7 +160,7 @@ const integracoesMock: Integracao[] = [
     icone: 'api',
     cor: '#f57c00',
     configuracoes: {
-      tipoAutenticacao: 'OAUTH2',
+      tipoAutenticacao: TipoAutenticacao.OAUTH2,
     },
     totalRegistros: 520,
     registrosHoje: 0,
