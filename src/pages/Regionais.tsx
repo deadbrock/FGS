@@ -42,6 +42,8 @@ import {
   Male as MaleIcon,
   Female as FemaleIcon,
   FilterList as FilterListIcon,
+  AdminPanelSettings as AdminPanelSettingsIcon,
+  SupervisorAccount as SupervisorAccountIcon,
 } from '@mui/icons-material';
 import { StatCard, LoadingSkeleton, PageHeader } from '../components';
 import { MapaRegioesList, CardEstadoDetalhes } from '../components/regionais';
@@ -87,6 +89,12 @@ export const Regionais: React.FC = () => {
   const [filtroGenero, setFiltroGenero] = useState<string>('TODOS');
   const [filtroEstado, setFiltroEstado] = useState<EstadoBrasil | 'TODOS'>('TODOS');
   const [colaboradorSelecionado, setColaboradorSelecionado] = useState<ColaboradorRegional | null>(null);
+  
+  // Estados para aba Administrativo
+  const [buscaAdm, setBuscaAdm] = useState('');
+  const [filtroGeneroAdm, setFiltroGeneroAdm] = useState<string>('TODOS');
+  const [filtroEstadoAdm, setFiltroEstadoAdm] = useState<EstadoBrasil | 'TODOS'>('TODOS');
+  const [filtroCargoAdm, setFiltroCargoAdm] = useState<string>('TODOS');
 
   // Carregar dados iniciais
   useEffect(() => {
@@ -169,6 +177,64 @@ export const Regionais: React.FC = () => {
   const totalMasculino = colaboradoresGlobaisFiltrados.filter(c => c.genero === 'MASCULINO').length;
   const totalFeminino = colaboradoresGlobaisFiltrados.filter(c => c.genero === 'FEMININO').length;
 
+  // Função para verificar se é cargo administrativo/gestão
+  const isCargoAdministrativo = (cargo: string): boolean => {
+    const cargosAdministrativos = [
+      'supervisor',
+      'supervisora',
+      'encarregado',
+      'encarregada',
+      'coordenador',
+      'coordenadora',
+      'gerente',
+      'diretor',
+      'diretora',
+      'gestor',
+      'gestora',
+      'líder',
+      'chefe',
+      'administrador',
+      'administradora',
+    ];
+    
+    const cargoLower = cargo.toLowerCase();
+    return cargosAdministrativos.some(c => cargoLower.includes(c));
+  };
+
+  // Filtrar colaboradores administrativos
+  const colaboradoresAdministrativos = todosColaboradores.filter(col => isCargoAdministrativo(col.cargo));
+
+  // Filtrar colaboradores administrativos com filtros aplicados
+  const colaboradoresAdministrativosFiltrados = colaboradoresAdministrativos.filter((col) => {
+    const matchBusca = buscaAdm === '' ||
+      col.nome.toLowerCase().includes(buscaAdm.toLowerCase()) ||
+      col.email.toLowerCase().includes(buscaAdm.toLowerCase()) ||
+      col.cargo.toLowerCase().includes(buscaAdm.toLowerCase()) ||
+      col.cidade.toLowerCase().includes(buscaAdm.toLowerCase());
+    
+    const matchGenero = filtroGeneroAdm === 'TODOS' || col.genero === filtroGeneroAdm;
+    const matchEstado = filtroEstadoAdm === 'TODOS' || col.estado === filtroEstadoAdm;
+    
+    // Filtro adicional por tipo de cargo
+    let matchCargo = true;
+    if (filtroCargoAdm !== 'TODOS') {
+      matchCargo = col.cargo.toLowerCase().includes(filtroCargoAdm.toLowerCase());
+    }
+    
+    return matchBusca && matchGenero && matchEstado && matchCargo;
+  });
+
+  // Contar por tipo de cargo administrativo
+  const totalSupervisores = colaboradoresAdministrativosFiltrados.filter(c => 
+    c.cargo.toLowerCase().includes('supervisor')
+  ).length;
+  const totalEncarregados = colaboradoresAdministrativosFiltrados.filter(c => 
+    c.cargo.toLowerCase().includes('encarregado')
+  ).length;
+  const totalCoordenadores = colaboradoresAdministrativosFiltrados.filter(c => 
+    c.cargo.toLowerCase().includes('coordenador') || c.cargo.toLowerCase().includes('gerente')
+  ).length;
+
   if (loading) {
     return (
       <Box>
@@ -248,6 +314,11 @@ export const Regionais: React.FC = () => {
           <Tab label="Detalhes do Estado" disabled={!estadoSelecionado} />
           <Tab label="Ranking de Estados" />
           <Tab label="Colaboradores" icon={<PeopleIcon />} iconPosition="start" />
+          <Tab 
+            label="Administrativo" 
+            icon={<AdminPanelSettingsIcon />} 
+            iconPosition="start"
+          />
         </Tabs>
 
         {/* Tab 0: Visão por Regiões */}
@@ -708,6 +779,326 @@ export const Regionais: React.FC = () => {
                 </Typography>
               </Box>
             )}
+          </Box>
+        </TabPanel>
+
+        {/* Tab 4: Administrativo */}
+        <TabPanel value={tabAtual} index={4}>
+          <Box p={2}>
+            {/* Banner Informativo */}
+            <Card 
+              sx={{ 
+                mb: 3, 
+                background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
+                color: 'white'
+              }}
+            >
+              <CardContent>
+                <Box display="flex" alignItems="center" gap={2}>
+                  <SupervisorAccountIcon sx={{ fontSize: 48 }} />
+                  <Box>
+                    <Typography variant="h6" fontWeight={700}>
+                      Quadro Administrativo
+                    </Typography>
+                    <Typography variant="body2" sx={{ opacity: 0.9 }}>
+                      Supervisores, Encarregados, Coordenadores e demais cargos de gestão
+                    </Typography>
+                  </Box>
+                </Box>
+              </CardContent>
+            </Card>
+
+            {/* Cards de Estatísticas Administrativas */}
+            <Grid container spacing={3} mb={3}>
+              <Grid item xs={12} sm={6} md={3}>
+                <Card sx={{ background: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)', color: 'white' }}>
+                  <CardContent>
+                    <Box display="flex" justifyContent="space-between" alignItems="center">
+                      <Box>
+                        <Typography variant="caption" sx={{ opacity: 0.9 }}>Total</Typography>
+                        <Typography variant="h4" fontWeight={700}>
+                          {colaboradoresAdministrativosFiltrados.length}
+                        </Typography>
+                        <Typography variant="caption">Administrativos</Typography>
+                      </Box>
+                      <AdminPanelSettingsIcon sx={{ fontSize: 48, opacity: 0.3 }} />
+                    </Box>
+                  </CardContent>
+                </Card>
+              </Grid>
+              <Grid item xs={12} sm={6} md={3}>
+                <Card 
+                  sx={{ 
+                    background: 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)', 
+                    color: 'white',
+                    cursor: 'pointer',
+                    '&:hover': { transform: 'translateY(-4px)', boxShadow: 4 },
+                    transition: 'all 0.3s'
+                  }}
+                  onClick={() => setFiltroCargoAdm(filtroCargoAdm === 'supervisor' ? 'TODOS' : 'supervisor')}
+                >
+                  <CardContent>
+                    <Box display="flex" justifyContent="space-between" alignItems="center">
+                      <Box>
+                        <Typography variant="caption" sx={{ opacity: 0.9 }}>Supervisores</Typography>
+                        <Typography variant="h4" fontWeight={700}>{totalSupervisores}</Typography>
+                        <Typography variant="caption">
+                          {((totalSupervisores / colaboradoresAdministrativosFiltrados.length) * 100).toFixed(1)}%
+                        </Typography>
+                      </Box>
+                      <SupervisorAccountIcon sx={{ fontSize: 48, opacity: 0.3 }} />
+                    </Box>
+                  </CardContent>
+                </Card>
+              </Grid>
+              <Grid item xs={12} sm={6} md={3}>
+                <Card 
+                  sx={{ 
+                    background: 'linear-gradient(135deg, #a855f7 0%, #9333ea 100%)', 
+                    color: 'white',
+                    cursor: 'pointer',
+                    '&:hover': { transform: 'translateY(-4px)', boxShadow: 4 },
+                    transition: 'all 0.3s'
+                  }}
+                  onClick={() => setFiltroCargoAdm(filtroCargoAdm === 'encarregado' ? 'TODOS' : 'encarregado')}
+                >
+                  <CardContent>
+                    <Box display="flex" justifyContent="space-between" alignItems="center">
+                      <Box>
+                        <Typography variant="caption" sx={{ opacity: 0.9 }}>Encarregados</Typography>
+                        <Typography variant="h4" fontWeight={700}>{totalEncarregados}</Typography>
+                        <Typography variant="caption">
+                          {((totalEncarregados / colaboradoresAdministrativosFiltrados.length) * 100).toFixed(1)}%
+                        </Typography>
+                      </Box>
+                      <BusinessIcon sx={{ fontSize: 48, opacity: 0.3 }} />
+                    </Box>
+                  </CardContent>
+                </Card>
+              </Grid>
+              <Grid item xs={12} sm={6} md={3}>
+                <Card 
+                  sx={{ 
+                    background: 'linear-gradient(135deg, #c026d3 0%, #a21caf 100%)', 
+                    color: 'white',
+                    cursor: 'pointer',
+                    '&:hover': { transform: 'translateY(-4px)', boxShadow: 4 },
+                    transition: 'all 0.3s'
+                  }}
+                  onClick={() => setFiltroCargoAdm(filtroCargoAdm === 'coordenador' ? 'TODOS' : 'coordenador')}
+                >
+                  <CardContent>
+                    <Box display="flex" justifyContent="space-between" alignItems="center">
+                      <Box>
+                        <Typography variant="caption" sx={{ opacity: 0.9 }}>Coordenadores</Typography>
+                        <Typography variant="h4" fontWeight={700}>{totalCoordenadores}</Typography>
+                        <Typography variant="caption">
+                          {((totalCoordenadores / colaboradoresAdministrativosFiltrados.length) * 100).toFixed(1)}%
+                        </Typography>
+                      </Box>
+                      <TrendingUpIcon sx={{ fontSize: 48, opacity: 0.3 }} />
+                    </Box>
+                  </CardContent>
+                </Card>
+              </Grid>
+            </Grid>
+
+            {/* Filtros */}
+            <Card sx={{ mb: 3, p: 2, borderRadius: 2 }}>
+              <Box display="flex" alignItems="center" gap={1} mb={2}>
+                <FilterListIcon />
+                <Typography variant="h6" fontWeight={600}>Filtros</Typography>
+              </Box>
+              <Grid container spacing={2}>
+                <Grid item xs={12} md={4}>
+                  <TextField
+                    fullWidth
+                    placeholder="Buscar por nome, email, cargo ou cidade..."
+                    value={buscaAdm}
+                    onChange={(e) => setBuscaAdm(e.target.value)}
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <SearchIcon />
+                        </InputAdornment>
+                      ),
+                    }}
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6} md={3}>
+                  <FormControl fullWidth>
+                    <InputLabel>Tipo de Cargo</InputLabel>
+                    <Select
+                      value={filtroCargoAdm}
+                      label="Tipo de Cargo"
+                      onChange={(e) => setFiltroCargoAdm(e.target.value)}
+                    >
+                      <MenuItem value="TODOS">Todos os Cargos</MenuItem>
+                      <MenuItem value="supervisor">Supervisores</MenuItem>
+                      <MenuItem value="encarregado">Encarregados</MenuItem>
+                      <MenuItem value="coordenador">Coordenadores</MenuItem>
+                      <MenuItem value="gerente">Gerentes</MenuItem>
+                      <MenuItem value="diretor">Diretores</MenuItem>
+                    </Select>
+                  </FormControl>
+                </Grid>
+                <Grid item xs={12} sm={6} md={2}>
+                  <FormControl fullWidth>
+                    <InputLabel>Gênero</InputLabel>
+                    <Select
+                      value={filtroGeneroAdm}
+                      label="Gênero"
+                      onChange={(e) => setFiltroGeneroAdm(e.target.value)}
+                    >
+                      <MenuItem value="TODOS">Todos</MenuItem>
+                      <MenuItem value="MASCULINO">Masculino</MenuItem>
+                      <MenuItem value="FEMININO">Feminino</MenuItem>
+                    </Select>
+                  </FormControl>
+                </Grid>
+                <Grid item xs={12} sm={12} md={3}>
+                  <FormControl fullWidth>
+                    <InputLabel>Estado</InputLabel>
+                    <Select
+                      value={filtroEstadoAdm}
+                      label="Estado"
+                      onChange={(e) => setFiltroEstadoAdm(e.target.value as EstadoBrasil | 'TODOS')}
+                    >
+                      <MenuItem value="TODOS">Todos os Estados</MenuItem>
+                      {estatisticasGerais && Object.keys(estatisticasGerais.distribuicaoPorEstado)
+                        .sort()
+                        .map((estado) => (
+                          <MenuItem key={estado} value={estado}>
+                            {estado} - {regionaisService.getNomeEstado(estado as EstadoBrasil)}
+                          </MenuItem>
+                        ))}
+                    </Select>
+                  </FormControl>
+                </Grid>
+              </Grid>
+            </Card>
+
+            {/* Tabela de Colaboradores Administrativos */}
+            <TableContainer component={Card}>
+              <Table>
+                <TableHead>
+                  <TableRow>
+                    <TableCell>Colaborador</TableCell>
+                    <TableCell>Cargo Administrativo</TableCell>
+                    <TableCell>Departamento</TableCell>
+                    <TableCell>Estado/Cidade</TableCell>
+                    <TableCell>Admissão</TableCell>
+                    <TableCell align="center">Ações</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {colaboradoresAdministrativosFiltrados.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={6} align="center">
+                        <Box py={4}>
+                          <AdminPanelSettingsIcon sx={{ fontSize: 64, color: 'text.secondary', mb: 2 }} />
+                          <Typography variant="body2" color="text.secondary" fontWeight={600}>
+                            Nenhum colaborador administrativo encontrado
+                          </Typography>
+                          <Typography variant="caption" color="text.secondary">
+                            {colaboradoresAdministrativos.length === 0 
+                              ? 'Não há funcionários com cargos de supervisão ou gestão cadastrados'
+                              : 'Ajuste os filtros para ver mais resultados'
+                            }
+                          </Typography>
+                        </Box>
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    colaboradoresAdministrativosFiltrados.slice(0, 50).map((col) => (
+                      <TableRow key={col.id} hover>
+                        <TableCell>
+                          <Box display="flex" alignItems="center" gap={1.5}>
+                            <Avatar 
+                              src={col.avatar} 
+                              sx={{ 
+                                width: 40, 
+                                height: 40,
+                                background: 'linear-gradient(135deg, #6366f1, #8b5cf6)'
+                              }}
+                            >
+                              {col.nome.charAt(0)}
+                            </Avatar>
+                            <Box>
+                              <Typography variant="body2" fontWeight={600}>
+                                {col.nome}
+                              </Typography>
+                              <Typography variant="caption" color="text.secondary">
+                                {col.email}
+                              </Typography>
+                            </Box>
+                          </Box>
+                        </TableCell>
+                        <TableCell>
+                          <Chip
+                            label={col.cargo}
+                            size="small"
+                            color="primary"
+                            variant="outlined"
+                            icon={<AdminPanelSettingsIcon />}
+                          />
+                        </TableCell>
+                        <TableCell>{col.departamento}</TableCell>
+                        <TableCell>
+                          <Box>
+                            <Typography variant="body2" fontWeight={600}>
+                              {col.estado} - {regionaisService.getNomeEstado(col.estado)}
+                            </Typography>
+                            <Typography variant="caption" color="text.secondary">
+                              {col.cidade}
+                            </Typography>
+                          </Box>
+                        </TableCell>
+                        <TableCell>
+                          <Typography variant="caption">
+                            {new Date(col.dataAdmissao).toLocaleDateString('pt-BR')}
+                          </Typography>
+                        </TableCell>
+                        <TableCell align="center">
+                          <Tooltip title="Ver detalhes">
+                            <IconButton
+                              size="small"
+                              onClick={() => setColaboradorSelecionado(col)}
+                            >
+                              <VisibilityIcon fontSize="small" />
+                            </IconButton>
+                          </Tooltip>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
+            </TableContainer>
+
+            {colaboradoresAdministrativosFiltrados.length > 50 && (
+              <Box mt={2} textAlign="center">
+                <Typography variant="body2" color="text.secondary">
+                  Exibindo 50 de {colaboradoresAdministrativosFiltrados.length} colaboradores administrativos.
+                </Typography>
+              </Box>
+            )}
+
+            {/* Informação sobre detecção automática */}
+            <Card sx={{ mt: 3, p: 2, background: alpha('#6366f1', 0.05) }}>
+              <Box display="flex" alignItems="start" gap={2}>
+                <AdminPanelSettingsIcon sx={{ color: '#6366f1', mt: 0.5 }} />
+                <Box>
+                  <Typography variant="subtitle2" fontWeight={700} color="primary" gutterBottom>
+                    Detecção Automática de Promoções
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    O sistema identifica automaticamente quando um colaborador é promovido para cargo administrativo
+                    (Supervisor, Encarregado, Coordenador, Gerente, etc.) e o adiciona nesta listagem.
+                  </Typography>
+                </Box>
+              </Box>
+            </Card>
           </Box>
         </TabPanel>
       </Card>
