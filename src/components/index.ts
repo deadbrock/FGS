@@ -16,6 +16,9 @@ export { SkeletonTable, SkeletonCard, SkeletonStats } from './SkeletonTable';
 export { AnimatedCard } from './AnimatedCard';
 export { ActionButton } from './ActionButton';
 export type { ActionType } from './ActionButton';
+export { ModernTable, TableCellStatus, TableCellAvatar } from './ModernTable';
+export type { ColumnDef } from './ModernTable';
+export { LoadingSkeleton, PageLoadingSkeleton } from './LoadingSkeleton';
 
 // Componentes de UX
 export { LoaderFGS } from './LoaderFGS';

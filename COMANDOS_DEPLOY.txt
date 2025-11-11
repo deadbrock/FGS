@@ -1,0 +1,202 @@
+# ========================================
+# COMANDOS RÁPIDOS DE DEPLOY - FGS
+# ========================================
+
+# ==================
+# PREPARAÇÃO
+# ==================
+
+# 1. Verificar se está tudo pronto
+npm run deploy:check
+
+# 2. Build local (testar)
+npm run build
+
+# 3. Preview do build
+npm run preview
+
+# 4. Commit e push (se necessário)
+git add .
+git commit -m "Preparar para deploy"
+git push origin main
+
+
+# ==================
+# VERCEL
+# ==================
+
+# Via CLI (Método 1)
+npm install -g vercel          # Instalar CLI
+vercel login                   # Login
+npm run deploy:vercel          # Deploy para produção
+
+# Via Dashboard (Método 2 - Recomendado)
+# 1. Acesse: https://vercel.com/
+# 2. Import Repository
+# 3. Clique em "Deploy"
+
+
+# ==================
+# RAILWAY
+# ==================
+
+# Via CLI (Método 1)
+npm install -g @railway/cli    # Instalar CLI
+railway login                  # Login
+railway init                   # Inicializar projeto
+npm run deploy:railway         # Deploy
+
+# Via Dashboard (Método 2 - Recomendado)
+# 1. Acesse: https://railway.app/
+# 2. New Project → Deploy from GitHub
+# 3. Selecione o repositório
+# 4. Settings → Networking → Generate Domain
+
+
+# ==================
+# PÓS-DEPLOY
+# ==================
+
+# Ver logs (Vercel)
+vercel logs <deployment-url>
+
+# Ver logs (Railway)
+railway logs
+
+# Rollback (Vercel)
+vercel rollback
+
+# Rollback (Railway)
+railway rollback
+
+
+# ==================
+# MANUTENÇÃO
+# ==================
+
+# Limpar build
+rm -rf dist
+
+# Reinstalar dependências
+rm -rf node_modules
+npm install
+
+# Build completo
+npm run build:check
+
+
+# ==================
+# TROUBLESHOOTING
+# ==================
+
+# Erro no build?
+npm run build                  # Testar localmente
+npm run lint                   # Verificar erros de código
+
+# Rotas não funcionam?
+# Verificar se vercel.json existe e está correto
+
+# Site não carrega?
+# Ver logs na plataforma (dashboard)
+
+
+# ==================
+# URLS ÚTEIS
+# ==================
+
+# Vercel Dashboard
+https://vercel.com/dashboard
+
+# Railway Dashboard
+https://railway.app/dashboard
+
+# Vercel Docs
+https://vercel.com/docs
+
+# Railway Docs
+https://docs.railway.app
+
+
+# ==================
+# ARQUIVOS IMPORTANTES
+# ==================
+
+vercel.json          # Configuração Vercel
+railway.json         # Configuração Railway
+nixpacks.toml        # Build config Railway
+vite.config.ts       # Configuração Vite
+package.json         # Scripts e dependências
+
+# Documentação
+DEPLOY_README.md           # Início rápido
+DEPLOY_VERCEL.md          # Guia completo Vercel
+DEPLOY_RAILWAY.md         # Guia completo Railway
+DEPLOY_GUIA_COMPLETO.md   # Guia geral
+
+
+# ==================
+# DICAS
+# ==================
+
+# 1. Sempre teste o build localmente antes:
+npm run build && npm run preview
+
+# 2. Use o script de verificação:
+npm run deploy:check
+
+# 3. Faça commit antes de deploy:
+git status
+git add .
+git commit -m "Descrição das mudanças"
+git push
+
+# 4. Para deploy rápido (Vercel):
+vercel --prod
+
+# 5. Para deploy rápido (Railway):
+railway up
+
+# 6. Monitore após deploy:
+# - Verifique se o site está acessível
+# - Teste as principais funcionalidades
+# - Verifique os logs por erros
+
+
+# ==================
+# AMBIENTE LOCAL
+# ==================
+
+# Desenvolvimento
+npm run dev                    # Localhost apenas
+npm run dev:network            # Acessível na rede local
+
+# Preview de produção
+npm run preview                # Simula ambiente de produção
+
+
+# ==================
+# VARIÁVEIS DE AMBIENTE
+# ==================
+
+# Desenvolvimento (.env.local)
+VITE_ENV=development
+
+# Produção (configurar no dashboard)
+VITE_ENV=production
+VITE_API_URL=https://sua-api.com
+
+
+# ==================
+# CHECKLIST
+# ==================
+
+# Antes de fazer deploy:
+# [ ] npm run build funciona
+# [ ] npm run preview mostra site correto
+# [ ] Código commitado
+# [ ] Remote configurado
+# [ ] Arquivos de config presentes
+# [ ] .env não commitado
+# [ ] npm run deploy:check passou
+
+

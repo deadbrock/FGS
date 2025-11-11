@@ -4,14 +4,14 @@ import { DadosContratuais } from '../../types/prontuario';
 import { FileUpload } from '../FileUpload';
 
 interface DadosContratuaisFormProps {
-  dados: Partial<DadosContratuais>;
+  dados?: Partial<DadosContratuais>;
   onChange: (campo: string, valor: any) => void;
   onFileUpload?: (files: File[]) => void;
   readonly?: boolean;
 }
 
 export const DadosContratuaisForm: React.FC<DadosContratuaisFormProps> = ({
-  dados,
+  dados = {},
   onChange,
   onFileUpload,
   readonly = false,

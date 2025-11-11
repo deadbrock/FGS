@@ -14,6 +14,7 @@ import { Comunicacao } from '../pages/Comunicacao';
 import { Relatorios } from '../pages/Relatorios';
 import { Seguranca } from '../pages/Seguranca';
 import { Integracoes } from '../pages/Integracoes';
+import { Regionais } from '../pages/Regionais';
 import { UserRole } from '../types';
 
 // Componente de rotas da aplicação
@@ -71,11 +72,11 @@ export const AppRoutes: React.FC = () => {
             }
           />
 
-          {/* Treinamentos - Admin, RH e Gestor */}
+          {/* Treinamentos - Admin, RH, Gestor e Segurança do Trabalho */}
           <Route
             path="/treinamentos"
             element={
-              <PrivateRoute allowedRoles={[UserRole.ADMINISTRADOR, UserRole.RH, UserRole.GESTOR]}>
+              <PrivateRoute allowedRoles={[UserRole.ADMINISTRADOR, UserRole.RH, UserRole.GESTOR, UserRole.SEGURANCA_TRABALHO]}>
                 <Treinamentos />
               </PrivateRoute>
             }
@@ -117,6 +118,16 @@ export const AppRoutes: React.FC = () => {
             element={
               <PrivateRoute allowedRoles={[UserRole.ADMINISTRADOR, UserRole.RH, UserRole.GESTOR]}>
                 <Relatorios />
+              </PrivateRoute>
+            }
+          />
+
+          {/* Regionais - Admin, RH e Gestor */}
+          <Route
+            path="/regionais"
+            element={
+              <PrivateRoute allowedRoles={[UserRole.ADMINISTRADOR, UserRole.RH, UserRole.GESTOR]}>
+                <Regionais />
               </PrivateRoute>
             }
           />

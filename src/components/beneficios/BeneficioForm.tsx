@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Dialog,
   DialogTitle,
@@ -28,23 +28,34 @@ interface BeneficioFormProps {
   onSave: (beneficio: Partial<Beneficio>) => void;
 }
 
+const defaultFormData: Partial<Beneficio> = {
+  tipo: TipoBeneficio.VALE_REFEICAO,
+  tipoValor: TipoValor.VALOR_FIXO,
+  frequencia: FrequenciaBeneficio.MENSAL,
+  status: StatusBeneficio.ATIVO,
+  exigeComprovacao: false,
+  custoEmpresa: 0,
+  custoColaborador: 0,
+};
+
 export const BeneficioForm: React.FC<BeneficioFormProps> = ({
   open,
   beneficio,
   onClose,
   onSave,
 }) => {
-  const [formData, setFormData] = useState<Partial<Beneficio>>(
-    beneficio || {
-      tipo: TipoBeneficio.VALE_REFEICAO,
-      tipoValor: TipoValor.VALOR_FIXO,
-      frequencia: FrequenciaBeneficio.MENSAL,
-      status: StatusBeneficio.ATIVO,
-      exigeComprovacao: false,
-      custoEmpresa: 0,
-      custoColaborador: 0,
+  const [formData, setFormData] = useState<Partial<Beneficio>>(defaultFormData);
+
+  // Atualizar formData quando o beneficio mudar ou o modal abrir
+  useEffect(() => {
+    if (open) {
+      if (beneficio) {
+        setFormData(beneficio);
+      } else {
+        setFormData(defaultFormData);
+      }
     }
-  );
+  }, [open, beneficio]);
 
   const handleSubmit = () => {
     onSave(formData);

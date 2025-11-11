@@ -11,3 +11,4 @@ export { Comunicacao } from './Comunicacao';
 export { Relatorios } from './Relatorios';
 export { Seguranca } from './Seguranca';
 export { Integracoes } from './Integracoes';
+export { Regionais } from './Regionais';

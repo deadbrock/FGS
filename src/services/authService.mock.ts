@@ -9,6 +9,7 @@ const mockUsers: User[] = [
     role: UserRole.ADMINISTRADOR,
     departamento: 'TI',
     cargo: 'Administrador',
+    avatar: 'https://i.pravatar.cc/150?img=12',
   },
   {
     id: '2',
@@ -17,6 +18,7 @@ const mockUsers: User[] = [
     role: UserRole.RH,
     departamento: 'Recursos Humanos',
     cargo: 'Gerente de RH',
+    avatar: 'https://i.pravatar.cc/150?img=47',
   },
   {
     id: '3',
@@ -25,6 +27,7 @@ const mockUsers: User[] = [
     role: UserRole.GESTOR,
     departamento: 'Vendas',
     cargo: 'Gerente de Vendas',
+    avatar: 'https://i.pravatar.cc/150?img=33',
   },
   {
     id: '4',
@@ -33,6 +36,16 @@ const mockUsers: User[] = [
     role: UserRole.COLABORADOR,
     departamento: 'Operações',
     cargo: 'Assistente',
+    avatar: 'https://i.pravatar.cc/150?img=45',
+  },
+  {
+    id: '5',
+    nome: 'Carlos Segurança',
+    email: 'seguranca@fgs.com',
+    role: UserRole.SEGURANCA_TRABALHO,
+    departamento: 'Segurança do Trabalho',
+    cargo: 'Técnico de Segurança do Trabalho',
+    avatar: 'https://i.pravatar.cc/150?img=68',
   },
 ];
 
@@ -42,6 +55,7 @@ const mockPasswords: Record<string, string> = {
   'rh@fgs.com': 'rh123',
   'gestor@fgs.com': 'gestor123',
   'colaborador@fgs.com': 'colab123',
+  'seguranca@fgs.com': 'seguranca123',
 };
 
 // Serviço de autenticação MOCK (para testes sem backend)

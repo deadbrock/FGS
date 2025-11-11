@@ -133,9 +133,28 @@ export const Beneficios: React.FC = () => {
       } else {
         await beneficiosService.criarBeneficio(beneficio);
       }
-      carregarBeneficios();
+      setDialogOpen(false);
+      setBeneficioEdit(undefined);
+      await carregarBeneficios();
+      await carregarEstatisticas();
     } catch (error) {
       console.error('Erro ao salvar:', error);
+      alert('Erro ao salvar benefício. Tente novamente.');
+    }
+  };
+
+  const handleExcluirBeneficio = async (id: string) => {
+    if (!window.confirm('Tem certeza que deseja excluir este benefício?')) {
+      return;
+    }
+
+    try {
+      await beneficiosService.excluirBeneficio(id);
+      await carregarBeneficios();
+      await carregarEstatisticas();
+    } catch (error) {
+      console.error('Erro ao excluir:', error);
+      alert('Erro ao excluir benefício. Tente novamente.');
     }
   };
 
@@ -165,15 +184,21 @@ export const Beneficios: React.FC = () => {
     {
       id: 'id',
       label: 'Ações',
-      minWidth: 80,
+      minWidth: 120,
       format: (value, row) => (
-        <ActionButton
-          action="edit"
-          onClick={() => {
-            setBeneficioEdit(row as Beneficio);
-            setDialogOpen(true);
-          }}
-        />
+        <Box display="flex" gap={1}>
+          <ActionButton
+            action="edit"
+            onClick={() => {
+              setBeneficioEdit(row as Beneficio);
+              setDialogOpen(true);
+            }}
+          />
+          <ActionButton
+            action="delete"
+            onClick={() => handleExcluirBeneficio((row as Beneficio).id)}
+          />
+        </Box>
       ),
     },
   ];

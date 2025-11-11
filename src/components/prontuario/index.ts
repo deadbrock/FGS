@@ -6,4 +6,7 @@ export { AtestadoMedicoForm } from './AtestadoMedicoForm';
 export { FeriasForm } from './FeriasForm';
 export { AdvertenciaForm } from './AdvertenciaForm';
 export { AnexosDocumentos } from './AnexosDocumentos';
+export { HistoricoColaborador } from './HistoricoColaborador';
+export { AdicionarEventoModal } from './AdicionarEventoModal';
+export { BeneficiosColaboradorTab } from './BeneficiosColaboradorTab';
 

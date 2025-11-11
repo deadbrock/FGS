@@ -2,14 +2,15 @@ import { UserRole } from '../types';
 
 // Define as permissões de cada rota
 export const routePermissions: Record<string, UserRole[]> = {
-  '/dashboard': [UserRole.ADMINISTRADOR, UserRole.RH, UserRole.GESTOR, UserRole.COLABORADOR],
+  '/dashboard': [UserRole.ADMINISTRADOR, UserRole.RH, UserRole.GESTOR, UserRole.COLABORADOR, UserRole.SEGURANCA_TRABALHO],
   '/usuarios': [UserRole.ADMINISTRADOR, UserRole.RH],
   '/prontuario': [UserRole.ADMINISTRADOR, UserRole.RH, UserRole.GESTOR],
-  '/treinamentos': [UserRole.ADMINISTRADOR, UserRole.RH, UserRole.GESTOR],
+  '/treinamentos': [UserRole.ADMINISTRADOR, UserRole.RH, UserRole.GESTOR, UserRole.SEGURANCA_TRABALHO],
   '/ponto': [UserRole.ADMINISTRADOR, UserRole.RH, UserRole.GESTOR],
   '/beneficios': [UserRole.ADMINISTRADOR, UserRole.RH, UserRole.GESTOR],
   '/comunicacao': [UserRole.ADMINISTRADOR, UserRole.RH, UserRole.GESTOR],
   '/relatorios': [UserRole.ADMINISTRADOR, UserRole.RH, UserRole.GESTOR],
+  '/regionais': [UserRole.ADMINISTRADOR, UserRole.RH, UserRole.GESTOR],
   '/seguranca': [UserRole.ADMINISTRADOR],
   '/integracoes': [UserRole.ADMINISTRADOR],
   '/configuracoes': [UserRole.ADMINISTRADOR],
@@ -40,6 +41,7 @@ export const getRoleName = (role: UserRole): string => {
     [UserRole.RH]: 'Recursos Humanos',
     [UserRole.GESTOR]: 'Gestor',
     [UserRole.COLABORADOR]: 'Colaborador',
+    [UserRole.SEGURANCA_TRABALHO]: 'Segurança do Trabalho',
   };
   
   return roleNames[role] || role;
@@ -52,6 +54,7 @@ export const getRoleColor = (role: UserRole): string => {
     [UserRole.RH]: '#354a80',
     [UserRole.GESTOR]: '#f57c00',
     [UserRole.COLABORADOR]: '#388e3c',
+    [UserRole.SEGURANCA_TRABALHO]: '#1976d2',
   };
   
   return roleColors[role] || '#666666';

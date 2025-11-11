@@ -119,6 +119,16 @@ class BeneficiosServiceMock {
     throw new Error('Benefício não encontrado');
   }
 
+  async excluirBeneficio(id: string): Promise<void> {
+    await this.delay(400);
+    const index = beneficiosMock.findIndex(b => b.id === id);
+    if (index >= 0) {
+      beneficiosMock.splice(index, 1);
+    } else {
+      throw new Error('Benefício não encontrado');
+    }
+  }
+
   // BENEFÍCIOS DE COLABORADORES
   async listarBeneficiosColaborador(colaboradorId?: string): Promise<BeneficioColaborador[]> {
     await this.delay(300);

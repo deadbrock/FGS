@@ -59,6 +59,8 @@ import {
   FeriasForm,
   AdvertenciaForm,
   AnexosDocumentos,
+  HistoricoColaborador,
+  BeneficiosColaboradorTab,
 } from '../components/prontuario';
 import { formatarData } from '../utils/statusUtils';
 import prontuarioService from '../services/prontuarioService.mock';
@@ -1128,7 +1130,9 @@ export const Prontuario: React.FC = () => {
               <Tab label="Férias" />
               <Tab label="Treinamentos" />
               <Tab label="Advertências" />
+              <Tab label="Benefícios" />
               <Tab label="Anexos" />
+              <Tab label="📜 Histórico Completo" />
             </Tabs>
 
             {/* Tab Panel 0: Dados Pessoais */}
@@ -1472,14 +1476,24 @@ export const Prontuario: React.FC = () => {
               </Box>
             </TabPanel>
 
-            {/* Tab Panel 7: Anexos */}
+            {/* Tab Panel 7: Benefícios */}
             <TabPanel value={tabAtual} index={7}>
+              <BeneficiosColaboradorTab colaboradorId={colaboradorSelecionado?.id || ''} />
+            </TabPanel>
+
+            {/* Tab Panel 8: Anexos */}
+            <TabPanel value={tabAtual} index={8}>
               <AnexosDocumentos
                 colaboradorId={colaboradorSelecionado?.id || ''}
                 documentos={documentos}
                 onUpload={handleUploadDocumento}
                 onDelete={handleExcluirDocumento}
               />
+            </TabPanel>
+
+            {/* Tab Panel 9: Histórico Completo */}
+            <TabPanel value={tabAtual} index={9}>
+              <HistoricoColaborador colaboradorId={colaboradorSelecionado?.id || ''} />
             </TabPanel>
           </Card>
         </AnimatedCard>

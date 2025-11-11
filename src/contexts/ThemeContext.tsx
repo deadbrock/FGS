@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useMemo, useEffect } from 'react';
-import { ThemeProvider as MuiThemeProvider, createTheme, Theme } from '@mui/material/styles';
+import { ThemeProvider as MuiThemeProvider, Theme } from '@mui/material/styles';
 import { CssBaseline } from '@mui/material';
+import { createModernTheme } from '../styles/modernTheme';
 
 type ThemeMode = 'light' | 'dark';
 
@@ -40,6 +41,13 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
   };
 
   const theme = useMemo<Theme>(
+    () =>
+      createModernTheme(mode),
+    [mode]
+  );
+
+  /* TEMA ANTIGO - REMOVIDO E SUBSTITUÍDO PELO TEMA MODERNO
+  const oldTheme = useMemo<Theme>(
     () =>
       createTheme({
         palette: {
@@ -255,6 +263,7 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
       }),
     [mode]
   );
+  */
 
   return (
     <ThemeContext.Provider value={{ mode, toggleTheme }}>

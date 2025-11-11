@@ -37,6 +37,7 @@ import CampaignIcon from '@mui/icons-material/Campaign';
 import AssessmentIcon from '@mui/icons-material/Assessment';
 import SecurityIcon from '@mui/icons-material/Security';
 import IntegrationInstructionsIcon from '@mui/icons-material/IntegrationInstructions';
+import PublicIcon from '@mui/icons-material/Public';
 import SearchIcon from '@mui/icons-material/Search';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import Brightness4Icon from '@mui/icons-material/Brightness4';
@@ -80,7 +81,7 @@ const menuItems: MenuItem[] = [
     title: 'Treinamentos',
     path: '/treinamentos',
     icon: <SchoolIcon />,
-    allowedRoles: [UserRole.ADMINISTRADOR, UserRole.RH, UserRole.GESTOR],
+    allowedRoles: [UserRole.ADMINISTRADOR, UserRole.RH, UserRole.GESTOR, UserRole.SEGURANCA_TRABALHO],
   },
   {
     title: 'Ponto e Frequência',
@@ -104,6 +105,12 @@ const menuItems: MenuItem[] = [
     title: 'Relatórios',
     path: '/relatorios',
     icon: <AssessmentIcon />,
+    allowedRoles: [UserRole.ADMINISTRADOR, UserRole.RH, UserRole.GESTOR],
+  },
+  {
+    title: 'Regionais',
+    path: '/regionais',
+    icon: <PublicIcon />,
     allowedRoles: [UserRole.ADMINISTRADOR, UserRole.RH, UserRole.GESTOR],
   },
   {
@@ -176,43 +183,77 @@ export const DashboardLayout: React.FC = () => {
 
   return (
     <Box sx={{ display: 'flex', minHeight: '100vh' }}>
-      {/* AppBar */}
+      {/* AppBar Moderno */}
       <AppBar
         position="fixed"
+        elevation={0}
         sx={{
           zIndex: (theme) => theme.zIndex.drawer + 1,
           width: drawerOpen ? `calc(100% - ${DRAWER_WIDTH}px)` : '100%',
           ml: drawerOpen ? `${DRAWER_WIDTH}px` : 0,
           transition: 'all 0.3s ease',
+          background: (theme) => 
+            mode === 'dark'
+              ? 'linear-gradient(135deg, #1e293b 0%, #0f172a 100%)'
+              : 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)',
+          color: (theme) => theme.palette.text.primary,
+          borderBottom: (theme) => `1px solid ${alpha(theme.palette.divider, 0.1)}`,
+          backdropFilter: 'blur(10px)',
+          boxShadow: '0 4px 24px rgba(0,0,0,0.06)',
         }}
       >
-        <Toolbar>
+        <Toolbar sx={{ py: 1 }}>
           <IconButton
             color="inherit"
             aria-label="toggle drawer"
             onClick={toggleDrawer}
             edge="start"
-            sx={{ mr: 2 }}
+            sx={{ 
+              mr: 2,
+              background: (theme) => alpha(theme.palette.primary.main, 0.1),
+              '&:hover': {
+                background: (theme) => alpha(theme.palette.primary.main, 0.2),
+                transform: 'rotate(180deg)',
+              },
+              transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+            }}
           >
             {drawerOpen ? <ChevronLeftIcon /> : <MenuIcon />}
           </IconButton>
 
           <Logo size="small" showText={false} />
 
-          {/* Campo de Busca */}
+          {/* Campo de Busca Moderno */}
           <Box
             sx={{
               position: 'relative',
-              borderRadius: 2,
-              backgroundColor: (theme) => alpha(theme.palette.common.white, 0.15),
+              borderRadius: 3,
+              backgroundColor: (theme) => 
+                mode === 'dark' 
+                  ? alpha(theme.palette.common.white, 0.05)
+                  : alpha(theme.palette.grey[500], 0.08),
+              border: (theme) => `1px solid ${alpha(theme.palette.divider, 0.1)}`,
               '&:hover': {
-                backgroundColor: (theme) => alpha(theme.palette.common.white, 0.25),
+                backgroundColor: (theme) => 
+                  mode === 'dark'
+                    ? alpha(theme.palette.common.white, 0.08)
+                    : alpha(theme.palette.grey[500], 0.12),
+                boxShadow: `0 4px 12px ${alpha('#6366f1', 0.1)}`,
+              },
+              '&:focus-within': {
+                backgroundColor: (theme) => 
+                  mode === 'dark'
+                    ? alpha(theme.palette.common.white, 0.1)
+                    : alpha(theme.palette.grey[500], 0.15),
+                border: (theme) => `1px solid ${theme.palette.primary.main}`,
+                boxShadow: `0 4px 16px ${alpha('#6366f1', 0.2)}`,
               },
               marginLeft: 4,
               marginRight: 2,
               width: 'auto',
               maxWidth: 400,
               display: { xs: 'none', md: 'flex' },
+              transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
             }}
           >
             <Box
@@ -224,21 +265,27 @@ export const DashboardLayout: React.FC = () => {
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
+                color: 'text.secondary',
               }}
             >
               <SearchIcon />
             </Box>
             <InputBase
-              placeholder="Buscar..."
+              placeholder="Buscar no sistema..."
               inputProps={{ 'aria-label': 'search' }}
               sx={{
                 color: 'inherit',
+                width: '100%',
                 '& .MuiInputBase-input': {
-                  padding: (theme) => theme.spacing(1, 1, 1, 0),
+                  padding: (theme) => theme.spacing(1.5, 2, 1.5, 0),
                   paddingLeft: `calc(1em + ${40}px)`,
                   transition: 'width 0.3s',
                   width: '100%',
-                  minWidth: 200,
+                  minWidth: 250,
+                  fontSize: '0.95rem',
+                  '&::placeholder': {
+                    opacity: 0.7,
+                  },
                 },
               }}
             />
@@ -246,34 +293,89 @@ export const DashboardLayout: React.FC = () => {
 
           <Box sx={{ flexGrow: 1 }} />
 
-          {/* Ícones de Ação */}
-          <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+          {/* Ícones de Ação Modernos */}
+          <Box sx={{ display: 'flex', gap: 1.5, alignItems: 'center' }}>
             {/* Toggle Tema */}
-            <Tooltip title={mode === 'dark' ? 'Modo Claro' : 'Modo Escuro'}>
-              <IconButton color="inherit" onClick={toggleTheme}>
+            <Tooltip title={mode === 'dark' ? 'Modo Claro' : 'Modo Escuro'} arrow>
+              <IconButton 
+                color="inherit" 
+                onClick={toggleTheme}
+                sx={{
+                  background: (theme) => alpha(theme.palette.primary.main, 0.1),
+                  '&:hover': {
+                    background: (theme) => alpha(theme.palette.primary.main, 0.2),
+                    transform: 'rotate(180deg)',
+                  },
+                  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                }}
+              >
                 {mode === 'dark' ? <Brightness7Icon /> : <Brightness4Icon />}
               </IconButton>
             </Tooltip>
 
             {/* Notificações */}
-            <Tooltip title="Notificações">
-              <IconButton color="inherit" onClick={handleNotifMenuOpen}>
-                <Badge badgeContent={3} color="error">
+            <Tooltip title="Notificações" arrow>
+              <IconButton 
+                color="inherit" 
+                onClick={handleNotifMenuOpen}
+                sx={{
+                  background: (theme) => alpha(theme.palette.primary.main, 0.1),
+                  '&:hover': {
+                    background: (theme) => alpha(theme.palette.primary.main, 0.2),
+                  },
+                  transition: 'all 0.3s',
+                }}
+              >
+                <Badge 
+                  badgeContent={3} 
+                  color="error"
+                  sx={{
+                    '& .MuiBadge-badge': {
+                      animation: 'pulse 2s infinite',
+                      '@keyframes pulse': {
+                        '0%': {
+                          transform: 'scale(1)',
+                          boxShadow: '0 0 0 0 rgba(239, 68, 68, 0.7)',
+                        },
+                        '50%': {
+                          transform: 'scale(1.1)',
+                          boxShadow: '0 0 0 4px rgba(239, 68, 68, 0)',
+                        },
+                        '100%': {
+                          transform: 'scale(1)',
+                          boxShadow: '0 0 0 0 rgba(239, 68, 68, 0)',
+                        },
+                      },
+                    },
+                  }}
+                >
                   <NotificationsIcon />
                 </Badge>
               </IconButton>
             </Tooltip>
 
             {/* Avatar do Usuário */}
-            <Tooltip title="Perfil">
-              <IconButton onClick={handleProfileMenuOpen} sx={{ p: 0, ml: 2 }}>
+            <Tooltip title="Perfil" arrow>
+              <IconButton 
+                onClick={handleProfileMenuOpen} 
+                sx={{ 
+                  p: 0, 
+                  ml: 1,
+                  transition: 'all 0.3s',
+                  '&:hover': {
+                    transform: 'scale(1.1)',
+                  },
+                }}
+              >
                 <Avatar
                   sx={{
-                    bgcolor: '#a2122a',
-                    width: 40,
-                    height: 40,
+                    background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
+                    width: 42,
+                    height: 42,
+                    fontWeight: 700,
+                    boxShadow: '0 4px 16px rgba(99, 102, 241, 0.4)',
                     border: '2px solid',
-                    borderColor: 'divider',
+                    borderColor: 'background.paper',
                   }}
                 >
                   {user?.nome?.charAt(0).toUpperCase() || 'U'}
@@ -400,7 +502,7 @@ export const DashboardLayout: React.FC = () => {
         </Toolbar>
       </AppBar>
 
-      {/* Drawer/Sidebar */}
+      {/* Drawer/Sidebar Moderna */}
       <Drawer
         variant="permanent"
         open={drawerOpen}
@@ -412,29 +514,218 @@ export const DashboardLayout: React.FC = () => {
             boxSizing: 'border-box',
             transform: drawerOpen ? 'translateX(0)' : `translateX(-${DRAWER_WIDTH}px)`,
             transition: 'transform 0.3s ease',
+            background: (theme) => 
+              mode === 'dark' 
+                ? 'linear-gradient(180deg, #1e293b 0%, #0f172a 100%)'
+                : 'linear-gradient(180deg, #ffffff 0%, #f8fafc 100%)',
+            borderRight: (theme) => 
+              `1px solid ${alpha(theme.palette.divider, 0.1)}`,
+            boxShadow: '4px 0 24px rgba(0,0,0,0.05)',
           },
         }}
       >
-        <Toolbar />
-        <Box sx={{ overflow: 'auto', p: 1, mt: 2 }}>
-          <List>
-            {filteredMenuItems.map((item) => (
-              <ListItem key={item.path} disablePadding>
-                <ListItemButton
-                  selected={location.pathname === item.path}
-                  onClick={() => handleNavigate(item.path)}
-                >
-                  <ListItemIcon sx={{ minWidth: 40 }}>{item.icon}</ListItemIcon>
-                  <ListItemText
-                    primary={item.title}
-                    primaryTypographyProps={{
-                      fontWeight: location.pathname === item.path ? 600 : 400,
-                    }}
-                  />
-                </ListItemButton>
-              </ListItem>
-            ))}
-          </List>
+        <Toolbar sx={{ minHeight: '48px !important', height: '48px' }} />
+        <Box sx={{ overflowY: 'auto', overflowX: 'hidden', px: 2, pb: 2, pt: 6, height: '100%', display: 'flex', flexDirection: 'column' }}>
+          {/* Foto do Usuário - Ocupando espaço da Toolbar */}
+          <Box
+            sx={{
+              display: 'flex',
+              justifyContent: 'center',
+              mb: 1,
+              position: 'relative',
+              mt: -5,
+              overflow: 'visible',
+            }}
+          >
+            <Box
+              sx={{
+                position: 'relative',
+                '&::before': {
+                  content: '""',
+                  position: 'absolute',
+                  inset: -4,
+                  borderRadius: '50%',
+                  background: 'linear-gradient(135deg, #6366f1, #8b5cf6, #ec4899)',
+                  opacity: 0.8,
+                  zIndex: 0,
+                  animation: 'pulse 2s ease-in-out infinite',
+                },
+                '@keyframes pulse': {
+                  '0%, 100%': { opacity: 0.8 },
+                  '50%': { opacity: 1 },
+                },
+              }}
+            >
+              <Avatar
+                src={user?.avatar}
+                alt={user?.nome}
+                sx={{
+                  width: 100,
+                  height: 100,
+                  border: '4px solid',
+                  borderColor: 'background.paper',
+                  background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
+                  fontSize: '2.5rem',
+                  fontWeight: 700,
+                  boxShadow: '0 8px 24px rgba(99, 102, 241, 0.5)',
+                  position: 'relative',
+                  zIndex: 1,
+                  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                  cursor: 'pointer',
+                  '&:hover': {
+                    transform: 'scale(1.05)',
+                    boxShadow: '0 12px 32px rgba(99, 102, 241, 0.6)',
+                  },
+                }}
+              >
+                {!user?.avatar && user?.nome.charAt(0).toUpperCase()}
+              </Avatar>
+            </Box>
+          </Box>
+
+          {/* Seção do Usuário - Card com informações */}
+          <Box
+            sx={{
+              mb: 2,
+              p: 1.5,
+              borderRadius: 3,
+              mt: -1,
+              background: (theme) =>
+                mode === 'dark'
+                  ? 'linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%)'
+                  : 'linear-gradient(135deg, rgba(99, 102, 241, 0.05) 0%, rgba(139, 92, 246, 0.05) 100%)',
+              border: (theme) =>
+                `1px solid ${alpha(theme.palette.primary.main, 0.1)}`,
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: 0.5,
+              position: 'relative',
+              overflow: 'hidden',
+              '&::before': {
+                content: '""',
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                height: '3px',
+                background: 'linear-gradient(90deg, #6366f1, #8b5cf6)',
+              },
+            }}
+          >
+            <Typography variant="subtitle2" fontWeight={700} textAlign="center">
+              {user?.nome}
+            </Typography>
+            <RoleBadge role={user?.role || UserRole.COLABORADOR} />
+          </Box>
+
+          {/* Lista de Menu */}
+          <Box sx={{ flex: 1 }}>
+            <Typography
+              variant="caption"
+              sx={{
+                px: 1,
+                pb: 1,
+                display: 'block',
+                fontWeight: 700,
+                letterSpacing: '0.5px',
+                textTransform: 'uppercase',
+                color: 'text.secondary',
+                fontSize: '0.7rem',
+              }}
+            >
+              Menu Principal
+            </Typography>
+            <List sx={{ px: 0 }}>
+              {filteredMenuItems.map((item) => {
+                const isActive = location.pathname === item.path;
+                return (
+                  <ListItem key={item.path} disablePadding sx={{ mb: 0.5 }}>
+                    <ListItemButton
+                      selected={isActive}
+                      onClick={() => handleNavigate(item.path)}
+                      sx={{
+                        borderRadius: 2,
+                        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                        position: 'relative',
+                        overflow: 'hidden',
+                        '&.Mui-selected': {
+                          background: (theme) =>
+                            mode === 'dark'
+                              ? 'linear-gradient(135deg, rgba(99, 102, 241, 0.2) 0%, rgba(139, 92, 246, 0.2) 100%)'
+                              : 'linear-gradient(135deg, rgba(99, 102, 241, 0.12) 0%, rgba(139, 92, 246, 0.12) 100%)',
+                          '&:hover': {
+                            background: (theme) =>
+                              mode === 'dark'
+                                ? 'linear-gradient(135deg, rgba(99, 102, 241, 0.25) 0%, rgba(139, 92, 246, 0.25) 100%)'
+                                : 'linear-gradient(135deg, rgba(99, 102, 241, 0.16) 0%, rgba(139, 92, 246, 0.16) 100%)',
+                          },
+                          '&::before': {
+                            content: '""',
+                            position: 'absolute',
+                            left: 0,
+                            top: '50%',
+                            transform: 'translateY(-50%)',
+                            width: '4px',
+                            height: '60%',
+                            borderRadius: '0 4px 4px 0',
+                            background: 'linear-gradient(180deg, #6366f1, #8b5cf6)',
+                            boxShadow: '0 0 12px rgba(99, 102, 241, 0.6)',
+                          },
+                        },
+                        '&:hover': {
+                          backgroundColor: (theme) =>
+                            alpha(theme.palette.action.hover, 0.08),
+                          transform: 'translateX(6px)',
+                        },
+                      }}
+                    >
+                      <ListItemIcon 
+                        sx={{ 
+                          minWidth: 40,
+                          color: isActive ? 'primary.main' : 'text.secondary',
+                          transition: 'all 0.3s',
+                          transform: isActive ? 'scale(1.1)' : 'scale(1)',
+                        }}
+                      >
+                        {item.icon}
+                      </ListItemIcon>
+                      <ListItemText
+                        primary={item.title}
+                        primaryTypographyProps={{
+                          fontWeight: isActive ? 700 : 500,
+                          fontSize: '0.9rem',
+                          color: isActive ? 'primary.main' : 'text.primary',
+                        }}
+                      />
+                    </ListItemButton>
+                  </ListItem>
+                );
+              })}
+            </List>
+          </Box>
+
+          {/* Footer da Sidebar */}
+          <Box
+            sx={{
+              pt: 2,
+              mt: 'auto',
+              borderTop: 1,
+              borderColor: 'divider',
+            }}
+          >
+            <Typography
+              variant="caption"
+              color="text.secondary"
+              sx={{
+                display: 'block',
+                textAlign: 'center',
+                fontSize: '0.7rem',
+              }}
+            >
+              FGS © 2025
+            </Typography>
+          </Box>
         </Box>
       </Drawer>
 

@@ -3,13 +3,13 @@ import { Grid, TextField, MenuItem } from '@mui/material';
 import { DadosPessoais } from '../../types/prontuario';
 
 interface DadosPessoaisFormProps {
-  dados: Partial<DadosPessoais>;
+  dados?: Partial<DadosPessoais>;
   onChange: (campo: string, valor: any) => void;
   readonly?: boolean;
 }
 
 export const DadosPessoaisForm: React.FC<DadosPessoaisFormProps> = ({
-  dados,
+  dados = {},
   onChange,
   readonly = false,
 }) => {
@@ -19,7 +19,7 @@ export const DadosPessoaisForm: React.FC<DadosPessoaisFormProps> = ({
         <TextField
           fullWidth
           label="Nome Completo"
-          value={dados.nome || ''}
+          value={dados?.nome || ''}
           onChange={(e) => onChange('nome', e.target.value)}
           required
           disabled={readonly}

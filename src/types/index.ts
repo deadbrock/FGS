@@ -4,6 +4,7 @@ export enum UserRole {
   RH = 'RH',
   GESTOR = 'GESTOR',
   COLABORADOR = 'COLABORADOR',
+  SEGURANCA_TRABALHO = 'SEGURANCA_TRABALHO',
 }
 
 // Interface de usuário
@@ -69,4 +70,117 @@ export interface DashboardStats {
   novosColaboradores: number;
   taxaPresenca: number;
 }
+
+// ============================================
+// MÓDULO DE PRONTUÁRIO
+// ============================================
+
+// Tipos de eventos no histórico do colaborador
+export enum TipoEventoHistorico {
+  ADMISSAO = 'ADMISSAO',
+  ATESTADO = 'ATESTADO',
+  ADVERTENCIA = 'ADVERTENCIA',
+  SUSPENSAO = 'SUSPENSAO',
+  PROMOCAO = 'PROMOCAO',
+  TRANSFERENCIA = 'TRANSFERENCIA',
+  FERIAS = 'FERIAS',
+  LICENCA = 'LICENCA',
+  AFASTAMENTO = 'AFASTAMENTO',
+  TREINAMENTO = 'TREINAMENTO',
+  ELOGIO = 'ELOGIO',
+  DEMISSAO = 'DEMISSAO',
+}
+
+// Tipo de advertência
+export enum TipoAdvertencia {
+  VERBAL = 'VERBAL',
+  ESCRITA = 'ESCRITA',
+  SUSPENSAO = 'SUSPENSAO',
+}
+
+// Status do colaborador
+export enum StatusColaborador {
+  ATIVO = 'ATIVO',
+  AFASTADO = 'AFASTADO',
+  FERIAS = 'FERIAS',
+  DEMITIDO = 'DEMITIDO',
+}
+
+// Interface base para colaborador no prontuário
+export interface Colaborador {
+  id: string;
+  nome: string;
+  cpf: string;
+  rg?: string;
+  email: string;
+  telefone: string;
+  cargo: string;
+  departamento: string;
+  dataAdmissao: Date;
+  dataDemissao?: Date;
+  status: StatusColaborador;
+  avatar?: string;
+  salario?: number;
+  cargaHoraria?: number;
+  supervisor?: string;
+}
+
+// Interface para evento de histórico
+export interface EventoHistorico {
+  id: string;
+  colaboradorId: string;
+  tipo: TipoEventoHistorico;
+  data: Date;
+  descricao: string;
+  observacoes?: string;
+  documentoAnexo?: string;
+  registradoPor: string;
+  registradoPorNome: string;
+  
+  // Campos específicos por tipo de evento
+  atestado?: {
+    cid?: string;
+    diasAfastamento: number;
+    dataInicio: Date;
+    dataFim: Date;
+    medicoNome?: string;
+    medicoCrm?: string;
+  };
+  
+  advertencia?: {
+    tipo: TipoAdvertencia;
+    motivo: string;
+    gravidade: 'LEVE' | 'MEDIA' | 'GRAVE';
+    testemunhas?: string[];
+  };
+  
+  ferias?: {
+    dataInicio: Date;
+    dataFim: Date;
+    diasCorridos: number;
+    periodoAquisitivo: string;
+  };
+  
+  promocao?: {
+    cargoAnterior: string;
+    cargoNovo: string;
+    salarioAnterior?: number;
+    salarioNovo?: number;
+  };
+  
+  transferencia?: {
+    departamentoOrigem: string;
+    departamentoDestino: string;
+    motivoTransferencia?: string;
+  };
+  
+  demissao?: {
+    motivoDemissao: string;
+    tipoDemissao: 'VOLUNTARIA' | 'SEM_JUSTA_CAUSA' | 'JUSTA_CAUSA' | 'ACORDO';
+    dataAviso?: Date;
+  };
+}
+
+// Exportações de tipos de outros módulos
+export * from './regionais';
 

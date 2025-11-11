@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   Box,
   Typography,
@@ -18,12 +18,14 @@ import {
   Avatar,
   Tabs,
   Tab,
+  IconButton,
 } from '@mui/material';
 import SaveIcon from '@mui/icons-material/Save';
 import DeleteIcon from '@mui/icons-material/Delete';
 import PersonIcon from '@mui/icons-material/Person';
 import BusinessIcon from '@mui/icons-material/Business';
 import NotificationsIcon from '@mui/icons-material/Notifications';
+import PhotoCameraIcon from '@mui/icons-material/PhotoCamera';
 import { useNavigationLog } from '../hooks/useNavigationLog';
 import { useAuth } from '../hooks/useAuth';
 import { RoleBadge } from '../components/RoleBadge';
@@ -55,6 +57,8 @@ export const Configuracoes: React.FC = () => {
   const { user } = useAuth();
   const [success, setSuccess] = useState(false);
   const [tabValue, setTabValue] = useState(0);
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(user?.avatar || null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [perfil, setPerfil] = useState({
     nome: user?.nome || '',
@@ -78,9 +82,22 @@ export const Configuracoes: React.FC = () => {
   };
 
   const handleSave = () => {
+    // Atualizar dados do usuário no localStorage
+    const storedUser = localStorage.getItem('@FGS:user');
+    if (storedUser) {
+      const userObj = JSON.parse(storedUser);
+      userObj.nome = perfil.nome;
+      userObj.email = perfil.email;
+      localStorage.setItem('@FGS:user', JSON.stringify(userObj));
+    }
+    
     logAction('Configurações salvas');
     setSuccess(true);
-    setTimeout(() => setSuccess(false), 3000);
+    setTimeout(() => {
+      setSuccess(false);
+      // Recarregar para atualizar o nome no sidebar
+      window.location.reload();
+    }, 1500);
   };
 
   const handleClearLogs = () => {
@@ -88,6 +105,54 @@ export const Configuracoes: React.FC = () => {
       logService.clearLogs();
       logAction('Logs limpos');
       alert('Logs limpos com sucesso!');
+    }
+  };
+
+  const handleAvatarClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleAvatarChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      // Validar tipo de arquivo
+      if (!file.type.startsWith('image/')) {
+        alert('Por favor, selecione apenas arquivos de imagem (JPG, PNG, etc.)');
+        return;
+      }
+
+      // Validar tamanho (máximo 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        alert('A imagem deve ter no máximo 5MB');
+        return;
+      }
+
+      // Criar preview da imagem
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setAvatarPreview(reader.result as string);
+        logAction('Foto de perfil alterada');
+        
+        // Aqui você salvaria a imagem no backend/localStorage
+        // Por enquanto, vamos apenas salvar no localStorage
+        localStorage.setItem('@FGS:userAvatar', reader.result as string);
+        
+        // Atualizar também no objeto user do localStorage
+        const storedUser = localStorage.getItem('@FGS:user');
+        if (storedUser) {
+          const userObj = JSON.parse(storedUser);
+          userObj.avatar = reader.result as string;
+          localStorage.setItem('@FGS:user', JSON.stringify(userObj));
+        }
+        
+        setSuccess(true);
+        setTimeout(() => {
+          setSuccess(false);
+          // Recarregar a página para atualizar o avatar no sidebar
+          window.location.reload();
+        }, 1500);
+      };
+      reader.readAsDataURL(file);
     }
   };
 
@@ -131,34 +196,71 @@ export const Configuracoes: React.FC = () => {
             <Card>
               <CardContent>
                 <Box display="flex" flexDirection="column" alignItems="center" gap={2}>
-                  <Avatar
-                    sx={{
-                      width: 120,
-                      height: 120,
-                      bgcolor: '#a2122a',
-                      fontSize: '3rem',
-                      fontWeight: 700,
-                    }}
-                  >
-                    {user?.nome?.charAt(0).toUpperCase() || 'U'}
-                  </Avatar>
+                  <Box sx={{ position: 'relative' }}>
+                    <Avatar
+                      src={avatarPreview || undefined}
+                      sx={{
+                        width: 120,
+                        height: 120,
+                        bgcolor: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
+                        fontSize: '3rem',
+                        fontWeight: 700,
+                        border: '4px solid',
+                        borderColor: 'background.paper',
+                        boxShadow: '0 8px 24px rgba(99, 102, 241, 0.3)',
+                      }}
+                    >
+                      {!avatarPreview && (user?.nome?.charAt(0).toUpperCase() || 'U')}
+                    </Avatar>
+                    <IconButton
+                      sx={{
+                        position: 'absolute',
+                        bottom: 0,
+                        right: 0,
+                        bgcolor: 'primary.main',
+                        color: 'white',
+                        boxShadow: 2,
+                        '&:hover': {
+                          bgcolor: 'primary.dark',
+                        },
+                      }}
+                      size="small"
+                      onClick={handleAvatarClick}
+                    >
+                      <PhotoCameraIcon fontSize="small" />
+                    </IconButton>
+                  </Box>
+                  
+                  {/* Input escondido para upload de arquivo */}
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    style={{ display: 'none' }}
+                    onChange={handleAvatarChange}
+                  />
+                  
                   <Box textAlign="center">
                     <Typography variant="h6" fontWeight={600}>
-                      {user?.nome || 'Usuário'}
+                      {perfil.nome || user?.nome || 'Usuário'}
                     </Typography>
                     <Typography variant="body2" color="text.secondary" gutterBottom>
-                      {user?.email || 'email@exemplo.com'}
+                      {perfil.email || user?.email || 'email@exemplo.com'}
                     </Typography>
                     <RoleBadge role={user?.role || 'COLABORADOR'} />
                   </Box>
                   <Button
                     variant="outlined"
                     fullWidth
-                    startIcon={<PersonIcon />}
+                    startIcon={<PhotoCameraIcon />}
                     sx={{ mt: 2 }}
+                    onClick={handleAvatarClick}
                   >
                     Alterar Foto
                   </Button>
+                  <Typography variant="caption" color="text.secondary" textAlign="center">
+                    JPG, PNG ou GIF (máx. 5MB)
+                  </Typography>
                 </Box>
               </CardContent>
             </Card>

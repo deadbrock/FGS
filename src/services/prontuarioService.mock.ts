@@ -1,526 +1,398 @@
-import {
-  ProntuarioColaborador,
-  ExameMedico,
-  AtestadoMedico,
-  Ferias,
-  Treinamento,
-  Advertencia,
-  StatusProntuario,
-  PaginacaoParams,
-  PaginacaoResultado,
-  FiltrosProntuario,
-} from '../types/prontuario';
+import { 
+  Colaborador, 
+  EventoHistorico, 
+  TipoEventoHistorico, 
+  StatusColaborador,
+  TipoAdvertencia 
+} from '../types';
 
-// Nomes realistas para os colaboradores
-const nomesMasculinos = [
-  'João Silva Santos', 'Carlos Eduardo Oliveira', 'Pedro Henrique Costa',
-  'Rafael Almeida Souza', 'Lucas Martins Ferreira', 'Bruno Pereira Lima',
-  'Guilherme Santos Rocha', 'Fernando Costa Silva', 'Rodrigo Alves Santos',
-  'Thiago Souza Oliveira', 'Gabriel Lima Costa', 'André Pereira Santos',
-  'Marcelo Silva Ferreira', 'Ricardo Costa Almeida', 'Felipe Santos Lima',
+// Dados mock de colaboradores
+const mockColaboradores: Colaborador[] = [
+  {
+    id: '1',
+    nome: 'João Silva Santos',
+    cpf: '123.456.789-00',
+    rg: '12.345.678-9',
+    email: 'joao.silva@fgs.com',
+    telefone: '(11) 98765-4321',
+    cargo: 'Analista de Sistemas',
+    departamento: 'TI',
+    dataAdmissao: new Date('2020-01-15'),
+    status: StatusColaborador.ATIVO,
+    salario: 6500,
+    cargaHoraria: 44,
+    supervisor: 'Carlos Mendes',
+  },
+  {
+    id: '2',
+    nome: 'Maria Oliveira Costa',
+    cpf: '987.654.321-00',
+    rg: '98.765.432-1',
+    email: 'maria.oliveira@fgs.com',
+    telefone: '(11) 98765-1234',
+    cargo: 'Gerente de Vendas',
+    departamento: 'Comercial',
+    dataAdmissao: new Date('2018-03-20'),
+    status: StatusColaborador.FERIAS,
+    salario: 8500,
+    cargaHoraria: 44,
+    supervisor: 'Roberto Ferreira',
+  },
+  {
+    id: '3',
+    nome: 'Pedro Souza Lima',
+    cpf: '456.789.123-00',
+    rg: '45.678.912-3',
+    email: 'pedro.souza@fgs.com',
+    telefone: '(11) 98765-5678',
+    cargo: 'Assistente Administrativo',
+    departamento: 'Administrativo',
+    dataAdmissao: new Date('2019-07-10'),
+    dataDemissao: new Date('2024-10-30'),
+    status: StatusColaborador.DEMITIDO,
+    salario: 3200,
+    cargaHoraria: 44,
+    supervisor: 'Ana Paula',
+  },
+  {
+    id: '4',
+    nome: 'Ana Paula Ferreira',
+    cpf: '321.654.987-00',
+    rg: '32.165.498-7',
+    email: 'ana.ferreira@fgs.com',
+    telefone: '(11) 98765-9012',
+    cargo: 'Coordenadora RH',
+    departamento: 'Recursos Humanos',
+    dataAdmissao: new Date('2017-05-05'),
+    status: StatusColaborador.ATIVO,
+    salario: 7800,
+    cargaHoraria: 44,
+    supervisor: 'Diretor Geral',
+  },
+  {
+    id: '5',
+    nome: 'Carlos Eduardo Mendes',
+    cpf: '789.123.456-00',
+    rg: '78.912.345-6',
+    email: 'carlos.mendes@fgs.com',
+    telefone: '(11) 98765-3456',
+    cargo: 'Operador de Produção',
+    departamento: 'Produção',
+    dataAdmissao: new Date('2021-02-14'),
+    status: StatusColaborador.AFASTADO,
+    salario: 2800,
+    cargaHoraria: 44,
+    supervisor: 'Marcos Silva',
+  },
 ];
 
-const nomesFemininos = [
-  'Maria Silva Santos', 'Ana Paula Oliveira', 'Juliana Costa Ferreira',
-  'Fernanda Almeida Santos', 'Carla Souza Lima', 'Patricia Santos Costa',
-  'Camila Oliveira Silva', 'Renata Ferreira Alves', 'Beatriz Costa Santos',
-  'Amanda Lima Oliveira', 'Daniela Santos Ferreira', 'Larissa Costa Silva',
-  'Mariana Almeida Santos', 'Priscila Oliveira Costa', 'Vanessa Santos Lima',
-];
-
-const cargos = [
-  'Analista de RH', 'Assistente Administrativo', 'Coordenador de Produção',
-  'Gerente de Operações', 'Diretor Comercial', 'Analista Financeiro',
-  'Assistente de TI', 'Coordenador de Vendas', 'Gerente de Projetos',
-  'Analista de Marketing', 'Supervisor de Logística', 'Técnico de Manutenção',
-];
-
-const departamentos = [
-  'Recursos Humanos', 'Administrativo', 'Operacional', 'Comercial',
-  'Financeiro', 'TI', 'Marketing', 'Logística', 'Produção',
-];
-
-const cidades = [
-  'São Paulo - SP', 'Rio de Janeiro - RJ', 'Belo Horizonte - MG',
-  'Curitiba - PR', 'Porto Alegre - RS', 'Salvador - BA',
-  'Brasília - DF', 'Fortaleza - CE', 'Recife - PE',
-];
-
-const tiposExame: Array<'Admissional' | 'Periódico' | 'Demissional' | 'Retorno ao Trabalho' | 'Mudança de Função'> = [
-  'Admissional', 'Periódico', 'Retorno ao Trabalho', 'Mudança de Função', 'Demissional',
-];
-
-const tiposTreinamento = [
-  'Segurança do Trabalho', 'Gestão de Pessoas', 'Excel Avançado',
-  'Liderança e Coaching', 'Comunicação Assertiva', 'Qualidade Total',
-  'Atendimento ao Cliente', 'Vendas Consultivas', 'Gestão de Projetos',
-  'Inovação e Criatividade', 'Trabalho em Equipe', 'Inteligência Emocional',
-];
-
-const instituicoes = [
-  'FGS Academy', 'Tech Institute', 'Centro de Treinamento Profissional',
-  'Escola de Negócios', 'Instituto de Desenvolvimento', 'Academia Corporativa',
-];
-
-// Gera um CPF mock baseado no ID
-function gerarCPF(id: number): string {
-  const base = String(id).padStart(9, '0');
-  return `${base.slice(0, 3)}.${base.slice(3, 6)}.${base.slice(6, 9)}-${String(id % 100).padStart(2, '0')}`;
-}
-
-// Gera dados de prontuário para um colaborador específico
-function gerarProntuarioMock(colaboradorId: string): ProntuarioColaborador {
-  const id = parseInt(colaboradorId);
-  const sexo = id % 2 === 0 ? 'M' : 'F';
-  const nomes = sexo === 'M' ? nomesMasculinos : nomesFemininos;
-  const nome = nomes[id % nomes.length];
-  const cargo = cargos[id % cargos.length];
-  const departamento = departamentos[id % departamentos.length];
-  const cidade = cidades[id % cidades.length];
-
-  // Dados Pessoais
-  const anoNascimento = 1980 + (id % 30);
-  const mesNascimento = (id % 12) + 1;
-  const diaNascimento = (id % 28) + 1;
-  const dataNascimento = `${anoNascimento}-${String(mesNascimento).padStart(2, '0')}-${String(diaNascimento).padStart(2, '0')}`;
-
-  // Data de Admissão
-  const anoAdmissao = 2020 + (id % 5);
-  const mesAdmissao = (id % 12) + 1;
-  const diaAdmissao = (id % 28) + 1;
-  const dataAdmissao = `${anoAdmissao}-${String(mesAdmissao).padStart(2, '0')}-${String(diaAdmissao).padStart(2, '0')}`;
-
-  // Exames Médicos (2-4 exames por colaborador)
-  const numExames = 2 + (id % 3);
-  const examesMedicos: ExameMedico[] = [];
+// Dados mock de eventos de histórico
+const mockEventosHistorico: EventoHistorico[] = [
+  // Eventos do João Silva Santos (id: 1)
+  {
+    id: 'evt-1',
+    colaboradorId: '1',
+    tipo: TipoEventoHistorico.ADMISSAO,
+    data: new Date('2020-01-15'),
+    descricao: 'Admissão como Assistente de TI',
+    registradoPor: 'rh-1',
+    registradoPorNome: 'Ana Paula Ferreira',
+  },
+  {
+    id: 'evt-2',
+    colaboradorId: '1',
+    tipo: TipoEventoHistorico.TREINAMENTO,
+    data: new Date('2020-03-10'),
+    descricao: 'Treinamento em Segurança da Informação',
+    observacoes: 'Carga horária: 40 horas',
+    registradoPor: 'rh-1',
+    registradoPorNome: 'Ana Paula Ferreira',
+  },
+  {
+    id: 'evt-3',
+    colaboradorId: '1',
+    tipo: TipoEventoHistorico.PROMOCAO,
+    data: new Date('2021-06-01'),
+    descricao: 'Promoção para Analista de Sistemas',
+    registradoPor: 'rh-1',
+    registradoPorNome: 'Ana Paula Ferreira',
+    promocao: {
+      cargoAnterior: 'Assistente de TI',
+      cargoNovo: 'Analista de Sistemas',
+      salarioAnterior: 4500,
+      salarioNovo: 6500,
+    },
+  },
+  {
+    id: 'evt-4',
+    colaboradorId: '1',
+    tipo: TipoEventoHistorico.FERIAS,
+    data: new Date('2022-01-10'),
+    descricao: 'Férias programadas',
+    registradoPor: 'rh-1',
+    registradoPorNome: 'Ana Paula Ferreira',
+    ferias: {
+      dataInicio: new Date('2022-01-10'),
+      dataFim: new Date('2022-01-30'),
+      diasCorridos: 20,
+      periodoAquisitivo: '2020-2021',
+    },
+  },
+  {
+    id: 'evt-5',
+    colaboradorId: '1',
+    tipo: TipoEventoHistorico.ELOGIO,
+    data: new Date('2023-05-15'),
+    descricao: 'Elogio por projeto bem-sucedido',
+    observacoes: 'Implementação do novo sistema de gestão com excelência',
+    registradoPor: 'gestor-1',
+    registradoPorNome: 'Carlos Mendes',
+  },
   
-  for (let i = 0; i < numExames; i++) {
-    const dataExame = new Date(anoAdmissao + i, mesAdmissao - 1, diaAdmissao);
-    const dataValidade = new Date(dataExame);
-    dataValidade.setFullYear(dataValidade.getFullYear() + 1);
-    
-    const hoje = new Date();
-    let status: StatusProntuario;
-    if (dataValidade < hoje) {
-      status = StatusProntuario.VENCIDO;
-    } else if (dataValidade < new Date(hoje.setMonth(hoje.getMonth() + 2))) {
-      status = StatusProntuario.PENDENTE;
-    } else {
-      status = StatusProntuario.APROVADO;
-    }
-
-    examesMedicos.push({
-      id: `${colaboradorId}-exam-${i + 1}`,
-      colaboradorId,
-      tipo: tiposExame[i % tiposExame.length],
-      dataRealizacao: dataExame.toISOString().split('T')[0],
-      dataValidade: dataValidade.toISOString().split('T')[0],
-      resultado: 'Apto',
-      status,
-      medico: `Dr. ${sexo === 'M' ? 'Carlos' : 'Ana'} ${['Silva', 'Oliveira', 'Santos'][i % 3]}`,
-      crm: `${123456 + i}-SP`,
-      observacoes: status === StatusProntuario.VENCIDO ? 'Necessita renovação urgente' : undefined,
-    });
-  }
-
-  // Treinamentos (2-5 treinamentos por colaborador)
-  const numTreinamentos = 2 + (id % 4);
-  const treinamentos: Treinamento[] = [];
-  
-  for (let i = 0; i < numTreinamentos; i++) {
-    const dataInicio = new Date(anoAdmissao + i, (id + i) % 12, 1);
-    const dataFim = new Date(dataInicio);
-    dataFim.setDate(dataFim.getDate() + 10 + (i * 5));
-    
-    const temValidade = i % 2 === 0;
-    let status: StatusProntuario;
-    
-    if (temValidade) {
-      const validade = new Date(dataFim);
-      validade.setFullYear(validade.getFullYear() + 1);
-      
-      const hoje = new Date();
-      if (validade < hoje) {
-        status = StatusProntuario.VENCIDO;
-      } else if (validade < new Date(hoje.setMonth(hoje.getMonth() + 2))) {
-        status = StatusProntuario.PENDENTE;
-      } else {
-        status = StatusProntuario.APROVADO;
-      }
-    } else {
-      status = StatusProntuario.APROVADO;
-    }
-
-    treinamentos.push({
-      id: `${colaboradorId}-train-${i + 1}`,
-      colaboradorId,
-      titulo: tiposTreinamento[i % tiposTreinamento.length],
-      descricao: `Treinamento completo sobre ${tiposTreinamento[i % tiposTreinamento.length]}`,
-      dataInicio: dataInicio.toISOString().split('T')[0],
-      dataFim: dataFim.toISOString().split('T')[0],
-      cargaHoraria: 20 + (i * 10),
-      instrutor: `${['Maria', 'Pedro', 'Ana', 'Carlos'][i % 4]} Instrutor`,
-      instituicao: instituicoes[i % instituicoes.length],
-      status,
-      nota: 7 + (id % 4),
-    });
-  }
-
-  // Atestados (0-2 atestados)
-  const atestados: AtestadoMedico[] = [];
-  if (id % 3 === 0) {
-    const dataAtestado = new Date(anoAdmissao + 1, 5, 10);
-    atestados.push({
-      id: `${colaboradorId}-atestado-1`,
-      colaboradorId,
-      dataEmissao: dataAtestado.toISOString().split('T')[0],
-      dataInicio: dataAtestado.toISOString().split('T')[0],
-      dataFim: new Date(dataAtestado.setDate(dataAtestado.getDate() + 2)).toISOString().split('T')[0],
+  // Eventos da Maria Oliveira Costa (id: 2)
+  {
+    id: 'evt-6',
+    colaboradorId: '2',
+    tipo: TipoEventoHistorico.ADMISSAO,
+    data: new Date('2018-03-20'),
+    descricao: 'Admissão como Vendedora',
+    registradoPor: 'rh-1',
+    registradoPorNome: 'Ana Paula Ferreira',
+  },
+  {
+    id: 'evt-7',
+    colaboradorId: '2',
+    tipo: TipoEventoHistorico.PROMOCAO,
+    data: new Date('2019-08-15'),
+    descricao: 'Promoção para Gerente de Vendas',
+    registradoPor: 'rh-1',
+    registradoPorNome: 'Ana Paula Ferreira',
+    promocao: {
+      cargoAnterior: 'Vendedora',
+      cargoNovo: 'Gerente de Vendas',
+      salarioAnterior: 5500,
+      salarioNovo: 8500,
+    },
+  },
+  {
+    id: 'evt-8',
+    colaboradorId: '2',
+    tipo: TipoEventoHistorico.ATESTADO,
+    data: new Date('2023-08-20'),
+    descricao: 'Atestado médico - Gripe',
+    registradoPor: 'rh-1',
+    registradoPorNome: 'Ana Paula Ferreira',
+    atestado: {
+      cid: 'J11',
       diasAfastamento: 3,
-      medico: 'Dra. Ana Paula Silva',
-      crm: '789012-SP',
-      cid: 'J00',
-      observacoes: 'Resfriado comum',
-      status: StatusProntuario.APROVADO,
-    });
-  }
-
-  // Férias
-  const ferias: Ferias[] = [
-    {
-      id: `${colaboradorId}-ferias-1`,
-      colaboradorId,
-      periodoAquisitivo: {
-        inicio: dataAdmissao,
-        fim: new Date(new Date(dataAdmissao).setFullYear(new Date(dataAdmissao).getFullYear() + 1)).toISOString().split('T')[0],
-      },
-      diasDireito: 30,
-      diasGozados: 30,
-      diasRestantes: 0,
-      dataInicio: new Date(anoAdmissao + 1, 0, 10).toISOString().split('T')[0],
-      dataFim: new Date(anoAdmissao + 1, 1, 8).toISOString().split('T')[0],
-      tipo: 'Integral',
-      status: StatusProntuario.APROVADO,
+      dataInicio: new Date('2023-08-20'),
+      dataFim: new Date('2023-08-22'),
+      medicoNome: 'Dr. Ricardo Santos',
+      medicoCrm: '123456-SP',
     },
-  ];
-
-  // Advertências (0-2 advertências)
-  const advertencias: Advertencia[] = [];
-  if (id % 5 === 0) {
-    advertencias.push({
-      id: `${colaboradorId}-adv-1`,
-      colaboradorId,
-      tipo: 'Verbal',
-      data: new Date(anoAdmissao + 1, 3, 15).toISOString().split('T')[0],
-      motivo: 'Atraso reiterado',
-      descricao: 'Colaborador chegou atrasado 3 vezes no mês sem justificativa',
-      aplicadoPor: 'Gerente Direto',
-      status: StatusProntuario.APROVADO,
-    });
-  }
-
-  return {
-    id: colaboradorId,
-    colaboradorId,
-    dadosPessoais: {
-      id: `dp-${colaboradorId}`,
-      nome,
-      cpf: gerarCPF(id),
-      rg: `${String(id * 123456).slice(0, 2)}.${String(id * 123456).slice(2, 5)}.${String(id * 123456).slice(5, 8)}-${id % 10}`,
-      dataNascimento,
-      sexo,
-      estadoCivil: ['Solteiro(a)', 'Casado(a)', 'Divorciado(a)'][id % 3],
-      nacionalidade: 'Brasileira',
-      naturalidade: cidade,
-      nomeMae: `Maria ${nome.split(' ')[nome.split(' ').length - 1]}`,
-      nomePai: `José ${nome.split(' ')[nome.split(' ').length - 1]}`,
-      telefone: `(11) ${3000 + (id % 9000)}-${String(id).padStart(4, '0')}`,
-      celular: `(11) 9${8000 + (id % 2000)}-${String(id).padStart(4, '0')}`,
-      email: `${nome.toLowerCase().replace(/\s+/g, '.')}.${id}@fgs.com`,
-      endereco: {
-        cep: `${String(1000 + (id % 9000)).padStart(5, '0')}-${String(id % 1000).padStart(3, '0')}`,
-        logradouro: `Rua ${['das Flores', 'dos Pinheiros', 'das Acácias', 'Principal'][id % 4]}`,
-        numero: String(100 + (id * 10)),
-        complemento: id % 3 === 0 ? `Apto ${id % 100}` : undefined,
-        bairro: ['Centro', 'Jardim América', 'Vila Nova', 'Bela Vista'][id % 4],
-        cidade: cidade.split(' - ')[0],
-        estado: cidade.split(' - ')[1],
-      },
+  },
+  {
+    id: 'evt-9',
+    colaboradorId: '2',
+    tipo: TipoEventoHistorico.FERIAS,
+    data: new Date('2024-11-01'),
+    descricao: 'Férias programadas',
+    registradoPor: 'rh-1',
+    registradoPorNome: 'Ana Paula Ferreira',
+    ferias: {
+      dataInicio: new Date('2024-11-01'),
+      dataFim: new Date('2024-11-30'),
+      diasCorridos: 30,
+      periodoAquisitivo: '2023-2024',
     },
-    dadosContratuais: {
-      id: `dc-${colaboradorId}`,
-      colaboradorId,
-      dataAdmissao,
-      cargo,
-      departamento,
-      salario: 3000 + (id * 500) + ((id % 5) * 1000),
-      tipoContrato: ['CLT', 'PJ'][id % 2] as 'CLT' | 'PJ',
-      jornadaTrabalho: id % 2 === 0 ? '44h semanais' : '40h semanais',
-      horarioEntrada: id % 2 === 0 ? '08:00' : '09:00',
-      horarioSaida: id % 2 === 0 ? '17:00' : '18:00',
-      status: StatusProntuario.APROVADO,
+  },
+  
+  // Eventos do Pedro Souza Lima (id: 3) - DEMITIDO
+  {
+    id: 'evt-10',
+    colaboradorId: '3',
+    tipo: TipoEventoHistorico.ADMISSAO,
+    data: new Date('2019-07-10'),
+    descricao: 'Admissão como Assistente Administrativo',
+    registradoPor: 'rh-1',
+    registradoPorNome: 'Ana Paula Ferreira',
+  },
+  {
+    id: 'evt-11',
+    colaboradorId: '3',
+    tipo: TipoEventoHistorico.ADVERTENCIA,
+    data: new Date('2023-05-15'),
+    descricao: 'Advertência por atrasos frequentes',
+    registradoPor: 'rh-1',
+    registradoPorNome: 'Ana Paula Ferreira',
+    advertencia: {
+      tipo: TipoAdvertencia.VERBAL,
+      motivo: 'Atrasos recorrentes no período de 30 dias',
+      gravidade: 'LEVE',
     },
-    examesMedicos,
-    atestados,
-    ferias,
-    frequencia: [],
-    advertencias,
-    treinamentos,
-    ultimaAtualizacao: new Date().toISOString(),
-  };
-}
-
-// Cache de prontuários gerados
-const prontuariosCache = new Map<string, ProntuarioColaborador>();
+  },
+  {
+    id: 'evt-12',
+    colaboradorId: '3',
+    tipo: TipoEventoHistorico.ADVERTENCIA,
+    data: new Date('2024-03-20'),
+    descricao: 'Advertência escrita por descumprimento de normas',
+    registradoPor: 'rh-1',
+    registradoPorNome: 'Ana Paula Ferreira',
+    advertencia: {
+      tipo: TipoAdvertencia.ESCRITA,
+      motivo: 'Não seguir procedimentos de segurança',
+      gravidade: 'MEDIA',
+      testemunhas: ['Carlos Silva', 'Maria Santos'],
+    },
+  },
+  {
+    id: 'evt-13',
+    colaboradorId: '3',
+    tipo: TipoEventoHistorico.DEMISSAO,
+    data: new Date('2024-10-30'),
+    descricao: 'Desligamento da empresa',
+    observacoes: 'Rescisão contratual por acordo entre as partes',
+    registradoPor: 'rh-1',
+    registradoPorNome: 'Ana Paula Ferreira',
+    demissao: {
+      motivoDemissao: 'Acordo entre as partes para nova oportunidade profissional',
+      tipoDemissao: 'ACORDO',
+      dataAviso: new Date('2024-10-15'),
+    },
+  },
+  
+  // Eventos da Ana Paula Ferreira (id: 4)
+  {
+    id: 'evt-14',
+    colaboradorId: '4',
+    tipo: TipoEventoHistorico.ADMISSAO,
+    data: new Date('2017-05-05'),
+    descricao: 'Admissão como Analista de RH',
+    registradoPor: 'admin-1',
+    registradoPorNome: 'Diretor Geral',
+  },
+  {
+    id: 'evt-15',
+    colaboradorId: '4',
+    tipo: TipoEventoHistorico.PROMOCAO,
+    data: new Date('2019-11-01'),
+    descricao: 'Promoção para Coordenadora de RH',
+    registradoPor: 'admin-1',
+    registradoPorNome: 'Diretor Geral',
+    promocao: {
+      cargoAnterior: 'Analista de RH',
+      cargoNovo: 'Coordenadora RH',
+      salarioAnterior: 5500,
+      salarioNovo: 7800,
+    },
+  },
+  
+  // Eventos do Carlos Eduardo Mendes (id: 5) - AFASTADO
+  {
+    id: 'evt-16',
+    colaboradorId: '5',
+    tipo: TipoEventoHistorico.ADMISSAO,
+    data: new Date('2021-02-14'),
+    descricao: 'Admissão como Operador de Produção',
+    registradoPor: 'rh-1',
+    registradoPorNome: 'Ana Paula Ferreira',
+  },
+  {
+    id: 'evt-17',
+    colaboradorId: '5',
+    tipo: TipoEventoHistorico.ATESTADO,
+    data: new Date('2024-10-15'),
+    descricao: 'Atestado médico - Acidente de trabalho',
+    registradoPor: 'rh-1',
+    registradoPorNome: 'Ana Paula Ferreira',
+    atestado: {
+      cid: 'S61',
+      diasAfastamento: 45,
+      dataInicio: new Date('2024-10-15'),
+      dataFim: new Date('2024-11-30'),
+      medicoNome: 'Dra. Juliana Almeida',
+      medicoCrm: '654321-SP',
+    },
+  },
+  {
+    id: 'evt-18',
+    colaboradorId: '5',
+    tipo: TipoEventoHistorico.AFASTAMENTO,
+    data: new Date('2024-10-15'),
+    descricao: 'Afastamento por acidente de trabalho',
+    observacoes: 'CAT emitida. Acompanhamento pelo INSS.',
+    registradoPor: 'rh-1',
+    registradoPorNome: 'Ana Paula Ferreira',
+  },
+];
 
 class ProntuarioServiceMock {
-  async buscarProntuario(colaboradorId: string): Promise<ProntuarioColaborador> {
-    await this.delay(500);
-    
-    if (!prontuariosCache.has(colaboradorId)) {
-      prontuariosCache.set(colaboradorId, gerarProntuarioMock(colaboradorId));
-    }
-    
-    return prontuariosCache.get(colaboradorId)!;
+  // Buscar todos os colaboradores
+  async getColaboradores(): Promise<Colaborador[]> {
+    await new Promise((resolve) => setTimeout(resolve, 500));
+    return mockColaboradores;
   }
 
-  async buscarExames(
-    colaboradorId: string,
-    pagina: number,
-    itensPorPagina: number,
-    status?: StatusProntuario[],
-    busca?: string
-  ): Promise<{ dados: ExameMedico[]; total: number }> {
-    await this.delay(300);
+  // Buscar colaborador por ID
+  async getColaboradorById(id: string): Promise<Colaborador | null> {
+    await new Promise((resolve) => setTimeout(resolve, 300));
+    return mockColaboradores.find((c) => c.id === id) || null;
+  }
+
+  // Buscar histórico de um colaborador
+  async getHistoricoColaborador(colaboradorId: string): Promise<EventoHistorico[]> {
+    await new Promise((resolve) => setTimeout(resolve, 400));
+    return mockEventosHistorico
+      .filter((e) => e.colaboradorId === colaboradorId)
+      .sort((a, b) => b.data.getTime() - a.data.getTime());
+  }
+
+  // Adicionar evento ao histórico
+  async adicionarEvento(evento: Omit<EventoHistorico, 'id'>): Promise<EventoHistorico> {
+    await new Promise((resolve) => setTimeout(resolve, 500));
     
-    const prontuario = await this.buscarProntuario(colaboradorId);
-    let dados = [...prontuario.examesMedicos];
-
-    // Aplicar filtros
-    if (status && status.length > 0) {
-      dados = dados.filter((e) => status.includes(e.status));
-    }
-
-    if (busca) {
-      dados = dados.filter((e) =>
-        e.tipo.toLowerCase().includes(busca.toLowerCase()) ||
-        e.medico?.toLowerCase().includes(busca.toLowerCase())
-      );
-    }
-
-    const total = dados.length;
-    const inicio = pagina * itensPorPagina;
-    const fim = inicio + itensPorPagina;
-
-    return {
-      dados: dados.slice(inicio, fim),
-      total,
+    const novoEvento: EventoHistorico = {
+      ...evento,
+      id: `evt-${Date.now()}`,
     };
+    
+    mockEventosHistorico.push(novoEvento);
+    return novoEvento;
   }
 
-  async buscarTreinamentos(
+  // Atualizar status do colaborador
+  async atualizarStatusColaborador(
     colaboradorId: string,
-    pagina: number,
-    itensPorPagina: number,
-    status?: StatusProntuario[],
-    busca?: string
-  ): Promise<{ dados: Treinamento[]; total: number }> {
-    await this.delay(300);
+    status: StatusColaborador
+  ): Promise<Colaborador | null> {
+    await new Promise((resolve) => setTimeout(resolve, 300));
     
-    const prontuario = await this.buscarProntuario(colaboradorId);
-    let dados = [...prontuario.treinamentos];
-
-    if (status && status.length > 0) {
-      dados = dados.filter((t) => status.includes(t.status));
+    const colaborador = mockColaboradores.find((c) => c.id === colaboradorId);
+    if (colaborador) {
+      colaborador.status = status;
+      return colaborador;
     }
+    return null;
+  }
 
-    if (busca) {
-      dados = dados.filter((t) =>
-        t.titulo?.toLowerCase().includes(busca.toLowerCase())
-      );
-    }
-
-    const total = dados.length;
-    const inicio = pagina * itensPorPagina;
-    const fim = inicio + itensPorPagina;
-
+  // Estatísticas gerais
+  async getEstatisticas(): Promise<{
+    totalColaboradores: number;
+    ativos: number;
+    afastados: number;
+    ferias: number;
+    demitidos: number;
+  }> {
+    await new Promise((resolve) => setTimeout(resolve, 200));
+    
     return {
-      dados: dados.slice(inicio, fim),
-      total,
+      totalColaboradores: mockColaboradores.length,
+      ativos: mockColaboradores.filter((c) => c.status === StatusColaborador.ATIVO).length,
+      afastados: mockColaboradores.filter((c) => c.status === StatusColaborador.AFASTADO).length,
+      ferias: mockColaboradores.filter((c) => c.status === StatusColaborador.FERIAS).length,
+      demitidos: mockColaboradores.filter((c) => c.status === StatusColaborador.DEMITIDO).length,
     };
-  }
-
-  async listarExames(
-    colaboradorId: string,
-    params: PaginacaoParams,
-    filtros?: FiltrosProntuario
-  ): Promise<PaginacaoResultado<ExameMedico>> {
-    const resultado = await this.buscarExames(
-      colaboradorId,
-      params.pagina,
-      params.itensPorPagina,
-      filtros?.status,
-      filtros?.busca
-    );
-
-    return {
-      dados: resultado.dados,
-      total: resultado.total,
-      pagina: params.pagina,
-      totalPaginas: Math.ceil(resultado.total / params.itensPorPagina),
-    };
-  }
-
-  async listarTreinamentos(
-    colaboradorId: string,
-    params: PaginacaoParams,
-    filtros?: FiltrosProntuario
-  ): Promise<PaginacaoResultado<Treinamento>> {
-    const resultado = await this.buscarTreinamentos(
-      colaboradorId,
-      params.pagina,
-      params.itensPorPagina,
-      filtros?.status,
-      filtros?.busca
-    );
-
-    return {
-      dados: resultado.dados,
-      total: resultado.total,
-      pagina: params.pagina,
-      totalPaginas: Math.ceil(resultado.total / params.itensPorPagina),
-    };
-  }
-
-  async listarAtestados(
-    colaboradorId: string,
-    params: PaginacaoParams,
-    filtros?: FiltrosProntuario
-  ): Promise<PaginacaoResultado<AtestadoMedico>> {
-    await this.delay(300);
-    
-    const prontuario = await this.buscarProntuario(colaboradorId);
-    let dados = [...prontuario.atestados];
-
-    if (filtros?.status && filtros.status.length > 0) {
-      dados = dados.filter((a) => filtros.status!.includes(a.status));
-    }
-
-    const total = dados.length;
-    const inicio = params.pagina * params.itensPorPagina;
-    const fim = inicio + params.itensPorPagina;
-
-    return {
-      dados: dados.slice(inicio, fim),
-      total,
-      pagina: params.pagina,
-      totalPaginas: Math.ceil(total / params.itensPorPagina),
-    };
-  }
-
-  async listarFerias(colaboradorId: string): Promise<Ferias[]> {
-    await this.delay(300);
-    const prontuario = await this.buscarProntuario(colaboradorId);
-    return prontuario.ferias;
-  }
-
-  async listarAdvertencias(colaboradorId: string): Promise<Advertencia[]> {
-    await this.delay(300);
-    const prontuario = await this.buscarProntuario(colaboradorId);
-    return prontuario.advertencias;
-  }
-
-  async atualizarDadosPessoais(colaboradorId: string, dados: any): Promise<void> {
-    await this.delay(500);
-    console.log('Dados pessoais atualizados:', dados);
-    
-    // Atualiza o cache
-    if (prontuariosCache.has(colaboradorId)) {
-      const prontuario = prontuariosCache.get(colaboradorId)!;
-      prontuario.dadosPessoais = { ...prontuario.dadosPessoais, ...dados };
-      prontuario.ultimaAtualizacao = new Date().toISOString();
-    }
-  }
-
-  async atualizarDadosContratuais(colaboradorId: string, dados: any): Promise<void> {
-    await this.delay(500);
-    console.log('Dados contratuais atualizados:', dados);
-    
-    if (prontuariosCache.has(colaboradorId)) {
-      const prontuario = prontuariosCache.get(colaboradorId)!;
-      prontuario.dadosContratuais = { ...prontuario.dadosContratuais, ...dados };
-      prontuario.ultimaAtualizacao = new Date().toISOString();
-    }
-  }
-
-  async criarExame(colaboradorId: string, exame: Partial<ExameMedico>): Promise<ExameMedico> {
-    await this.delay(500);
-    
-    const novoExame: ExameMedico = {
-      ...exame,
-      id: `${colaboradorId}-exam-${Date.now()}`,
-      colaboradorId,
-      status: StatusProntuario.PENDENTE,
-    } as ExameMedico;
-
-    if (prontuariosCache.has(colaboradorId)) {
-      const prontuario = prontuariosCache.get(colaboradorId)!;
-      prontuario.examesMedicos.push(novoExame);
-      prontuario.ultimaAtualizacao = new Date().toISOString();
-    }
-
-    return novoExame;
-  }
-
-  async atualizarExame(exameId: string, exame: Partial<ExameMedico>): Promise<void> {
-    await this.delay(500);
-    console.log('Exame atualizado:', exameId, exame);
-  }
-
-  async excluirExame(exameId: string): Promise<void> {
-    await this.delay(300);
-    console.log('Exame excluído:', exameId);
-  }
-
-  async criarTreinamento(
-    colaboradorId: string,
-    treinamento: Partial<Treinamento>
-  ): Promise<Treinamento> {
-    await this.delay(500);
-    
-    const novoTreinamento: Treinamento = {
-      ...treinamento,
-      id: `${colaboradorId}-train-${Date.now()}`,
-      colaboradorId,
-      status: StatusProntuario.PENDENTE,
-    } as Treinamento;
-
-    if (prontuariosCache.has(colaboradorId)) {
-      const prontuario = prontuariosCache.get(colaboradorId)!;
-      prontuario.treinamentos.push(novoTreinamento);
-      prontuario.ultimaAtualizacao = new Date().toISOString();
-    }
-
-    return novoTreinamento;
-  }
-
-  async atualizarTreinamento(treinamentoId: string, treinamento: Partial<Treinamento>): Promise<void> {
-    await this.delay(500);
-    console.log('Treinamento atualizado:', treinamentoId, treinamento);
-  }
-
-  async excluirTreinamento(treinamentoId: string): Promise<void> {
-    await this.delay(300);
-    console.log('Treinamento excluído:', treinamentoId);
-  }
-
-  async uploadArquivo(colaboradorId: string, tipo: string, file: File): Promise<string> {
-    await this.delay(1000);
-    return `https://example.com/uploads/${colaboradorId}/${tipo}/${file.name}`;
-  }
-
-  private delay(ms: number): Promise<void> {
-    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 }
 
