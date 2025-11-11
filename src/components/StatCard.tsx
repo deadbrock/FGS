@@ -1,5 +1,5 @@
 import React from 'react';
-import { Card, CardContent, Typography, Box, alpha } from '@mui/material';
+import { Card, CardContent, Typography, Box, alpha, useTheme, useMediaQuery } from '@mui/material';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import TrendingDownIcon from '@mui/icons-material/TrendingDown';
 
@@ -24,6 +24,10 @@ export const StatCard: React.FC<StatCardProps> = ({
   color = '#354a80',
   subtitle,
 }) => {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const isTablet = useMediaQuery(theme.breakpoints.between('sm', 'md'));
+  
   return (
     <Card
       sx={{
@@ -31,8 +35,8 @@ export const StatCard: React.FC<StatCardProps> = ({
         overflow: 'hidden',
         transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
         '&:hover': {
-          transform: 'translateY(-8px) scale(1.02)',
-          boxShadow: `0 20px 40px ${alpha(color, 0.25)}`,
+          transform: isMobile ? 'none' : 'translateY(-8px) scale(1.02)',
+          boxShadow: `0 ${isMobile ? '12px 24px' : '20px 40px'} ${alpha(color, 0.25)}`,
         },
         '&::before': {
           content: '""',
@@ -40,14 +44,25 @@ export const StatCard: React.FC<StatCardProps> = ({
           top: 0,
           left: 0,
           right: 0,
-          height: '4px',
+          height: isMobile ? '3px' : '4px',
           background: `linear-gradient(90deg, ${color}, ${alpha(color, 0.6)})`,
         },
       }}
     >
-      <CardContent sx={{ position: 'relative', zIndex: 1 }}>
-        <Box display="flex" justifyContent="space-between" alignItems="flex-start">
-          <Box flex={1}>
+      <CardContent sx={{ 
+        position: 'relative', 
+        zIndex: 1,
+        p: isMobile ? 2 : 3,
+        '&:last-child': { pb: isMobile ? 2 : 3 }
+      }}>
+        <Box 
+          display="flex" 
+          justifyContent="space-between" 
+          alignItems="flex-start"
+          flexDirection={isMobile ? 'column' : 'row'}
+          gap={isMobile ? 2 : 0}
+        >
+          <Box flex={1} width={isMobile ? '100%' : 'auto'}>
             <Typography 
               variant="body2" 
               color="text.secondary" 
@@ -56,13 +71,13 @@ export const StatCard: React.FC<StatCardProps> = ({
                 fontWeight: 600,
                 letterSpacing: '0.5px',
                 textTransform: 'uppercase',
-                fontSize: '0.75rem',
+                fontSize: isMobile ? '0.7rem' : '0.75rem',
               }}
             >
               {title}
             </Typography>
             <Typography 
-              variant="h3" 
+              variant={isMobile ? 'h4' : isTablet ? 'h3' : 'h3'}
               fontWeight={800} 
               gutterBottom
               sx={{
@@ -124,16 +139,21 @@ export const StatCard: React.FC<StatCardProps> = ({
             sx={{
               background: `linear-gradient(135deg, ${color}, ${alpha(color, 0.8)})`,
               color: 'white',
-              borderRadius: 3,
-              p: 2,
+              borderRadius: isMobile ? 2 : 3,
+              p: isMobile ? 1.5 : 2,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              boxShadow: `0 8px 24px ${alpha(color, 0.35)}`,
+              boxShadow: `0 ${isMobile ? '6px 16px' : '8px 24px'} ${alpha(color, 0.35)}`,
               transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+              minWidth: isMobile ? 48 : 56,
+              minHeight: isMobile ? 48 : 56,
               '&:hover': {
-                transform: 'rotate(10deg) scale(1.1)',
-                boxShadow: `0 12px 32px ${alpha(color, 0.45)}`,
+                transform: isMobile ? 'scale(1.05)' : 'rotate(10deg) scale(1.1)',
+                boxShadow: `0 ${isMobile ? '8px 20px' : '12px 32px'} ${alpha(color, 0.45)}`,
+              },
+              '& > svg': {
+                fontSize: isMobile ? '1.5rem' : '2rem',
               },
             }}
           >

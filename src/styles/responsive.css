@@ -1,0 +1,350 @@
+/* ============================================
+   RESPONSIVE DESIGN - Sistema FGS
+   ============================================ */
+
+/* Mobile First - Base Styles */
+:root {
+  --header-height: 64px;
+  --drawer-width: 280px;
+  --drawer-width-mobile: 240px;
+  --spacing-xs: 8px;
+  --spacing-sm: 16px;
+  --spacing-md: 24px;
+  --spacing-lg: 32px;
+  --spacing-xl: 48px;
+}
+
+/* ============================================
+   MOBILE (< 768px)
+   ============================================ */
+@media (max-width: 767px) {
+  /* Typography */
+  h1, .MuiTypography-h1 {
+    font-size: 1.75rem !important;
+  }
+  
+  h2, .MuiTypography-h2 {
+    font-size: 1.5rem !important;
+  }
+  
+  h3, .MuiTypography-h3 {
+    font-size: 1.25rem !important;
+  }
+  
+  h4, .MuiTypography-h4 {
+    font-size: 1.125rem !important;
+  }
+  
+  h5, .MuiTypography-h5 {
+    font-size: 1rem !important;
+  }
+  
+  h6, .MuiTypography-h6 {
+    font-size: 0.875rem !important;
+  }
+
+  /* Buttons */
+  .MuiButton-root {
+    font-size: 0.875rem !important;
+    padding: 8px 16px !important;
+  }
+
+  .MuiButton-sizeLarge {
+    font-size: 0.9375rem !important;
+    padding: 10px 22px !important;
+  }
+
+  /* Cards */
+  .MuiCard-root {
+    margin-bottom: 12px !important;
+  }
+
+  .MuiCardContent-root {
+    padding: 12px !important;
+  }
+
+  /* Tables */
+  .MuiTable-root {
+    font-size: 0.8125rem !important;
+  }
+
+  .MuiTableCell-root {
+    padding: 8px !important;
+  }
+
+  /* Grid */
+  .MuiGrid-container {
+    margin: -8px !important;
+  }
+
+  .MuiGrid-item {
+    padding: 8px !important;
+  }
+
+  /* Dialogs */
+  .MuiDialog-paper {
+    margin: 16px !important;
+    max-width: calc(100% - 32px) !important;
+  }
+
+  /* Tabs */
+  .MuiTabs-root {
+    min-height: 48px !important;
+  }
+
+  .MuiTab-root {
+    min-height: 48px !important;
+    padding: 8px 12px !important;
+    font-size: 0.875rem !important;
+  }
+
+  /* Forms */
+  .MuiTextField-root {
+    margin-bottom: 12px !important;
+  }
+
+  .MuiInputBase-root {
+    font-size: 0.875rem !important;
+  }
+
+  /* Spacing */
+  .page-content {
+    padding: 12px !important;
+  }
+
+  .section-spacing {
+    margin-bottom: 16px !important;
+  }
+}
+
+/* ============================================
+   TABLET (768px - 1023px)
+   ============================================ */
+@media (min-width: 768px) and (max-width: 1023px) {
+  /* Typography */
+  h1, .MuiTypography-h1 {
+    font-size: 2rem !important;
+  }
+  
+  h2, .MuiTypography-h2 {
+    font-size: 1.75rem !important;
+  }
+  
+  h3, .MuiTypography-h3 {
+    font-size: 1.5rem !important;
+  }
+
+  /* Cards */
+  .MuiCard-root {
+    margin-bottom: 16px !important;
+  }
+
+  /* Grid */
+  .MuiGrid-container {
+    margin: -12px !important;
+  }
+
+  .MuiGrid-item {
+    padding: 12px !important;
+  }
+
+  /* Spacing */
+  .page-content {
+    padding: 16px !important;
+  }
+
+  .section-spacing {
+    margin-bottom: 20px !important;
+  }
+}
+
+/* ============================================
+   DESKTOP (>= 1024px)
+   ============================================ */
+@media (min-width: 1024px) {
+  .page-content {
+    padding: 24px !important;
+  }
+
+  .section-spacing {
+    margin-bottom: 24px !important;
+  }
+}
+
+/* ============================================
+   LARGE DESKTOP (>= 1440px)
+   ============================================ */
+@media (min-width: 1440px) {
+  .page-content {
+    padding: 32px !important;
+  }
+
+  .section-spacing {
+    margin-bottom: 32px !important;
+  }
+
+  /* Increase max-width for large containers */
+  .container-large {
+    max-width: 1400px !important;
+    margin: 0 auto !important;
+  }
+}
+
+/* ============================================
+   EXTRA LARGE DESKTOP (>= 1920px)
+   ============================================ */
+@media (min-width: 1920px) {
+  .page-content {
+    padding: 40px !important;
+  }
+
+  .section-spacing {
+    margin-bottom: 40px !important;
+  }
+
+  .container-large {
+    max-width: 1600px !important;
+  }
+}
+
+/* ============================================
+   UTILITY CLASSES
+   ============================================ */
+
+/* Hide on Mobile */
+.hide-mobile {
+  display: none !important;
+}
+
+@media (min-width: 768px) {
+  .hide-mobile {
+    display: block !important;
+  }
+}
+
+/* Hide on Desktop */
+.hide-desktop {
+  display: block !important;
+}
+
+@media (min-width: 1024px) {
+  .hide-desktop {
+    display: none !important;
+  }
+}
+
+/* Show only on Mobile */
+.show-mobile {
+  display: block !important;
+}
+
+@media (min-width: 768px) {
+  .show-mobile {
+    display: none !important;
+  }
+}
+
+/* Show only on Tablet */
+.show-tablet {
+  display: none !important;
+}
+
+@media (min-width: 768px) and (max-width: 1023px) {
+  .show-tablet {
+    display: block !important;
+  }
+}
+
+/* Show only on Desktop */
+.show-desktop {
+  display: none !important;
+}
+
+@media (min-width: 1024px) {
+  .show-desktop {
+    display: block !important;
+  }
+}
+
+/* ============================================
+   SCROLLBAR RESPONSIVE
+   ============================================ */
+@media (max-width: 767px) {
+  ::-webkit-scrollbar {
+    width: 4px !important;
+    height: 4px !important;
+  }
+}
+
+/* ============================================
+   PRINT STYLES
+   ============================================ */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+
+  .page-content {
+    padding: 0 !important;
+  }
+
+  .MuiAppBar-root,
+  .MuiDrawer-root,
+  .MuiFab-root {
+    display: none !important;
+  }
+}
+
+/* ============================================
+   SAFE AREA (notches, etc)
+   ============================================ */
+@supports (padding: env(safe-area-inset-top)) {
+  .safe-area-top {
+    padding-top: env(safe-area-inset-top) !important;
+  }
+
+  .safe-area-bottom {
+    padding-bottom: env(safe-area-inset-bottom) !important;
+  }
+
+  .safe-area-left {
+    padding-left: env(safe-area-inset-left) !important;
+  }
+
+  .safe-area-right {
+    padding-right: env(safe-area-inset-right) !important;
+  }
+}
+
+/* ============================================
+   TOUCH TARGETS (minimum 44x44px for mobile)
+   ============================================ */
+@media (max-width: 767px) {
+  .MuiIconButton-root {
+    min-width: 44px !important;
+    min-height: 44px !important;
+  }
+
+  .MuiButton-root {
+    min-height: 44px !important;
+  }
+
+  .MuiTab-root {
+    min-height: 48px !important;
+  }
+}
+
+/* ============================================
+   OVERFLOW HANDLING
+   ============================================ */
+@media (max-width: 767px) {
+  .MuiTableContainer-root {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+
+  .MuiTable-root {
+    min-width: 600px !important;
+  }
+}
+

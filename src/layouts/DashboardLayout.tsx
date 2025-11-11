@@ -48,9 +48,11 @@ import { PageTransition } from '../components/PageTransition';
 import { useAuth } from '../hooks/useAuth';
 import { useNavigationLog } from '../hooks/useNavigationLog';
 import { useTheme } from '../hooks/useTheme';
+import { useResponsive } from '../hooks/useResponsive';
 import { UserRole } from '../types';
 
 const DRAWER_WIDTH = 280;
+const DRAWER_WIDTH_MOBILE = 240;
 
 interface MenuItem {
   title: string;
@@ -135,18 +137,30 @@ const menuItems: MenuItem[] = [
 
 // Layout principal do dashboard
 export const DashboardLayout: React.FC = () => {
-  const [drawerOpen, setDrawerOpen] = useState(true);
+  const { isMobile, isTablet, isDesktop } = useResponsive();
+  
+  // Em mobile/tablet, o drawer começa fechado por padrão
+  const [drawerOpen, setDrawerOpen] = useState(!isMobile && !isTablet);
+  const [mobileOpen, setMobileOpen] = useState(false);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [notifAnchorEl, setNotifAnchorEl] = useState<null | HTMLElement>(null);
   const navigate = useNavigate();
   const location = useLocation();
   const { user, logout } = useAuth();
-  const { logAction } = useNavigationLog();
+  const { logAction} = useNavigationLog();
   const { mode, toggleTheme } = useTheme();
 
   const toggleDrawer = () => {
-    setDrawerOpen(!drawerOpen);
+    if (isMobile || isTablet) {
+      setMobileOpen(!mobileOpen);
+    } else {
+      setDrawerOpen(!drawerOpen);
+    }
     logAction(drawerOpen ? 'Menu fechado' : 'Menu aberto');
+  };
+  
+  const handleDrawerClose = () => {
+    setMobileOpen(false);
   };
 
   const handleProfileMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
@@ -189,8 +203,14 @@ export const DashboardLayout: React.FC = () => {
         elevation={0}
         sx={{
           zIndex: (theme) => theme.zIndex.drawer + 1,
-          width: drawerOpen ? `calc(100% - ${DRAWER_WIDTH}px)` : '100%',
-          ml: drawerOpen ? `${DRAWER_WIDTH}px` : 0,
+          width: { 
+            xs: '100%',
+            lg: drawerOpen ? `calc(100% - ${DRAWER_WIDTH}px)` : '100%'
+          },
+          ml: { 
+            xs: 0,
+            lg: drawerOpen ? `${DRAWER_WIDTH}px` : 0
+          },
           transition: 'all 0.3s ease',
           background: (theme) => 
             mode === 'dark'
@@ -502,11 +522,12 @@ export const DashboardLayout: React.FC = () => {
         </Toolbar>
       </AppBar>
 
-      {/* Drawer/Sidebar Moderna */}
+      {/* Drawer Desktop */}
       <Drawer
         variant="permanent"
         open={drawerOpen}
         sx={{
+          display: { xs: 'none', lg: 'block' },
           width: drawerOpen ? DRAWER_WIDTH : 0,
           flexShrink: 0,
           '& .MuiDrawer-paper': {
@@ -729,14 +750,146 @@ export const DashboardLayout: React.FC = () => {
         </Box>
       </Drawer>
 
+      {/* Drawer Mobile/Tablet */}
+      <Drawer
+        variant="temporary"
+        open={mobileOpen}
+        onClose={handleDrawerClose}
+        ModalProps={{
+          keepMounted: true, // Melhor performance em mobile
+        }}
+        sx={{
+          display: { xs: 'block', lg: 'none' },
+          '& .MuiDrawer-paper': {
+            width: DRAWER_WIDTH_MOBILE,
+            boxSizing: 'border-box',
+            background: (theme) => 
+              mode === 'dark' 
+                ? 'linear-gradient(180deg, #1e293b 0%, #0f172a 100%)'
+                : 'linear-gradient(180deg, #ffffff 0%, #f8fafc 100%)',
+            borderRight: (theme) => 
+              `1px solid ${alpha(theme.palette.divider, 0.1)}`,
+          },
+        }}
+      >
+        <Toolbar />
+        <Box sx={{ overflowY: 'auto', overflowX: 'hidden', px: 2, pb: 2, pt: 3 }}>
+          {/* Versão simplificada para mobile - sem foto grande */}
+          <Box
+            sx={{
+              mb: 2,
+              p: 1.5,
+              borderRadius: 3,
+              background: (theme) =>
+                mode === 'dark'
+                  ? 'linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%)'
+                  : 'linear-gradient(135deg, rgba(99, 102, 241, 0.05) 0%, rgba(139, 92, 246, 0.05) 100%)',
+              border: (theme) =>
+                `1px solid ${alpha(theme.palette.primary.main, 0.1)}`,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 1.5,
+            }}
+          >
+            <Avatar
+              src={user?.avatar}
+              sx={{
+                width: 48,
+                height: 48,
+                background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
+                fontSize: '1.25rem',
+                fontWeight: 700,
+              }}
+            >
+              {!user?.avatar && user?.nome.charAt(0).toUpperCase()}
+            </Avatar>
+            <Box sx={{ flex: 1, minWidth: 0 }}>
+              <Typography
+                variant="body2"
+                fontWeight={600}
+                sx={{
+                  mb: 0.5,
+                  background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
+                  backgroundClip: 'text',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                {user?.nome || 'Usuário'}
+              </Typography>
+              <RoleBadge role={user?.role || UserRole.COLABORADOR} />
+            </Box>
+          </Box>
+
+          {/* Menu de Navegação Mobile */}
+          <List sx={{ mt: 2 }}>
+            {filteredMenuItems.map((item) => {
+              const isActive = location.pathname === item.path;
+              
+              return (
+                <ListItem key={item.path} disablePadding sx={{ mb: 0.5 }}>
+                  <ListItemButton
+                    onClick={() => {
+                      handleNavigate(item.path);
+                      handleDrawerClose(); // Fechar drawer ao navegar
+                    }}
+                    sx={{
+                      borderRadius: 2,
+                      py: 1.25,
+                      px: 2,
+                      mb: 0.5,
+                      background: isActive
+                        ? 'linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%)'
+                        : 'transparent',
+                      border: isActive ? `1px solid ${alpha('#6366f1', 0.2)}` : '1px solid transparent',
+                      transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                      '&:hover': {
+                        background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.08) 0%, rgba(139, 92, 246, 0.08) 100%)',
+                        transform: 'translateX(4px)',
+                      },
+                    }}
+                  >
+                    <ListItemIcon 
+                      sx={{ 
+                        minWidth: 40,
+                        color: isActive ? 'primary.main' : 'text.secondary',
+                      }}
+                    >
+                      {item.icon}
+                    </ListItemIcon>
+                    <ListItemText
+                      primary={item.title}
+                      primaryTypographyProps={{
+                        fontWeight: isActive ? 700 : 500,
+                        fontSize: '0.9rem',
+                        color: isActive ? 'primary.main' : 'text.primary',
+                      }}
+                    />
+                  </ListItemButton>
+                </ListItem>
+              );
+            })}
+          </List>
+        </Box>
+      </Drawer>
+
       {/* Conteúdo Principal */}
       <Box
         component="main"
         sx={{
           flexGrow: 1,
-          p: 3,
-          width: drawerOpen ? `calc(100% - ${DRAWER_WIDTH}px)` : '100%',
-          ml: drawerOpen ? 0 : `-${DRAWER_WIDTH}px`,
+          p: { xs: 2, sm: 2.5, md: 3, lg: 3, xl: 4 },
+          width: { 
+            xs: '100%',
+            lg: drawerOpen ? `calc(100% - ${DRAWER_WIDTH}px)` : '100%'
+          },
+          ml: { 
+            xs: 0,
+            lg: drawerOpen ? 0 : `-${DRAWER_WIDTH}px`
+          },
           transition: 'all 0.3s ease',
           minHeight: '100vh',
         }}
