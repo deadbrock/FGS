@@ -46,6 +46,7 @@ export interface DadosContratuais {
   dataDesligamento?: string;
   cargo: string;
   departamento: string;
+  localTrabalho?: string; // Estado (UF) onde o colaborador trabalha
   salario: number;
   tipoContrato: 'CLT' | 'PJ' | 'Estágio' | 'Temporário';
   jornadaTrabalho: string;

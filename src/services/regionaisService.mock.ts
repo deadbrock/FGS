@@ -90,7 +90,6 @@ const colaboradoresMock: ColaboradorRegional[] = [
     genero: (i % 2 === 0 ? 'MASCULINO' : 'FEMININO') as 'MASCULINO' | 'FEMININO',
     telefone: `(11) 9${String(i).padStart(4, '0')}-${String(i).padStart(4, '0')}`,
     unidade: `Unidade SP ${(i % 5) + 1}`,
-    avatar: `https://i.pravatar.cc/150?img=${(i % 70) + 1}`,
   })),
   // Rio de Janeiro
   ...Array.from({ length: 80 }, (_, i) => ({

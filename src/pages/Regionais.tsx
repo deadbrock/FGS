@@ -180,6 +180,7 @@ export const Regionais: React.FC = () => {
   // Função para verificar se é cargo administrativo/gestão
   const isCargoAdministrativo = (cargo: string): boolean => {
     const cargosAdministrativos = [
+      // Gestão e Supervisão
       'supervisor',
       'supervisora',
       'encarregado',
@@ -195,6 +196,41 @@ export const Regionais: React.FC = () => {
       'chefe',
       'administrador',
       'administradora',
+      // Administrativo
+      'auxiliar administrativo',
+      'assistente administrativo',
+      'analista administrativo',
+      // Departamento Pessoal
+      'auxiliar departamento pessoal',
+      'assistente departamento pessoal',
+      'analista departamento pessoal',
+      // RH
+      'auxiliar de rh',
+      'auxiliar rh',
+      'assistente de rh',
+      'assistente rh',
+      'analista de rh',
+      'analista rh',
+      // Financeiro
+      'auxiliar financeiro',
+      'assistente financeiro',
+      'analista financeiro',
+      // Faturamento
+      'auxiliar de faturamento',
+      'auxiliar faturamento',
+      'assistente de faturamento',
+      'assistente faturamento',
+      // Segurança do Trabalho
+      'segurança do trabalho',
+      'tecnico de segurança',
+      'técnico de segurança',
+      // Gerentes Específicos
+      'gerente operacional',
+      'gerente administrativo',
+      // Genéricos (auxiliar, assistente, analista)
+      'auxiliar',
+      'assistente',
+      'analista',
     ];
     
     const cargoLower = cargo.toLowerCase();
@@ -801,7 +837,7 @@ export const Regionais: React.FC = () => {
                       Quadro Administrativo
                     </Typography>
                     <Typography variant="body2" sx={{ opacity: 0.9 }}>
-                      Supervisores, Encarregados, Coordenadores e demais cargos de gestão
+                      Gestão, Supervisão, RH, Financeiro, Faturamento e Segurança do Trabalho
                     </Typography>
                   </Box>
                 </Box>
@@ -939,6 +975,13 @@ export const Regionais: React.FC = () => {
                       <MenuItem value="coordenador">Coordenadores</MenuItem>
                       <MenuItem value="gerente">Gerentes</MenuItem>
                       <MenuItem value="diretor">Diretores</MenuItem>
+                      <MenuItem value="auxiliar">Auxiliares</MenuItem>
+                      <MenuItem value="assistente">Assistentes</MenuItem>
+                      <MenuItem value="analista">Analistas</MenuItem>
+                      <MenuItem value="rh">RH</MenuItem>
+                      <MenuItem value="financeiro">Financeiro</MenuItem>
+                      <MenuItem value="faturamento">Faturamento</MenuItem>
+                      <MenuItem value="segurança">Segurança do Trabalho</MenuItem>
                     </Select>
                   </FormControl>
                 </Grid>
@@ -1093,8 +1136,10 @@ export const Regionais: React.FC = () => {
                     Detecção Automática de Promoções
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
-                    O sistema identifica automaticamente quando um colaborador é promovido para cargo administrativo
-                    (Supervisor, Encarregado, Coordenador, Gerente, etc.) e o adiciona nesta listagem.
+                    O sistema identifica automaticamente colaboradores com cargos administrativos incluindo: 
+                    Gestão (Supervisor, Encarregado, Coordenador, Gerente, Diretor), 
+                    Administrativo (Auxiliar, Assistente, Analista), 
+                    RH, Financeiro, Faturamento e Segurança do Trabalho.
                   </Typography>
                 </Box>
               </Box>

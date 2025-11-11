@@ -36,14 +36,23 @@ CREATE TABLE IF NOT EXISTS colaboradores (
   data_demissao DATE,
   cargo VARCHAR(100) NOT NULL,
   departamento VARCHAR(100) NOT NULL,
+  local_trabalho VARCHAR(2), -- Estado (UF) onde trabalha
   salario DECIMAL(10, 2) NOT NULL,
   status VARCHAR(20) DEFAULT 'ATIVO',
   endereco TEXT,
   cidade VARCHAR(100),
-  estado VARCHAR(2),
+  estado VARCHAR(2), -- Estado de residência
   cep VARCHAR(10),
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT chk_local_trabalho_uf CHECK (
+    local_trabalho IS NULL OR local_trabalho IN (
+      'AC', 'AL', 'AP', 'AM', 'BA', 'CE', 'DF', 'ES',
+      'GO', 'MA', 'MT', 'MS', 'MG', 'PA', 'PB', 'PR',
+      'PE', 'PI', 'RJ', 'RN', 'RS', 'RO', 'RR', 'SC',
+      'SP', 'SE', 'TO'
+    )
+  )
 );
 
 -- =============================================
@@ -231,6 +240,7 @@ CREATE INDEX IF NOT EXISTS idx_colaboradores_cpf ON colaboradores(cpf);
 CREATE INDEX IF NOT EXISTS idx_colaboradores_status ON colaboradores(status);
 CREATE INDEX IF NOT EXISTS idx_colaboradores_departamento ON colaboradores(departamento);
 CREATE INDEX IF NOT EXISTS idx_colaboradores_nome ON colaboradores(nome);
+CREATE INDEX IF NOT EXISTS idx_colaboradores_local_trabalho ON colaboradores(local_trabalho);
 
 -- Benefícios
 CREATE INDEX IF NOT EXISTS idx_beneficios_tipo ON beneficios(tipo);

@@ -11,15 +11,50 @@ A nova aba **"Administrativo"** no módulo Regionais exibe automaticamente todos
 O sistema identifica automaticamente colaboradores com os seguintes cargos:
 
 #### Cargos Detectados:
+
+**Gestão e Supervisão:**
 - ✅ **Supervisor / Supervisora**
 - ✅ **Encarregado / Encarregada**
 - ✅ **Coordenador / Coordenadora**
-- ✅ **Gerente**
+- ✅ **Gerente** (todos os tipos)
+- ✅ **Gerente Operacional**
+- ✅ **Gerente Administrativo**
 - ✅ **Diretor / Diretora**
 - ✅ **Gestor / Gestora**
 - ✅ **Líder**
 - ✅ **Chefe**
+
+**Administrativo:**
+- ✅ **Auxiliar Administrativo**
+- ✅ **Assistente Administrativo**
+- ✅ **Analista Administrativo**
 - ✅ **Administrador / Administradora**
+
+**Departamento Pessoal / RH:**
+- ✅ **Auxiliar Departamento Pessoal**
+- ✅ **Assistente Departamento Pessoal**
+- ✅ **Analista Departamento Pessoal**
+- ✅ **Auxiliar de RH**
+- ✅ **Assistente de RH**
+- ✅ **Analista de RH**
+
+**Financeiro:**
+- ✅ **Auxiliar Financeiro**
+- ✅ **Assistente Financeiro**
+- ✅ **Analista Financeiro**
+
+**Faturamento:**
+- ✅ **Auxiliar de Faturamento**
+- ✅ **Assistente de Faturamento**
+
+**Segurança do Trabalho:**
+- ✅ **Segurança do Trabalho**
+- ✅ **Técnico de Segurança do Trabalho**
+
+**Genéricos (qualquer área):**
+- ✅ **Auxiliar** (qualquer setor)
+- ✅ **Assistente** (qualquer setor)
+- ✅ **Analista** (qualquer setor)
 
 **Como Funciona:**
 - Quando um colaborador é **promovido** para qualquer um desses cargos
@@ -54,7 +89,14 @@ A aba exibe 4 cards com estatísticas:
 - Encarregados
 - Coordenadores
 - Gerentes
-- Diretores
+- Diretor
+- Auxiliares
+- Assistentes
+- Analistas
+- RH
+- Financeiro
+- Faturamento
+- Segurança do Trabalho
 
 ### 3. Gênero
 - Todos
@@ -93,8 +135,21 @@ A tabela exibe:
 // O sistema verifica se o cargo contém palavras-chave
 const isCargoAdministrativo = (cargo: string): boolean => {
   const cargosAdministrativos = [
+    // Gestão
     'supervisor', 'encarregado', 'coordenador', 
-    'gerente', 'diretor', 'gestor', 'líder', 'chefe'
+    'gerente', 'diretor', 'gestor', 'líder', 'chefe',
+    // Administrativo
+    'auxiliar administrativo', 'assistente administrativo', 'analista administrativo',
+    // RH e DP
+    'auxiliar rh', 'assistente rh', 'analista rh',
+    'auxiliar departamento pessoal', 'assistente departamento pessoal',
+    // Financeiro e Faturamento
+    'auxiliar financeiro', 'assistente financeiro', 'analista financeiro',
+    'auxiliar faturamento', 'assistente faturamento',
+    // Segurança
+    'segurança do trabalho',
+    // Genéricos
+    'auxiliar', 'assistente', 'analista'
   ];
   
   const cargoLower = cargo.toLowerCase();
@@ -103,17 +158,49 @@ const isCargoAdministrativo = (cargo: string): boolean => {
 ```
 
 **Exemplos de Cargos Detectados:**
+
+**Gestão:**
 - ✅ "Supervisor de Vendas"
 - ✅ "Encarregado de Manutenção"
 - ✅ "Coordenador de Logística"
 - ✅ "Gerente Regional"
+- ✅ "Gerente Operacional"
 - ✅ "Líder de Equipe"
 
+**Administrativo:**
+- ✅ "Auxiliar Administrativo"
+- ✅ "Assistente Administrativo"
+- ✅ "Analista Administrativo"
+
+**RH:**
+- ✅ "Auxiliar de RH"
+- ✅ "Assistente de RH"
+- ✅ "Analista de RH"
+- ✅ "Auxiliar Departamento Pessoal"
+
+**Financeiro:**
+- ✅ "Auxiliar Financeiro"
+- ✅ "Assistente Financeiro"
+- ✅ "Analista Financeiro"
+
+**Faturamento:**
+- ✅ "Auxiliar de Faturamento"
+- ✅ "Assistente de Faturamento"
+
+**Segurança:**
+- ✅ "Segurança do Trabalho"
+- ✅ "Técnico de Segurança do Trabalho"
+
+**Genéricos (qualquer área):**
+- ✅ "Auxiliar de Logística"
+- ✅ "Assistente de Vendas"
+- ✅ "Analista de Qualidade"
+
 **Exemplos de Cargos NÃO Detectados:**
-- ❌ "Analista"
-- ❌ "Assistente"
-- ❌ "Auxiliar"
-- ❌ "Técnico"
+- ❌ "Operador de Máquinas"
+- ❌ "Motorista"
+- ❌ "Técnico de Manutenção" (sem 'segurança')
+- ❌ "Ajudante Geral"
 
 ---
 
