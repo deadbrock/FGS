@@ -28,6 +28,9 @@ class UsuariosService {
     baseURL: `${API_URL}/api/usuarios`,
     headers: {
       'Content-Type': 'application/json',
+      'Cache-Control': 'no-cache, no-store, must-revalidate',
+      'Pragma': 'no-cache',
+      'Expires': '0',
     },
   });
 
@@ -36,7 +39,9 @@ class UsuariosService {
    */
   async getAll(): Promise<User[]> {
     try {
-      const response = await this.api.get('/');
+      // Cache buster: adiciona timestamp para evitar cache
+      const timestamp = new Date().getTime();
+      const response = await this.api.get(`/?_=${timestamp}`);
       return response.data.data || [];
     } catch (error) {
       console.error('Erro ao buscar usuários:', error);
