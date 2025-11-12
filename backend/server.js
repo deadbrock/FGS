@@ -19,30 +19,22 @@ export const pool = new Pool({
   } : false
 });
 
-// Função para criar usuário admin padrão
+// Função para criar usuário admin padrão (DESATIVADA - usar apenas usuários reais)
 async function initDefaultAdmin() {
   try {
+    // Verificar se existe algum admin no banco
     const checkAdmin = await pool.query(
-      "SELECT id FROM users WHERE email = 'admin@fgs.com'"
+      "SELECT id, nome, email FROM users WHERE role = 'ADMINISTRADOR' LIMIT 1"
     );
 
-    if (checkAdmin.rows.length === 0) {
-      const hashedPassword = await bcrypt.hash('admin123', 10);
-      await pool.query(`
-        INSERT INTO users (nome, email, senha, role, cargo, departamento)
-        VALUES ($1, $2, $3, $4, $5, $6)
-      `, [
-        'Administrador',
-        'admin@fgs.com',
-        hashedPassword,
-        'ADMINISTRADOR',
-        'Administrador do Sistema',
-        'TI'
-      ]);
-      console.log('✅ Usuário admin criado: admin@fgs.com / admin123');
+    if (checkAdmin.rows.length > 0) {
+      console.log('✅ Admin encontrado:', checkAdmin.rows[0].email);
+    } else {
+      console.log('⚠️  ATENÇÃO: Nenhum administrador encontrado no banco!');
+      console.log('⚠️  Crie um usuário administrador via Railway CLI ou interface.');
     }
   } catch (error) {
-    console.error('⚠️  Erro ao criar admin padrão:', error.message);
+    console.error('⚠️  Erro ao verificar admin:', error.message);
   }
 }
 
