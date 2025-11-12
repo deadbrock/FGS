@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   Box,
   Typography,
@@ -55,6 +55,14 @@ function TabPanel(props: TabPanelProps) {
 export const Configuracoes: React.FC = () => {
   const { logAction } = useNavigationLog();
   const { user } = useAuth();
+  
+  // Debug: verificar user ao carregar
+  useEffect(() => {
+    console.log('👤 User do AuthContext:', user);
+    console.log('🔑 User ID:', user?.id);
+    console.log('📧 User Email:', user?.email);
+  }, [user]);
+  
   const [success, setSuccess] = useState(false);
   const [tabValue, setTabValue] = useState(0);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(user?.avatar || null);
