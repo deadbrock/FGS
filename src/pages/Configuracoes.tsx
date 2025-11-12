@@ -85,12 +85,20 @@ export const Configuracoes: React.FC = () => {
     try {
       // Atualizar dados do usuário no backend
       if (user?.id) {
+        console.log('🔍 Atualizando usuário:', { 
+          userId: user.id, 
+          nome: perfil.nome, 
+          email: perfil.email 
+        });
+        
         const usuariosService = (await import('../services/usuariosService')).default;
         
         await usuariosService.update(user.id, {
           nome: perfil.nome,
           email: perfil.email,
         });
+
+        console.log('✅ Usuário atualizado com sucesso');
 
         // Atualizar também no localStorage
         const storedUser = localStorage.getItem('@FGS:user');
@@ -108,10 +116,14 @@ export const Configuracoes: React.FC = () => {
           // Recarregar para atualizar o nome no sidebar
           window.location.reload();
         }, 1500);
+      } else {
+        console.error('❌ user.id não encontrado:', user);
+        alert('Erro: ID do usuário não encontrado. Faça login novamente.');
       }
-    } catch (error) {
-      console.error('Erro ao salvar configurações:', error);
-      alert('Erro ao salvar configurações. Tente novamente.');
+    } catch (error: any) {
+      console.error('❌ Erro ao salvar configurações:', error);
+      console.error('Detalhes do erro:', error.response?.data);
+      alert(`Erro ao salvar configurações: ${error.message || 'Erro desconhecido'}`);
     }
   };
 

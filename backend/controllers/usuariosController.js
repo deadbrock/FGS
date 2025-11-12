@@ -136,10 +136,19 @@ export const updateUsuario = async (req, res) => {
     const { id } = req.params;
     const { nome, email, senha, role, cargo, departamento, avatar } = req.body;
 
+    console.log('📝 UPDATE REQUEST:', { 
+      id, 
+      body: { nome, email, role, cargo, departamento },
+      hasPassword: !!senha 
+    });
+
     // Verificar se o usuário existe
     const userCheck = await pool.query('SELECT id FROM users WHERE id = $1', [id]);
     
+    console.log('🔍 User check result:', userCheck.rows);
+    
     if (userCheck.rows.length === 0) {
+      console.error('❌ Usuário não encontrado:', id);
       return res.status(404).json({
         success: false,
         error: 'Usuário não encontrado'
@@ -213,7 +222,12 @@ export const updateUsuario = async (req, res) => {
       RETURNING id, nome, email, role, cargo, departamento, avatar, updated_at
     `;
 
+    console.log('🔍 SQL Query:', query);
+    console.log('🔍 SQL Values:', values);
+
     const result = await pool.query(query, values);
+
+    console.log('✅ Update successful:', result.rows[0]);
 
     res.json({
       success: true,
@@ -221,7 +235,8 @@ export const updateUsuario = async (req, res) => {
       data: result.rows[0]
     });
   } catch (error) {
-    console.error('Erro ao atualizar usuário:', error);
+    console.error('❌ ERRO AO ATUALIZAR USUÁRIO:', error);
+    console.error('Stack:', error.stack);
     res.status(500).json({
       success: false,
       error: 'Erro ao atualizar usuário',
