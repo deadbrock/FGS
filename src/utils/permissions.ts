@@ -36,6 +36,11 @@ export const hasPermission = (userRole: UserRole, path: string): boolean => {
 
 // Retorna o nome amigável do perfil
 export const getRoleName = (role: UserRole): string => {
+  // Proteção contra undefined/null
+  if (!role) {
+    return 'N/A';
+  }
+  
   const roleNames: Record<UserRole, string> = {
     [UserRole.ADMINISTRADOR]: 'Administrador',
     [UserRole.RH]: 'Recursos Humanos',
@@ -49,6 +54,11 @@ export const getRoleName = (role: UserRole): string => {
 
 // Retorna a cor do perfil para badges
 export const getRoleColor = (role: UserRole): string => {
+  // Proteção contra undefined/null
+  if (!role) {
+    return '#9e9e9e';
+  }
+  
   const roleColors: Record<UserRole, string> = {
     [UserRole.ADMINISTRADOR]: '#a2122a',
     [UserRole.RH]: '#354a80',
