@@ -311,7 +311,7 @@ export const Usuarios: React.FC = () => {
                       </TableCell>
                       <TableCell>{user.email}</TableCell>
                       <TableCell>
-                        <RoleBadge role={user.role} />
+                        <RoleBadge role={user.role || UserRole.COLABORADOR} />
                       </TableCell>
                       <TableCell>{user.cargo || '-'}</TableCell>
                       <TableCell>{user.departamento || '-'}</TableCell>
