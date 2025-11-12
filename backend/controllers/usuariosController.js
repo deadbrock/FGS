@@ -19,6 +19,9 @@ export const getUsuarios = async (req, res) => {
       ORDER BY created_at DESC
     `);
 
+    console.log(`📊 Retornando ${result.rows.length} usuários`);
+    console.log('📋 Usuários:', JSON.stringify(result.rows, null, 2));
+
     res.json({
       success: true,
       data: result.rows,

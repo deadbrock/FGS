@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import pkg from 'pg';
+import bcrypt from 'bcrypt';
 const { Pool } = pkg;
 
 // Carregar variáveis de ambiente
@@ -18,13 +19,42 @@ export const pool = new Pool({
   } : false
 });
 
+// Função para criar usuário admin padrão
+async function initDefaultAdmin() {
+  try {
+    const checkAdmin = await pool.query(
+      "SELECT id FROM users WHERE email = 'admin@fgs.com'"
+    );
+
+    if (checkAdmin.rows.length === 0) {
+      const hashedPassword = await bcrypt.hash('admin123', 10);
+      await pool.query(`
+        INSERT INTO users (nome, email, senha, role, cargo, departamento)
+        VALUES ($1, $2, $3, $4, $5, $6)
+      `, [
+        'Administrador',
+        'admin@fgs.com',
+        hashedPassword,
+        'ADMINISTRADOR',
+        'Administrador do Sistema',
+        'TI'
+      ]);
+      console.log('✅ Usuário admin criado: admin@fgs.com / admin123');
+    }
+  } catch (error) {
+    console.error('⚠️  Erro ao criar admin padrão:', error.message);
+  }
+}
+
 // Testar conexão com o banco
-pool.connect((err, client, release) => {
+pool.connect(async (err, client, release) => {
   if (err) {
     console.error('❌ Erro ao conectar ao banco de dados:', err.stack);
   } else {
     console.log('✅ Conectado ao PostgreSQL com sucesso!');
     release();
+    // Criar admin padrão após conectar
+    await initDefaultAdmin();
   }
 });
 
