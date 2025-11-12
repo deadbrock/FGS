@@ -63,10 +63,18 @@ export const ActionButton: React.FC<ActionButtonProps> = (props) => {
   if ('action' in props && props.action) {
     const config = actionConfig[props.action];
     
-    // Validação de segurança
+    // Validação de segurança - retorna botão de erro em vez de null
     if (!config) {
       console.error('ActionButton: action inválido:', props.action);
-      return null;
+      return (
+        <Tooltip title="Ação inválida">
+          <span>
+            <IconButton disabled size="small">
+              <ErrorIcon />
+            </IconButton>
+          </span>
+        </Tooltip>
+      );
     }
     
     const label = tooltip || config.label;
@@ -101,12 +109,6 @@ export const ActionButton: React.FC<ActionButtonProps> = (props) => {
   if ('icon' in props && props.icon) {
     const defaultColor = props.color || '#757575';
     const label = tooltip || 'Ação';
-
-    // Validação: icon não pode ser null/undefined
-    if (!props.icon) {
-      console.error('ActionButton: icon é null ou undefined');
-      return null;
-    }
 
     return (
       <Tooltip title={label}>
