@@ -328,7 +328,7 @@ export const Usuarios: React.FC = () => {
                                 icon={<DeleteIcon />}
                                 tooltip="Excluir"
                                 onClick={() => handleDeleteUser(user)}
-                                color="error"
+                                color="#d32f2f"
                               />
                             )}
                           </Box>
