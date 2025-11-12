@@ -19,12 +19,27 @@ export type ActionType =
   | 'upload'
   | 'refresh';
 
-interface ActionButtonProps {
+// Interface com action predefinido
+interface ActionButtonWithActionProps {
   action: ActionType;
   onClick: () => void;
   tooltip?: string;
   disabled?: boolean;
+  icon?: never;
+  color?: never;
 }
+
+// Interface com icon e color customizados
+interface ActionButtonWithIconProps {
+  action?: never;
+  icon: React.ReactNode;
+  onClick: () => void;
+  tooltip?: string;
+  disabled?: boolean;
+  color?: string;
+}
+
+type ActionButtonProps = ActionButtonWithActionProps | ActionButtonWithIconProps;
 
 const actionConfig: Record<
   ActionType,
@@ -40,38 +55,72 @@ const actionConfig: Record<
   refresh: { icon: <RefreshIcon />, color: '#757575', label: 'Atualizar' },
 };
 
-export const ActionButton: React.FC<ActionButtonProps> = ({
-  action,
-  onClick,
-  tooltip,
-  disabled = false,
-}) => {
-  const config = actionConfig[action];
-  const label = tooltip || config.label;
+export const ActionButton: React.FC<ActionButtonProps> = (props) => {
+  const { onClick, tooltip, disabled = false } = props;
 
-  return (
-    <Tooltip title={label}>
-      <span>
-        <IconButton
-          onClick={onClick}
-          disabled={disabled}
-          size="small"
-          sx={{
-            color: config.color,
-            transition: 'all 0.2s ease',
-            '&:hover': {
-              backgroundColor: alpha(config.color, 0.1),
-              transform: 'scale(1.1)',
-            },
-            '&:active': {
-              transform: 'scale(0.95)',
-            },
-          }}
-        >
-          {config.icon}
-        </IconButton>
-      </span>
-    </Tooltip>
-  );
+  // Se passou action, usa o config predefinido
+  if ('action' in props && props.action) {
+    const config = actionConfig[props.action];
+    const label = tooltip || config.label;
+
+    return (
+      <Tooltip title={label}>
+        <span>
+          <IconButton
+            onClick={onClick}
+            disabled={disabled}
+            size="small"
+            sx={{
+              color: config.color,
+              transition: 'all 0.2s ease',
+              '&:hover': {
+                backgroundColor: alpha(config.color, 0.1),
+                transform: 'scale(1.1)',
+              },
+              '&:active': {
+                transform: 'scale(0.95)',
+              },
+            }}
+          >
+            {config.icon}
+          </IconButton>
+        </span>
+      </Tooltip>
+    );
+  }
+
+  // Se passou icon, usa icon customizado
+  if ('icon' in props && props.icon) {
+    const defaultColor = props.color || '#757575';
+    const label = tooltip || 'Ação';
+
+    return (
+      <Tooltip title={label}>
+        <span>
+          <IconButton
+            onClick={onClick}
+            disabled={disabled}
+            size="small"
+            sx={{
+              color: defaultColor,
+              transition: 'all 0.2s ease',
+              '&:hover': {
+                backgroundColor: alpha(defaultColor, 0.1),
+                transform: 'scale(1.1)',
+              },
+              '&:active': {
+                transform: 'scale(0.95)',
+              },
+            }}
+          >
+            {props.icon}
+          </IconButton>
+        </span>
+      </Tooltip>
+    );
+  }
+
+  // Fallback: não deveria chegar aqui
+  return null;
 };
 
