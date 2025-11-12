@@ -1,22 +1,15 @@
-// MODO MOCK - Para usar sem backend
-// Para conectar com backend real, descomente o código comentado abaixo
-
-export { default } from './authService.mock';
-
-/* 
-// ========================================
-// CÓDIGO PARA BACKEND REAL (DESCOMENTE)
-// ========================================
-
-import api from './api';
+// MODO BACKEND REAL
+import axios from 'axios';
 import { LoginCredentials, LoginResponse, User } from '../types';
+
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3333';
 
 // Serviço de autenticação
 class AuthService {
   // Login do usuário
   async login(credentials: LoginCredentials): Promise<LoginResponse> {
     try {
-      const response = await api.post<LoginResponse>('/auth/login', credentials);
+      const response = await axios.post<LoginResponse>(`${API_URL}/api/auth/login`, credentials);
       
       // Armazena token e dados do usuário no localStorage
       if (response.data.token) {
@@ -25,9 +18,10 @@ class AuthService {
       }
       
       return response.data;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Erro ao fazer login:', error);
-      throw new Error('Email ou senha inválidos');
+      const message = error.response?.data?.error || 'Email ou senha inválidos';
+      throw new Error(message);
     }
   }
 
@@ -59,11 +53,15 @@ class AuthService {
 
   // Verifica dados do usuário autenticado
   async me(): Promise<User> {
-    const response = await api.get<User>('/auth/me');
-    return response.data;
+    const token = this.getStoredToken();
+    const response = await axios.get<any>(`${API_URL}/api/auth/me`, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+    return response.data.user;
   }
 }
 
 export default new AuthService();
-*/
 
