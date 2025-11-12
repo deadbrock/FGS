@@ -8,6 +8,7 @@ import AddIcon from '@mui/icons-material/Add';
 import DownloadIcon from '@mui/icons-material/Download';
 import UploadIcon from '@mui/icons-material/Upload';
 import RefreshIcon from '@mui/icons-material/Refresh';
+import ErrorIcon from '@mui/icons-material/Error';
 
 export type ActionType =
   | 'edit'
@@ -61,6 +62,13 @@ export const ActionButton: React.FC<ActionButtonProps> = (props) => {
   // Se passou action, usa o config predefinido
   if ('action' in props && props.action) {
     const config = actionConfig[props.action];
+    
+    // Validação de segurança
+    if (!config) {
+      console.error('ActionButton: action inválido:', props.action);
+      return null;
+    }
+    
     const label = tooltip || config.label;
 
     return (
@@ -94,6 +102,12 @@ export const ActionButton: React.FC<ActionButtonProps> = (props) => {
     const defaultColor = props.color || '#757575';
     const label = tooltip || 'Ação';
 
+    // Validação: icon não pode ser null/undefined
+    if (!props.icon) {
+      console.error('ActionButton: icon é null ou undefined');
+      return null;
+    }
+
     return (
       <Tooltip title={label}>
         <span>
@@ -120,7 +134,16 @@ export const ActionButton: React.FC<ActionButtonProps> = (props) => {
     );
   }
 
-  // Fallback: não deveria chegar aqui
-  return null;
+  // Fallback: retorna um botão vazio mas válido
+  console.warn('ActionButton: nem action nem icon foram fornecidos', props);
+  return (
+    <Tooltip title="Ação inválida">
+      <span>
+        <IconButton disabled size="small">
+          <ErrorIcon />
+        </IconButton>
+      </span>
+    </Tooltip>
+  );
 };
 
