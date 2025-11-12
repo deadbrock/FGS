@@ -143,7 +143,15 @@ export const updateUsuario = async (req, res) => {
     });
 
     // Verificar se o usuário existe
-    const userCheck = await pool.query('SELECT id FROM users WHERE id = $1', [id]);
+    // Tenta buscar por UUID ou por CAST para texto (compatibilidade com IDs numéricos antigos)
+    let userCheck;
+    try {
+      userCheck = await pool.query('SELECT id FROM users WHERE id = $1', [id]);
+    } catch (uuidError) {
+      // Se falhar (ID não é UUID), tenta buscar por CAST
+      console.warn('⚠️  ID não é UUID, tentando buscar por CAST:', id);
+      userCheck = await pool.query('SELECT id FROM users WHERE CAST(id AS TEXT) = $1', [id]);
+    }
     
     console.log('🔍 User check result:', userCheck.rows);
     
@@ -154,12 +162,15 @@ export const updateUsuario = async (req, res) => {
         error: 'Usuário não encontrado'
       });
     }
+    
+    // Usar o ID real do banco (UUID)
+    const realUserId = userCheck.rows[0].id;
 
     // Verificar se o email já está sendo usado por outro usuário
     if (email) {
       const emailCheck = await pool.query(
         'SELECT id FROM users WHERE email = $1 AND id != $2',
-        [email, id]
+        [email, realUserId]
       );
 
       if (emailCheck.rows.length > 0) {
@@ -206,7 +217,7 @@ export const updateUsuario = async (req, res) => {
     }
 
     updates.push(`updated_at = CURRENT_TIMESTAMP`);
-    values.push(id);
+    values.push(realUserId);
 
     if (updates.length === 1) { // Apenas updated_at
       return res.status(400).json({
@@ -224,6 +235,7 @@ export const updateUsuario = async (req, res) => {
 
     console.log('🔍 SQL Query:', query);
     console.log('🔍 SQL Values:', values);
+    console.log('🔍 Using realUserId:', realUserId);
 
     const result = await pool.query(query, values);
 
