@@ -81,23 +81,38 @@ export const Configuracoes: React.FC = () => {
     setTabValue(newValue);
   };
 
-  const handleSave = () => {
-    // Atualizar dados do usuário no localStorage
-    const storedUser = localStorage.getItem('@FGS:user');
-    if (storedUser) {
-      const userObj = JSON.parse(storedUser);
-      userObj.nome = perfil.nome;
-      userObj.email = perfil.email;
-      localStorage.setItem('@FGS:user', JSON.stringify(userObj));
+  const handleSave = async () => {
+    try {
+      // Atualizar dados do usuário no backend
+      if (user?.id) {
+        const usuariosService = (await import('../services/usuariosService')).default;
+        
+        await usuariosService.update(user.id, {
+          nome: perfil.nome,
+          email: perfil.email,
+        });
+
+        // Atualizar também no localStorage
+        const storedUser = localStorage.getItem('@FGS:user');
+        if (storedUser) {
+          const userObj = JSON.parse(storedUser);
+          userObj.nome = perfil.nome;
+          userObj.email = perfil.email;
+          localStorage.setItem('@FGS:user', JSON.stringify(userObj));
+        }
+        
+        logAction('Configurações salvas');
+        setSuccess(true);
+        setTimeout(() => {
+          setSuccess(false);
+          // Recarregar para atualizar o nome no sidebar
+          window.location.reload();
+        }, 1500);
+      }
+    } catch (error) {
+      console.error('Erro ao salvar configurações:', error);
+      alert('Erro ao salvar configurações. Tente novamente.');
     }
-    
-    logAction('Configurações salvas');
-    setSuccess(true);
-    setTimeout(() => {
-      setSuccess(false);
-      // Recarregar para atualizar o nome no sidebar
-      window.location.reload();
-    }, 1500);
   };
 
   const handleClearLogs = () => {
