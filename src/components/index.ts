@@ -8,6 +8,7 @@ export { StatusChip } from './StatusChip';
 export { FileUpload } from './FileUpload';
 export { TabelaPaginada } from './TabelaPaginada';
 export { FiltrosTabela } from './FiltrosTabela';
+export { ErrorBoundary } from './ErrorBoundary';
 
 // Novos componentes modernos
 export { PageHeader } from './PageHeader';
