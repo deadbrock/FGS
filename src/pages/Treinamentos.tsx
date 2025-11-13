@@ -898,6 +898,7 @@ export const Treinamentos: React.FC = () => {
                 </Card>
               </Grid>
             </Grid>
+            )}
           </Box>
         </TabPanel>
       </AnimatedCard>
