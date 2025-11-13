@@ -135,28 +135,35 @@ export const Treinamentos: React.FC = () => {
   const carregarAgendamentos = async () => {
     try {
       setLoading(true);
-      // Mock de agendamentos - substitua por chamada real ao service
-      const mockAgendamentos = Array.from({ length: 25 }, (_, i) => ({
-        id: `ag-${i + 1}`,
-        tipoTreinamento: ['NR-10', 'NR-35', 'Primeiros Socorros', 'Excel Avançado'][i % 4],
-        dataAgendamento: new Date(2024, 0, 15 + i).toISOString(),
-        horario: ['08:00', '14:00', '09:00', '15:00'][i % 4],
-        local: ['Sala 101', 'Sala 202', 'Auditório', 'Online'][i % 4],
-        instrutor: ['João Silva', 'Maria Santos', 'Pedro Costa', 'Ana Lima'][i % 4],
-        totalVagas: [20, 30, 15, 50][i % 4],
-        vagasOcupadas: Math.floor(Math.random() * 20) + 5,
-        status: ['Confirmado', 'Pendente', 'Cancelado', 'Realizado'][i % 4],
-        colaboradores: Math.floor(Math.random() * 15) + 5,
+      
+      // Buscar turmas (agendamentos) reais do backend
+      const turmas = await treinamentosService.getTurmas();
+      const turmasArray = Array.isArray(turmas) ? turmas : [];
+
+      // Mapear turmas para formato de agendamento
+      const agendamentosReais = turmasArray.map((turma: any) => ({
+        id: turma.id,
+        tipoTreinamento: turma.treinamento_titulo || turma.treinamento_nome || '-',
+        dataAgendamento: turma.data_inicio || turma.data_inicio,
+        horario: turma.horario || '-',
+        local: turma.local || '-',
+        instrutor: turma.instrutor || '-',
+        totalVagas: turma.vagas || 0,
+        vagasOcupadas: turma.vagas_ocupadas || 0,
+        status: turma.status || 'ABERTA',
+        colaboradores: turma.colaboradores || 0,
+        dataFim: turma.data_fim,
+        codigo: turma.codigo,
       }));
 
       // Aplicar filtros
-      let agendamentosFiltrados = mockAgendamentos;
+      let agendamentosFiltrados = agendamentosReais;
 
       if (buscaAgendamentos) {
         agendamentosFiltrados = agendamentosFiltrados.filter(
-          a => a.tipoTreinamento.toLowerCase().includes(buscaAgendamentos.toLowerCase()) ||
-               a.instrutor.toLowerCase().includes(buscaAgendamentos.toLowerCase()) ||
-               a.local.toLowerCase().includes(buscaAgendamentos.toLowerCase())
+          a => (a.tipoTreinamento?.toLowerCase() || '').includes(buscaAgendamentos.toLowerCase()) ||
+               (a.instrutor?.toLowerCase() || '').includes(buscaAgendamentos.toLowerCase()) ||
+               (a.local?.toLowerCase() || '').includes(buscaAgendamentos.toLowerCase())
         );
       }
 
@@ -175,6 +182,9 @@ export const Treinamentos: React.FC = () => {
       setTotalAgendamentos(agendamentosFiltrados.length);
     } catch (error) {
       console.error('Erro ao carregar agendamentos:', error);
+      // Em caso de erro, inicializar com array vazio
+      setAgendamentos([]);
+      setTotalAgendamentos(0);
     } finally {
       setLoading(false);
     }

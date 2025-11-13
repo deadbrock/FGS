@@ -145,10 +145,12 @@ class TreinamentosService {
     try {
       const params = treinamentoId ? { treinamentoId } : {};
       const response = await this.api.get('/turmas', { params });
-      return response.data.data;
+      // Fix: garantir que sempre retorna array
+      return Array.isArray(response.data.data) ? response.data.data : [];
     } catch (error: any) {
       console.error('Erro ao buscar turmas:', error);
-      throw new Error(error.response?.data?.error || 'Erro ao buscar turmas');
+      // Em caso de erro, retornar array vazio ao invés de lançar exceção
+      return [];
     }
   }
 
