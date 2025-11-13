@@ -150,6 +150,29 @@ class RelatoriosService {
       throw new Error(error.response?.data?.error || 'Erro ao buscar relatório de férias');
     }
   }
+
+  // ============================================
+  // MÉTODOS DE COMPATIBILIDADE (LEGACY)
+  // ============================================
+
+  async buscarDashboard() {
+    return this.getDashboard();
+  }
+
+  async gerarRelatorio(tipo: string, filtros?: any) {
+    switch (tipo) {
+      case 'colaboradores':
+        return this.getRelatorioColaboradores(filtros);
+      case 'beneficios':
+        return this.getRelatorioBeneficios(filtros);
+      case 'treinamentos':
+        return this.getRelatorioTreinamentos(filtros);
+      case 'ferias':
+        return this.getRelatorioFerias(filtros);
+      default:
+        throw new Error(`Tipo de relatório inválido: ${tipo}`);
+    }
+  }
 }
 
 export default new RelatoriosService();

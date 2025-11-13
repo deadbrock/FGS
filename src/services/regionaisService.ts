@@ -79,6 +79,28 @@ class RegionaisService {
       throw new Error(error.response?.data?.error || 'Erro ao buscar colaboradores administrativos');
     }
   }
+
+  // ============================================
+  // MÉTODOS DE COMPATIBILIDADE (LEGACY)
+  // ============================================
+
+  // Alias para compatibilidade com código antigo
+  async getRankingEstados() {
+    const stats = await this.getEstatisticasGerais();
+    return stats.distribuicaoPorEstado.map(item => ({
+      estado: item.estado,
+      total: item.total,
+      crescimento: 0 // Mock - não implementado no backend
+    }));
+  }
+
+  async getColaboradoresPorEstado(estado: string) {
+    return this.getColaboradores({ estado });
+  }
+
+  async getAllColaboradores(filtros?: FiltrosRegionais) {
+    return this.getColaboradores(filtros);
+  }
 }
 
 export default new RegionaisService();

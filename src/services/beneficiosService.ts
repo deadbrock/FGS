@@ -156,6 +156,40 @@ class BeneficiosService {
       throw new Error(error.response?.data?.error || 'Erro ao buscar estatísticas');
     }
   }
+
+  // ==========================================
+  // MÉTODOS DE COMPATIBILIDADE (LEGACY)
+  // ==========================================
+
+  async buscarEstatisticas() {
+    return this.getEstatisticas();
+  }
+
+  async listarBeneficios() {
+    return this.getTipos();
+  }
+
+  async listarBeneficiosColaborador(colaboradorId?: string) {
+    return this.getAll(colaboradorId);
+  }
+
+  async associarBeneficio(dados: Partial<BeneficioColaborador>) {
+    return this.create(dados);
+  }
+
+  async buscarHistorico(colaboradorId: string) {
+    // Não implementado no backend - retorna lista de benefícios do colaborador
+    return this.getAll(colaboradorId);
+  }
+
+  async gerarRelatorioCustos(dataInicio?: string, dataFim?: string) {
+    // Mock - retorna estatísticas
+    const stats = await this.getEstatisticas();
+    return {
+      custoTotal: stats.custoTotalMensal,
+      porTipo: stats.porTipo
+    };
+  }
 }
 
 export default new BeneficiosService();

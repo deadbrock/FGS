@@ -190,6 +190,34 @@ class PontoService {
       throw new Error(error.response?.data?.error || 'Erro ao buscar estatísticas');
     }
   }
+
+  // ============================================
+  // MÉTODOS DE COMPATIBILIDADE (LEGACY)
+  // ============================================
+
+  async buscarEstatisticas() {
+    return this.getEstatisticas();
+  }
+
+  async listarResumosDias(colaboradorId?: string, dataInicio?: string, dataFim?: string) {
+    return this.getRegistros({ colaborador_id: colaboradorId, data_inicio: dataInicio, data_fim: dataFim });
+  }
+
+  async buscarRanking() {
+    // Não implementado no backend - retorna mock vazio
+    return {
+      maisPresentes: [],
+      menosPresentes: []
+    };
+  }
+
+  async gerarRelatorioAtrasos(dataInicio: string, dataFim: string) {
+    // Não implementado no backend - retorna mock vazio
+    return {
+      colaboradores: [],
+      totalAtrasos: 0
+    };
+  }
 }
 
 export default new PontoService();

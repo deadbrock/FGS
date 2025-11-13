@@ -1,4 +1,4 @@
-import api from './api';
+import axios from 'axios';
 import {
   ProntuarioColaborador,
   ExameMedico,
@@ -11,21 +11,45 @@ import {
   FiltrosProntuario,
 } from '../types/prontuario';
 
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3333';
+
 class ProntuarioService {
+  private api = axios.create({
+    baseURL: `${API_URL}/api/colaboradores`,
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+
   // Buscar prontuário completo de um colaborador
   async buscarProntuario(colaboradorId: string): Promise<ProntuarioColaborador> {
-    const response = await api.get<ProntuarioColaborador>(`/prontuario/${colaboradorId}`);
-    return response.data;
+    try {
+      const response = await this.api.get(`/${colaboradorId}`);
+      return response.data.data;
+    } catch (error: any) {
+      console.error('Erro ao buscar prontuário:', error);
+      throw new Error(error.response?.data?.error || 'Erro ao buscar prontuário');
+    }
   }
 
   // Atualizar dados pessoais
   async atualizarDadosPessoais(colaboradorId: string, dados: any): Promise<void> {
-    await api.put(`/prontuario/${colaboradorId}/dados-pessoais`, dados);
+    try {
+      await this.api.put(`/${colaboradorId}`, dados);
+    } catch (error: any) {
+      console.error('Erro ao atualizar dados pessoais:', error);
+      throw new Error(error.response?.data?.error || 'Erro ao atualizar dados pessoais');
+    }
   }
 
   // Atualizar dados contratuais
   async atualizarDadosContratuais(colaboradorId: string, dados: any): Promise<void> {
-    await api.put(`/prontuario/${colaboradorId}/dados-contratuais`, dados);
+    try {
+      await this.api.put(`/${colaboradorId}`, dados);
+    } catch (error: any) {
+      console.error('Erro ao atualizar dados contratuais:', error);
+      throw new Error(error.response?.data?.error || 'Erro ao atualizar dados contratuais');
+    }
   }
 
   // Exames Médicos

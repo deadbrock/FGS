@@ -240,6 +240,35 @@ class TreinamentosService {
       throw new Error(error.response?.data?.error || 'Erro ao buscar estatísticas');
     }
   }
+
+  // ==========================================
+  // MÉTODOS DE COMPATIBILIDADE (LEGACY)
+  // ==========================================
+
+  async listarTipos() {
+    // No contexto antigo, tipos = treinamentos/cursos
+    return this.getAll();
+  }
+
+  async listarAlertas() {
+    // Alertas = treinamentos vencendo/vencidos
+    const stats = await this.getEstatisticas();
+    return {
+      vencendo: stats.treinamentosVencendo,
+      vencidos: stats.treinamentosVencidos
+    };
+  }
+
+  async listarTreinamentos(colaboradorId?: string) {
+    if (colaboradorId) {
+      return this.getColaboradorTreinamentos(colaboradorId);
+    }
+    return this.getAll();
+  }
+
+  async buscarEstatisticas() {
+    return this.getEstatisticas();
+  }
 }
 
 export default new TreinamentosService();
