@@ -71,6 +71,8 @@ import colaboradoresRoutes from './routes/colaboradoresRoutes.js';
 import beneficiosRoutes from './routes/beneficiosRoutes.js';
 import treinamentosRoutes from './routes/treinamentosRoutes.js';
 import regionaisRoutes from './routes/regionaisRoutes.js';
+import pontoRoutes from './routes/pontoRoutes.js';
+import relatoriosRoutes from './routes/relatoriosRoutes.js';
 
 app.use('/api/usuarios', usuariosRoutes);
 app.use('/api/auth', authRoutes);
@@ -78,6 +80,8 @@ app.use('/api/colaboradores', colaboradoresRoutes);
 app.use('/api/beneficios', beneficiosRoutes);
 app.use('/api/treinamentos', treinamentosRoutes);
 app.use('/api/regionais', regionaisRoutes);
+app.use('/api/ponto', pontoRoutes);
+app.use('/api/relatorios', relatoriosRoutes);
 
 // Rota de health check
 app.get('/health', (req, res) => {
