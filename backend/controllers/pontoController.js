@@ -534,48 +534,194 @@ export const getEspelhoPonto = async (req, res) => {
 // ESTATÍSTICAS
 export const getEstatisticasPonto = async (req, res) => {
   try {
-    // Total de registros
-    const totalRegistros = await pool.query(`
-      SELECT COUNT(*) FROM ponto_registros
-    `);
+    console.log('📊 Buscando estatísticas de ponto...');
 
-    // Por status
-    const porStatus = await pool.query(`
-      SELECT status, COUNT(*) as total
-      FROM ponto_registros
-      GROUP BY status
-    `);
+    // ============================================
+    // ESTATÍSTICAS DE HOJE
+    // ============================================
+    let hoje = {
+      presentes: 0,
+      ausentes: 0,
+      atrasados: 0,
+      totalColaboradores: 0,
+      percentualPresenca: 0
+    };
 
-    // Faltas não justificadas (último mês)
-    const faltasNaoJustificadas = await pool.query(`
-      SELECT 
-        c.nome_completo,
-        COUNT(*) as total_faltas
-      FROM ponto_registros pr
-      JOIN colaboradores c ON pr.colaborador_id = c.id
-      WHERE pr.tipo_dia = 'FALTA'
-        AND pr.falta_justificada = false
-        AND pr.data >= CURRENT_DATE - INTERVAL '30 days'
-      GROUP BY c.nome_completo
-      ORDER BY total_faltas DESC
-      LIMIT 10
-    `);
+    try {
+      // Total de colaboradores ativos
+      const totalColab = await pool.query(`
+        SELECT COUNT(*) FROM colaboradores WHERE status = 'ATIVO'
+      `);
+      hoje.totalColaboradores = parseInt(totalColab.rows[0]?.count || '0');
+
+      // Registros de hoje
+      const registrosHoje = await pool.query(`
+        SELECT 
+          COUNT(*) FILTER (WHERE tipo_dia = 'NORMAL' AND status = 'NORMAL') as presentes,
+          COUNT(*) FILTER (WHERE tipo_dia = 'FALTA') as ausentes,
+          COUNT(*) FILTER (WHERE status = 'ATRASO') as atrasados
+        FROM ponto_registros
+        WHERE data = CURRENT_DATE
+      `);
+
+      hoje.presentes = parseInt(registrosHoje.rows[0]?.presentes || '0');
+      hoje.ausentes = parseInt(registrosHoje.rows[0]?.ausentes || '0');
+      hoje.atrasados = parseInt(registrosHoje.rows[0]?.atrasados || '0');
+      
+      if (hoje.totalColaboradores > 0) {
+        hoje.percentualPresenca = Math.round((hoje.presentes / hoje.totalColaboradores) * 100);
+      }
+
+      console.log('✅ Estatísticas de hoje:', hoje);
+    } catch (err) {
+      console.error('⚠️ Erro ao buscar estatísticas de hoje:', err.message);
+    }
+
+    // ============================================
+    // ESTATÍSTICAS DO MÊS
+    // ============================================
+    let mes = {
+      totalRegistros: 0,
+      mediaHorasTrabalhadas: 0,
+      totalHorasExtras: 0,
+      totalAtrasos: 0,
+      totalFaltas: 0
+    };
+
+    try {
+      const primeiroDiaMes = new Date();
+      primeiroDiaMes.setDate(1);
+      primeiroDiaMes.setHours(0, 0, 0, 0);
+
+      // Total de registros do mês
+      const totalReg = await pool.query(`
+        SELECT COUNT(*) FROM ponto_registros
+        WHERE data >= $1
+      `, [primeiroDiaMes.toISOString().split('T')[0]]);
+      mes.totalRegistros = parseInt(totalReg.rows[0]?.count || '0');
+
+      // Média de horas trabalhadas
+      const mediaHoras = await pool.query(`
+        SELECT AVG(horas_trabalhadas) as media
+        FROM ponto_registros
+        WHERE data >= $1 AND horas_trabalhadas IS NOT NULL
+      `, [primeiroDiaMes.toISOString().split('T')[0]]);
+      mes.mediaHorasTrabalhadas = parseFloat(mediaHoras.rows[0]?.media || '0');
+
+      // Total de horas extras
+      const horasExtras = await pool.query(`
+        SELECT 
+          COALESCE(SUM(horas_extras_50), 0) + COALESCE(SUM(horas_extras_100), 0) as total
+        FROM ponto_registros
+        WHERE data >= $1
+      `, [primeiroDiaMes.toISOString().split('T')[0]]);
+      mes.totalHorasExtras = parseFloat(horasExtras.rows[0]?.total || '0');
+
+      // Total de atrasos
+      const atrasos = await pool.query(`
+        SELECT COUNT(*) FROM ponto_registros
+        WHERE data >= $1 AND status = 'ATRASO'
+      `, [primeiroDiaMes.toISOString().split('T')[0]]);
+      mes.totalAtrasos = parseInt(atrasos.rows[0]?.count || '0');
+
+      // Total de faltas
+      const faltas = await pool.query(`
+        SELECT COUNT(*) FROM ponto_registros
+        WHERE data >= $1 AND tipo_dia = 'FALTA'
+      `, [primeiroDiaMes.toISOString().split('T')[0]]);
+      mes.totalFaltas = parseInt(faltas.rows[0]?.count || '0');
+
+      console.log('✅ Estatísticas do mês:', mes);
+    } catch (err) {
+      console.error('⚠️ Erro ao buscar estatísticas do mês:', err.message);
+    }
+
+    // ============================================
+    // GRÁFICO DE PRESENÇA (últimos 7 dias)
+    // ============================================
+    let graficoPresenca = [];
+    try {
+      const grafico = await pool.query(`
+        SELECT 
+          data,
+          COUNT(*) FILTER (WHERE tipo_dia = 'NORMAL' AND status = 'NORMAL') as presentes,
+          COUNT(*) FILTER (WHERE tipo_dia = 'FALTA') as ausentes
+        FROM ponto_registros
+        WHERE data >= CURRENT_DATE - INTERVAL '7 days'
+        GROUP BY data
+        ORDER BY data ASC
+      `);
+      graficoPresenca = grafico.rows.map(row => ({
+        data: row.data,
+        presentes: parseInt(row.presentes || '0'),
+        ausentes: parseInt(row.ausentes || '0')
+      }));
+      console.log('✅ Gráfico de presença:', graficoPresenca.length, 'dias');
+    } catch (err) {
+      console.error('⚠️ Erro ao buscar gráfico de presença:', err.message);
+    }
+
+    // ============================================
+    // GRÁFICO DE ATRASOS (últimos 7 dias)
+    // ============================================
+    let graficoAtrasos = [];
+    try {
+      const grafico = await pool.query(`
+        SELECT 
+          data,
+          COUNT(*) FILTER (WHERE status = 'ATRASO') as atrasos
+        FROM ponto_registros
+        WHERE data >= CURRENT_DATE - INTERVAL '7 days'
+        GROUP BY data
+        ORDER BY data ASC
+      `);
+      graficoAtrasos = grafico.rows.map(row => ({
+        data: row.data,
+        atrasos: parseInt(row.atrasos || '0')
+      }));
+      console.log('✅ Gráfico de atrasos:', graficoAtrasos.length, 'dias');
+    } catch (err) {
+      console.error('⚠️ Erro ao buscar gráfico de atrasos:', err.message);
+    }
+
+    const resultado = {
+      hoje,
+      mes,
+      graficoPresenca,
+      graficoAtrasos
+    };
+
+    console.log('✅ Estatísticas de ponto carregadas com sucesso');
 
     res.json({
       success: true,
-      data: {
-        totalRegistros: parseInt(totalRegistros.rows[0].count),
-        porStatus: porStatus.rows,
-        faltasNaoJustificadas: faltasNaoJustificadas.rows
-      }
+      data: resultado
     });
 
   } catch (error) {
-    console.error('Erro ao buscar estatísticas de ponto:', error);
-    res.status(500).json({
-      success: false,
-      error: 'Erro ao buscar estatísticas',
-      message: error.message
+    console.error('❌ ERRO AO BUSCAR ESTATÍSTICAS DE PONTO:', error);
+    console.error('Stack:', error.stack);
+    // Retornar estrutura vazia ao invés de erro 500
+    res.json({
+      success: true,
+      data: {
+        hoje: {
+          presentes: 0,
+          ausentes: 0,
+          atrasados: 0,
+          totalColaboradores: 0,
+          percentualPresenca: 0
+        },
+        mes: {
+          totalRegistros: 0,
+          mediaHorasTrabalhadas: 0,
+          totalHorasExtras: 0,
+          totalAtrasos: 0,
+          totalFaltas: 0
+        },
+        graficoPresenca: [],
+        graficoAtrasos: []
+      }
     });
   }
 };

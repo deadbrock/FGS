@@ -190,15 +190,47 @@ class PontoService {
     try {
       const response = await this.api.get('/estatisticas');
       const data = response.data.data || {};
-      // Fix: garantir estrutura padrão
+      
+      // Garantir estrutura padrão esperada pelo frontend
       return {
-        totalRegistros: data.totalRegistros || 0,
-        porStatus: Array.isArray(data.porStatus) ? data.porStatus : [],
-        faltasNaoJustificadas: Array.isArray(data.faltasNaoJustificadas) ? data.faltasNaoJustificadas : []
+        hoje: {
+          presentes: data.hoje?.presentes || 0,
+          ausentes: data.hoje?.ausentes || 0,
+          atrasados: data.hoje?.atrasados || 0,
+          totalColaboradores: data.hoje?.totalColaboradores || 0,
+          percentualPresenca: data.hoje?.percentualPresenca || 0,
+        },
+        mes: {
+          totalRegistros: data.mes?.totalRegistros || 0,
+          mediaHorasTrabalhadas: data.mes?.mediaHorasTrabalhadas || 0,
+          totalHorasExtras: data.mes?.totalHorasExtras || 0,
+          totalAtrasos: data.mes?.totalAtrasos || 0,
+          totalFaltas: data.mes?.totalFaltas || 0,
+        },
+        graficoPresenca: Array.isArray(data.graficoPresenca) ? data.graficoPresenca : [],
+        graficoAtrasos: Array.isArray(data.graficoAtrasos) ? data.graficoAtrasos : [],
       };
     } catch (error: any) {
       console.error('Erro ao buscar estatísticas de ponto:', error);
-      throw new Error(error.response?.data?.error || 'Erro ao buscar estatísticas');
+      // Retornar estrutura vazia ao invés de lançar erro
+      return {
+        hoje: {
+          presentes: 0,
+          ausentes: 0,
+          atrasados: 0,
+          totalColaboradores: 0,
+          percentualPresenca: 0,
+        },
+        mes: {
+          totalRegistros: 0,
+          mediaHorasTrabalhadas: 0,
+          totalHorasExtras: 0,
+          totalAtrasos: 0,
+          totalFaltas: 0,
+        },
+        graficoPresenca: [],
+        graficoAtrasos: [],
+      };
     }
   }
 

@@ -51,7 +51,24 @@ export const Ponto: React.FC = () => {
   useNavigationLog();
 
   const [tabAtual, setTabAtual] = useState(0);
-  const [estatisticas, setEstatisticas] = useState<EstatisticasPonto | null>(null);
+  const [estatisticas, setEstatisticas] = useState<EstatisticasPonto>({
+    hoje: {
+      presentes: 0,
+      ausentes: 0,
+      atrasados: 0,
+      totalColaboradores: 0,
+      percentualPresenca: 0,
+    },
+    mes: {
+      totalRegistros: 0,
+      mediaHorasTrabalhadas: 0,
+      totalHorasExtras: 0,
+      totalAtrasos: 0,
+      totalFaltas: 0,
+    },
+    graficoPresenca: [],
+    graficoAtrasos: [],
+  });
   const [resumosDias, setResumosDias] = useState<ResumoDia[]>([]);
   const [ranking, setRanking] = useState<RankingPontualidade | null>(null);
   const [relatorioAtrasos, setRelatorioAtrasos] = useState<RelatorioAtrasos | null>(null);
@@ -70,10 +87,13 @@ export const Ponto: React.FC = () => {
 
   const carregarEstatisticas = async () => {
     try {
+      console.log('📊 Carregando estatísticas de ponto...');
       const dados = await pontoService.buscarEstatisticas();
+      console.log('✅ Estatísticas carregadas:', dados);
       setEstatisticas(dados);
     } catch (error) {
-      console.error('Erro ao carregar estatísticas:', error);
+      console.error('❌ Erro ao carregar estatísticas:', error);
+      // Manter valores padrão em caso de erro
     }
   };
 
@@ -134,16 +154,14 @@ export const Ponto: React.FC = () => {
         {/* Aba 0: Dashboard */}
         <TabPanel value={tabAtual} index={0}>
           <Box p={3}>
-            {estatisticas && (
-              <>
-                <Typography variant="h6" mb={3}>
-                  Situação Hoje
-                </Typography>
+            <Typography variant="h6" mb={3}>
+              Situação Hoje
+            </Typography>
                 <Grid container spacing={3} mb={4}>
                   <Grid item xs={12} sm={6} md={3}>
                     <StatCard
                       title="Presentes"
-                      value={estatisticas.hoje.presentes}
+                      value={estatisticas.hoje.presentes || 0}
                       icon={<PeopleIcon />}
                       color="#388e3c"
                     />
@@ -151,7 +169,7 @@ export const Ponto: React.FC = () => {
                   <Grid item xs={12} sm={6} md={3}>
                     <StatCard
                       title="Atrasados"
-                      value={estatisticas.hoje.atrasados}
+                      value={estatisticas.hoje.atrasados || 0}
                       icon={<AccessTimeIcon />}
                       color="#f57c00"
                     />
@@ -159,7 +177,7 @@ export const Ponto: React.FC = () => {
                   <Grid item xs={12} sm={6} md={3}>
                     <StatCard
                       title="Ausentes"
-                      value={estatisticas.hoje.ausentes}
+                      value={estatisticas.hoje.ausentes || 0}
                       icon={<WarningIcon />}
                       color="#d32f2f"
                     />
@@ -167,7 +185,7 @@ export const Ponto: React.FC = () => {
                   <Grid item xs={12} sm={6} md={3}>
                     <StatCard
                       title="% Presença"
-                      value={`${estatisticas.hoje.percentualPresenca}%`}
+                      value={`${estatisticas.hoje.percentualPresenca || 0}%`}
                       icon={<TrendingUpIcon />}
                       color="#1976d2"
                     />
@@ -176,7 +194,7 @@ export const Ponto: React.FC = () => {
 
                 <Grid container spacing={3}>
                   <Grid item xs={12} md={8}>
-                    <GraficoPresenca dados={estatisticas.graficoPresenca} />
+                    <GraficoPresenca dados={estatisticas.graficoPresenca || []} />
                   </Grid>
                   <Grid item xs={12} md={4}>
                     <Card>
@@ -184,13 +202,14 @@ export const Ponto: React.FC = () => {
                         <Typography variant="h6" mb={2}>
                           Estatísticas do Mês
                         </Typography>
+                        {estatisticas.mes && (
                         <Box display="flex" flexDirection="column" gap={2}>
                           <Box>
                             <Typography variant="caption" color="text.secondary">
                               Total de Registros
                             </Typography>
                             <Typography variant="h6">
-                              {estatisticas.mes.totalRegistros}
+                              {estatisticas.mes.totalRegistros || 0}
                             </Typography>
                           </Box>
                           <Box>
@@ -198,7 +217,7 @@ export const Ponto: React.FC = () => {
                               Média Horas/Dia
                             </Typography>
                             <Typography variant="h6">
-                              {formatarMinutosParaHoras(estatisticas.mes.mediaHorasTrabalhadas)}
+                              {formatarMinutosParaHoras(estatisticas.mes.mediaHorasTrabalhadas || 0)}
                             </Typography>
                           </Box>
                           <Box>
@@ -206,7 +225,7 @@ export const Ponto: React.FC = () => {
                               Horas Extras
                             </Typography>
                             <Typography variant="h6" color="success.main">
-                              {formatarMinutosParaHoras(estatisticas.mes.totalHorasExtras)}
+                              {formatarMinutosParaHoras(estatisticas.mes.totalHorasExtras || 0)}
                             </Typography>
                           </Box>
                           <Box>
@@ -214,10 +233,11 @@ export const Ponto: React.FC = () => {
                               Total Atrasos
                             </Typography>
                             <Typography variant="h6" color="warning.main">
-                              {estatisticas.mes.totalAtrasos}
+                              {estatisticas.mes.totalAtrasos || 0}
                             </Typography>
                           </Box>
                         </Box>
+                        )}
                       </Box>
                     </Card>
                   </Grid>
