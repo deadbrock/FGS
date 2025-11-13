@@ -21,6 +21,21 @@ Dados iniciais para o sistema funcionar:
 
 ## 🚀 Como Executar
 
+### **0. Resetar Banco (SE NECESSÁRIO)**
+
+⚠️ **Use apenas se precisar limpar o banco e começar do zero**
+
+```bash
+node database/reset-database.js
+```
+
+**O que faz:**
+- Deleta TODAS as tabelas existentes
+- Limpa o banco completamente
+- Prepara para criação do schema novo
+
+---
+
 ### **1. Criar Schema Completo**
 
 ```bash
