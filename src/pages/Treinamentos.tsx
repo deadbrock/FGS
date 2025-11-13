@@ -17,6 +17,7 @@ import {
   Button,
   IconButton,
   Tooltip,
+  CircularProgress,
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import FileUploadIcon from '@mui/icons-material/FileUpload';
@@ -153,47 +154,91 @@ export const Treinamentos: React.FC = () => {
 
   const carregarEstatisticas = async () => {
     try {
+      setLoading(true);
+      console.log('📊 Carregando estatísticas...');
+      
       // Buscar estatísticas do backend
-      const stats = await treinamentosService.getEstatisticas();
+      let stats = { totalTreinamentos: 0, totalTurmas: 0, totalColaboradoresTreinados: 0, treinamentosVencendo: 0, treinamentosVencidos: 0 };
+      try {
+        stats = await treinamentosService.getEstatisticas();
+        console.log('✅ Estatísticas do backend:', stats);
+      } catch (err) {
+        console.warn('⚠️ Erro ao buscar estatísticas do backend, usando valores padrão:', err);
+      }
       
       // Buscar tipos de treinamento ativos
-      const tipos = await treinamentosService.getAll();
-      const tiposAtivos = tipos.filter(t => t.ativo !== false);
+      let tipos: any[] = [];
+      let tiposAtivos = 0;
+      try {
+        tipos = await treinamentosService.getAll();
+        tiposAtivos = tipos.filter(t => t.ativo !== false).length;
+        console.log('✅ Tipos de treinamento:', tipos.length, 'Ativos:', tiposAtivos);
+      } catch (err) {
+        console.warn('⚠️ Erro ao buscar tipos de treinamento:', err);
+      }
       
       // Buscar treinamentos realizados para calcular vencidos
-      const treinamentosRealizados = await treinamentosService.getColaboradorTreinamentos();
-      const hoje = new Date();
-      hoje.setHours(0, 0, 0, 0);
-      
-      const vencidos = treinamentosRealizados.filter((t: any) => {
-        if (!t.data_validade) return false;
-        const dataValidade = new Date(t.data_validade);
-        dataValidade.setHours(0, 0, 0, 0);
-        return dataValidade < hoje;
-      });
-      
-      const vencendo = treinamentosRealizados.filter((t: any) => {
-        if (!t.data_validade) return false;
-        const dataValidade = new Date(t.data_validade);
-        dataValidade.setHours(0, 0, 0, 0);
-        const diasRestantes = Math.ceil((dataValidade.getTime() - hoje.getTime()) / (1000 * 60 * 60 * 24));
-        return diasRestantes > 0 && diasRestantes <= 30;
-      });
+      let treinamentosRealizados: any[] = [];
+      let vencidos = 0;
+      let vencendo = 0;
+      try {
+        treinamentosRealizados = await treinamentosService.getColaboradorTreinamentos();
+        const hoje = new Date();
+        hoje.setHours(0, 0, 0, 0);
+        
+        vencidos = treinamentosRealizados.filter((t: any) => {
+          if (!t.data_validade) return false;
+          try {
+            const dataValidade = new Date(t.data_validade);
+            dataValidade.setHours(0, 0, 0, 0);
+            return dataValidade < hoje;
+          } catch {
+            return false;
+          }
+        }).length;
+        
+        vencendo = treinamentosRealizados.filter((t: any) => {
+          if (!t.data_validade) return false;
+          try {
+            const dataValidade = new Date(t.data_validade);
+            dataValidade.setHours(0, 0, 0, 0);
+            const diasRestantes = Math.ceil((dataValidade.getTime() - hoje.getTime()) / (1000 * 60 * 60 * 24));
+            return diasRestantes > 0 && diasRestantes <= 30;
+          } catch {
+            return false;
+          }
+        }).length;
+        
+        console.log('✅ Treinamentos realizados:', treinamentosRealizados.length, 'Vencidos:', vencidos, 'Vencendo:', vencendo);
+      } catch (err) {
+        console.warn('⚠️ Erro ao buscar treinamentos realizados:', err);
+      }
 
       // Buscar total de turmas
-      const turmas = await treinamentosService.getTurmas();
+      let turmas: any[] = [];
+      try {
+        turmas = await treinamentosService.getTurmas();
+        console.log('✅ Turmas:', turmas.length);
+      } catch (err) {
+        console.warn('⚠️ Erro ao buscar turmas:', err);
+      }
 
-      setEstatisticas({
+      const novasEstatisticas = {
         totalTreinamentos: stats.totalTreinamentos || tipos.length,
         totalTurmas: stats.totalTurmas || turmas.length,
-        totalColaboradoresTreinados: stats.totalColaboradoresTreinados || stats.totalRealizados || 0,
-        treinamentosVencendo: stats.treinamentosVencendo || vencendo.length,
-        treinamentosVencidos: stats.treinamentosVencidos || vencidos.length,
-        treinamentosAtivos: tiposAtivos.length,
-      });
+        totalColaboradoresTreinados: stats.totalColaboradoresTreinados || stats.totalRealizados || treinamentosRealizados.length,
+        treinamentosVencendo: stats.treinamentosVencendo || vencendo,
+        treinamentosVencidos: stats.treinamentosVencidos || vencidos,
+        treinamentosAtivos: tiposAtivos,
+      };
+
+      console.log('📊 Estatísticas finais:', novasEstatisticas);
+      setEstatisticas(novasEstatisticas);
     } catch (error) {
-      console.error('Erro ao carregar estatísticas:', error);
+      console.error('❌ Erro geral ao carregar estatísticas:', error);
       // Manter valores padrão em caso de erro
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -683,6 +728,13 @@ export const Treinamentos: React.FC = () => {
               Relatórios e Estatísticas
             </Typography>
             
+            {loading && (
+              <Box display="flex" justifyContent="center" py={4}>
+                <CircularProgress />
+              </Box>
+            )}
+            
+            {!loading && (
             <Grid container spacing={3}>
               {/* Card: Treinamentos Vencidos */}
               <Grid item xs={12} md={4}>
