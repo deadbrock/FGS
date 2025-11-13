@@ -110,7 +110,39 @@ class TreinamentosService {
 
   async create(treinamento: Partial<Treinamento>): Promise<Treinamento> {
     try {
-      const response = await this.api.post('/', treinamento);
+      // Mapear categoria do frontend para tipo do backend
+      const mapearCategoriaParaTipo = (categoria?: string): string => {
+        const mapeamento: Record<string, string> = {
+          'Segurança do Trabalho': 'NR',
+          'Técnico': 'TECNICO',
+          'Comportamental': 'COMPORTAMENTAL',
+          'Gestão': 'LIDERANCA',
+          'Compliance': 'COMPLIANCE',
+          'Tecnologia': 'TECNICO',
+          'Operacional': 'TECNICO',
+          'Outro': 'OUTROS',
+        };
+        return mapeamento[categoria || ''] || treinamento.tipo || 'OUTROS';
+      };
+
+      // Mapear campos do frontend para o backend
+      const dadosBackend: any = {
+        titulo: treinamento.nome || treinamento.titulo, // Frontend usa 'nome', backend espera 'titulo'
+        descricao: treinamento.descricao,
+        tipo: mapearCategoriaParaTipo(treinamento.categoria), // Mapear categoria para tipo
+        carga_horaria: treinamento.cargaHoraria || treinamento.carga_horaria,
+        validade_meses: treinamento.validadeDias ? Math.ceil(treinamento.validadeDias / 30) : null, // Converter dias para meses
+        ativo: treinamento.ativo !== false,
+      };
+
+      // Campos opcionais
+      if (treinamento.nr) dadosBackend.nr = treinamento.nr;
+      if (treinamento.instrutor) dadosBackend.instrutor = treinamento.instrutor;
+      if (treinamento.instituicao) dadosBackend.instituicao = treinamento.instituicao;
+      if (treinamento.modalidade) dadosBackend.modalidade = treinamento.modalidade;
+      if (treinamento.local) dadosBackend.local = treinamento.local;
+
+      const response = await this.api.post('/', dadosBackend);
       return response.data.data;
     } catch (error: any) {
       console.error('Erro ao criar treinamento:', error);
@@ -120,7 +152,45 @@ class TreinamentosService {
 
   async update(id: string, treinamento: Partial<Treinamento>): Promise<Treinamento> {
     try {
-      const response = await this.api.put(`/${id}`, treinamento);
+      // Mapear categoria do frontend para tipo do backend
+      const mapearCategoriaParaTipo = (categoria?: string): string => {
+        const mapeamento: Record<string, string> = {
+          'Segurança do Trabalho': 'NR',
+          'Técnico': 'TECNICO',
+          'Comportamental': 'COMPORTAMENTAL',
+          'Gestão': 'LIDERANCA',
+          'Compliance': 'COMPLIANCE',
+          'Tecnologia': 'TECNICO',
+          'Operacional': 'TECNICO',
+          'Outro': 'OUTROS',
+        };
+        return mapeamento[categoria || ''] || treinamento.tipo || 'OUTROS';
+      };
+
+      // Mapear campos do frontend para o backend (mesmo mapeamento do create)
+      const dadosBackend: any = {};
+      
+      if (treinamento.nome || treinamento.titulo) {
+        dadosBackend.titulo = treinamento.nome || treinamento.titulo;
+      }
+      if (treinamento.descricao !== undefined) dadosBackend.descricao = treinamento.descricao;
+      if (treinamento.categoria || treinamento.tipo) {
+        dadosBackend.tipo = mapearCategoriaParaTipo(treinamento.categoria);
+      }
+      if (treinamento.cargaHoraria || treinamento.carga_horaria) {
+        dadosBackend.carga_horaria = treinamento.cargaHoraria || treinamento.carga_horaria;
+      }
+      if (treinamento.validadeDias !== undefined) {
+        dadosBackend.validade_meses = treinamento.validadeDias ? Math.ceil(treinamento.validadeDias / 30) : null;
+      }
+      if (treinamento.ativo !== undefined) dadosBackend.ativo = treinamento.ativo;
+      if (treinamento.nr) dadosBackend.nr = treinamento.nr;
+      if (treinamento.instrutor) dadosBackend.instrutor = treinamento.instrutor;
+      if (treinamento.instituicao) dadosBackend.instituicao = treinamento.instituicao;
+      if (treinamento.modalidade) dadosBackend.modalidade = treinamento.modalidade;
+      if (treinamento.local) dadosBackend.local = treinamento.local;
+
+      const response = await this.api.put(`/${id}`, dadosBackend);
       return response.data.data;
     } catch (error: any) {
       console.error('Erro ao atualizar treinamento:', error);
