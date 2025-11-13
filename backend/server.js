@@ -69,11 +69,13 @@ import usuariosRoutes from './routes/usuariosRoutes.js';
 import authRoutes from './routes/authRoutes.js';
 import colaboradoresRoutes from './routes/colaboradoresRoutes.js';
 import beneficiosRoutes from './routes/beneficiosRoutes.js';
+import treinamentosRoutes from './routes/treinamentosRoutes.js';
 
 app.use('/api/usuarios', usuariosRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/colaboradores', colaboradoresRoutes);
 app.use('/api/beneficios', beneficiosRoutes);
+app.use('/api/treinamentos', treinamentosRoutes);
 
 // Rota de health check
 app.get('/health', (req, res) => {
