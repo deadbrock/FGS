@@ -1,102 +1,161 @@
-// MODO MOCK - Para usar sem backend
-export { default } from './beneficiosService.mock';
+import axios from 'axios';
 
-/*
-// ========================================
-// CÓDIGO PARA BACKEND REAL (DESCOMENTE)
-// ========================================
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3333';
 
-import api from './api';
-import {
-  Beneficio,
-  BeneficioColaborador,
-  HistoricoBeneficio,
-  EstatisticasBeneficios,
-  RelatorioCustos,
-  ComparativoPeriodos,
-} from '../types/beneficios';
+// ============================================
+// INTERFACES
+// ============================================
+
+export interface TipoBeneficio {
+  id: string;
+  nome: string;
+  descricao?: string;
+  valor_padrao?: number;
+  elegibilidade_cargo?: string;
+  elegibilidade_tempo_servico?: number;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface BeneficioColaborador {
+  id: string;
+  colaborador_id: string;
+  colaborador_nome?: string;
+  colaborador_cpf?: string;
+  colaborador_matricula?: string;
+  tipo_beneficio_id: string;
+  tipo_beneficio_nome?: string;
+  tipo_beneficio_descricao?: string;
+  valor?: number;
+  data_inicio: string;
+  data_fim?: string;
+  status: 'ATIVO' | 'INATIVO' | 'SUSPENSO' | 'CANCELADO';
+  observacoes?: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface EstatisticasBeneficios {
+  totalBeneficiosAtivos: number;
+  porTipo: Array<{
+    nome: string;
+    total: number;
+  }>;
+  custoTotalMensal: number;
+}
+
+// ============================================
+// SERVICE
+// ============================================
 
 class BeneficiosService {
-  // BENEFÍCIOS (Templates)
-  async listarBeneficios(): Promise<Beneficio[]> {
-    const response = await api.get('/beneficios');
-    return response.data;
+  private api = axios.create({
+    baseURL: `${API_URL}/api/beneficios`,
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+
+  // ==========================================
+  // TIPOS DE BENEFÍCIOS
+  // ==========================================
+
+  async getTipos(): Promise<TipoBeneficio[]> {
+    try {
+      const response = await this.api.get('/tipos');
+      return response.data.data;
+    } catch (error: any) {
+      console.error('Erro ao buscar tipos de benefícios:', error);
+      throw new Error(error.response?.data?.error || 'Erro ao buscar tipos de benefícios');
+    }
   }
 
-  async buscarBeneficio(id: string): Promise<Beneficio> {
-    const response = await api.get(`/beneficios/${id}`);
-    return response.data;
+  async createTipo(tipo: Partial<TipoBeneficio>): Promise<TipoBeneficio> {
+    try {
+      const response = await this.api.post('/tipos', tipo);
+      return response.data.data;
+    } catch (error: any) {
+      console.error('Erro ao criar tipo de benefício:', error);
+      throw new Error(error.response?.data?.error || 'Erro ao criar tipo de benefício');
+    }
   }
 
-  async criarBeneficio(beneficio: Partial<Beneficio>): Promise<Beneficio> {
-    const response = await api.post('/beneficios', beneficio);
-    return response.data;
+  async updateTipo(id: string, tipo: Partial<TipoBeneficio>): Promise<TipoBeneficio> {
+    try {
+      const response = await this.api.put(`/tipos/${id}`, tipo);
+      return response.data.data;
+    } catch (error: any) {
+      console.error('Erro ao atualizar tipo de benefício:', error);
+      throw new Error(error.response?.data?.error || 'Erro ao atualizar tipo de benefício');
+    }
   }
 
-  async atualizarBeneficio(id: string, beneficio: Partial<Beneficio>): Promise<Beneficio> {
-    const response = await api.put(`/beneficios/${id}`, beneficio);
-    return response.data;
+  async deleteTipo(id: string): Promise<void> {
+    try {
+      await this.api.delete(`/tipos/${id}`);
+    } catch (error: any) {
+      console.error('Erro ao deletar tipo de benefício:', error);
+      throw new Error(error.response?.data?.error || 'Erro ao deletar tipo de benefício');
+    }
   }
 
+  // ==========================================
   // BENEFÍCIOS DE COLABORADORES
-  async listarBeneficiosColaborador(colaboradorId?: string): Promise<BeneficioColaborador[]> {
-    const response = await api.get('/beneficios-colaborador', {
-      params: { colaboradorId },
-    });
-    return response.data;
+  // ==========================================
+
+  async getAll(colaboradorId?: string): Promise<BeneficioColaborador[]> {
+    try {
+      const params = colaboradorId ? { colaboradorId } : {};
+      const response = await this.api.get('/', { params });
+      return response.data.data;
+    } catch (error: any) {
+      console.error('Erro ao buscar benefícios de colaboradores:', error);
+      throw new Error(error.response?.data?.error || 'Erro ao buscar benefícios');
+    }
   }
 
-  async associarBeneficio(dados: Partial<BeneficioColaborador>): Promise<BeneficioColaborador> {
-    const response = await api.post('/beneficios-colaborador', dados);
-    return response.data;
+  async create(beneficio: Partial<BeneficioColaborador>): Promise<BeneficioColaborador> {
+    try {
+      const response = await this.api.post('/', beneficio);
+      return response.data.data;
+    } catch (error: any) {
+      console.error('Erro ao criar benefício:', error);
+      throw new Error(error.response?.data?.error || 'Erro ao criar benefício');
+    }
   }
 
-  async atualizarBeneficioColaborador(
-    id: string,
-    dados: Partial<BeneficioColaborador>
-  ): Promise<BeneficioColaborador> {
-    const response = await api.put(`/beneficios-colaborador/${id}`, dados);
-    return response.data;
+  async update(id: string, beneficio: Partial<BeneficioColaborador>): Promise<BeneficioColaborador> {
+    try {
+      const response = await this.api.put(`/${id}`, beneficio);
+      return response.data.data;
+    } catch (error: any) {
+      console.error('Erro ao atualizar benefício:', error);
+      throw new Error(error.response?.data?.error || 'Erro ao atualizar benefício');
+    }
   }
 
-  // HISTÓRICO
-  async buscarHistorico(
-    colaboradorId?: string,
-    beneficioId?: string
-  ): Promise<HistoricoBeneficio[]> {
-    const response = await api.get('/beneficios/historico', {
-      params: { colaboradorId, beneficioId },
-    });
-    return response.data;
+  async delete(id: string): Promise<void> {
+    try {
+      await this.api.delete(`/${id}`);
+    } catch (error: any) {
+      console.error('Erro ao deletar benefício:', error);
+      throw new Error(error.response?.data?.error || 'Erro ao deletar benefício');
+    }
   }
 
+  // ==========================================
   // ESTATÍSTICAS
-  async buscarEstatisticas(): Promise<EstatisticasBeneficios> {
-    const response = await api.get('/beneficios/estatisticas');
-    return response.data;
-  }
+  // ==========================================
 
-  // RELATÓRIOS
-  async gerarRelatorioCustos(dataInicio: string, dataFim: string): Promise<RelatorioCustos> {
-    const response = await api.get('/beneficios/relatorios/custos', {
-      params: { dataInicio, dataFim },
-    });
-    return response.data;
-  }
-
-  async gerarComparativo(
-    periodo1Inicio: string,
-    periodo1Fim: string,
-    periodo2Inicio: string,
-    periodo2Fim: string
-  ): Promise<ComparativoPeriodos> {
-    const response = await api.get('/beneficios/relatorios/comparativo', {
-      params: { periodo1Inicio, periodo1Fim, periodo2Inicio, periodo2Fim },
-    });
-    return response.data;
+  async getEstatisticas(): Promise<EstatisticasBeneficios> {
+    try {
+      const response = await this.api.get('/estatisticas');
+      return response.data.data;
+    } catch (error: any) {
+      console.error('Erro ao buscar estatísticas de benefícios:', error);
+      throw new Error(error.response?.data?.error || 'Erro ao buscar estatísticas');
+    }
   }
 }
 
 export default new BeneficiosService();
-*/
-

@@ -1,113 +1,195 @@
-// MODO MOCK - Para usar sem backend
-// Para conectar com backend real, descomente o código comentado abaixo
+import axios from 'axios';
 
-export { default } from './pontoService.mock';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3333';
 
-/*
-// ========================================
-// CÓDIGO PARA BACKEND REAL (DESCOMENTE)
-// ========================================
+export interface ConfiguracaoPonto {
+  id: string;
+  nome: string;
+  descricao?: string;
+  tipo_jornada: 'PADRAO' | 'ESCALA' | 'FLEXIVEL';
+  horas_dia?: number;
+  horas_semana?: number;
+  entrada_1?: string;
+  saida_1?: string;
+  entrada_2?: string;
+  saida_2?: string;
+  intervalo_minutos?: number;
+  tolerancia_atraso_minutos?: number;
+  permite_banco_horas: boolean;
+  ativo: boolean;
+  created_at?: string;
+  updated_at?: string;
+}
 
-import api from './api';
-import {
-  ResumoDia,
-  EstatisticasPonto,
-  RankingPontualidade,
-  RelatorioAtrasos,
-  RelatorioFaltas,
-  ConfiguracaoHorario,
-  SolicitacaoJustificativa,
-  EspelhoPonto,
-} from '../types/ponto';
+export interface RegistroPonto {
+  id: string;
+  colaborador_id: string;
+  colaborador_nome?: string;
+  colaborador_cpf?: string;
+  data: string;
+  entrada_1?: string;
+  saida_1?: string;
+  entrada_2?: string;
+  saida_2?: string;
+  horas_trabalhadas?: number;
+  horas_extras_50?: number;
+  horas_extras_100?: number;
+  tipo_dia: 'NORMAL' | 'FALTA' | 'FERIAS' | 'ATESTADO' | 'DSR' | 'FERIADO';
+  falta_justificada: boolean;
+  justificativa?: string;
+  observacoes?: string;
+  status: 'PENDENTE' | 'APROVADO' | 'REJEITADO';
+  aprovado_por?: string;
+  data_aprovacao?: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface EspelhoPonto {
+  registros: RegistroPonto[];
+  totais: {
+    totalHoras: string;
+    totalExtras50: string;
+    totalExtras100: string;
+    totalFaltas: number;
+    diasTrabalhados: number;
+  };
+}
+
+export interface EstatisticasPonto {
+  totalRegistros: number;
+  porStatus: Array<{
+    status: string;
+    total: number;
+  }>;
+  faltasNaoJustificadas: Array<{
+    nome_completo: string;
+    total_faltas: number;
+  }>;
+}
+
+export interface FiltrosPonto {
+  colaborador_id?: string;
+  data_inicio?: string;
+  data_fim?: string;
+  status?: 'PENDENTE' | 'APROVADO' | 'REJEITADO';
+  tipo_dia?: string;
+  limit?: number;
+  offset?: number;
+}
 
 class PontoService {
-  // RESUMOS DIÁRIOS
-  async listarResumosDias(
-    dataInicio: string,
-    dataFim: string,
-    colaboradorId?: string
-  ): Promise<ResumoDia[]> {
-    const params = { dataInicio, dataFim, colaboradorId };
-    const response = await api.get('/ponto/resumos', { params });
-    return response.data;
-  }
+  private api = axios.create({
+    baseURL: `${API_URL}/api/ponto`,
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
 
-  async buscarResumoDia(colaboradorId: string, data: string): Promise<ResumoDia | null> {
-    const response = await api.get(`/ponto/resumos/${colaboradorId}/${data}`);
-    return response.data;
-  }
-
-  // ESTATÍSTICAS
-  async buscarEstatisticas(): Promise<EstatisticasPonto> {
-    const response = await api.get('/ponto/estatisticas');
-    return response.data;
-  }
-
-  // RANKING
-  async buscarRanking(dataInicio: string, dataFim: string): Promise<RankingPontualidade> {
-    const response = await api.get('/ponto/ranking', { params: { dataInicio, dataFim } });
-    return response.data;
-  }
-
-  // RELATÓRIOS
-  async gerarRelatorioAtrasos(dataInicio: string, dataFim: string): Promise<RelatorioAtrasos> {
-    const response = await api.get('/ponto/relatorios/atrasos', { params: { dataInicio, dataFim } });
-    return response.data;
-  }
-
-  async gerarRelatorioFaltas(dataInicio: string, dataFim: string): Promise<RelatorioFaltas> {
-    const response = await api.get('/ponto/relatorios/faltas', { params: { dataInicio, dataFim } });
-    return response.data;
-  }
-
+  // ============================================
   // CONFIGURAÇÕES
-  async listarConfiguracoes(): Promise<ConfiguracaoHorario[]> {
-    const response = await api.get('/ponto/configuracoes');
-    return response.data;
+  // ============================================
+
+  async getConfiguracoes(ativo?: boolean): Promise<ConfiguracaoPonto[]> {
+    try {
+      const response = await this.api.get('/configuracoes', {
+        params: { ativo }
+      });
+      return response.data.data;
+    } catch (error: any) {
+      console.error('Erro ao buscar configurações de ponto:', error);
+      throw new Error(error.response?.data?.error || 'Erro ao buscar configurações');
+    }
   }
 
-  async criarConfiguracao(config: Partial<ConfiguracaoHorario>): Promise<ConfiguracaoHorario> {
-    const response = await api.post('/ponto/configuracoes', config);
-    return response.data;
+  async createConfiguracao(config: Partial<ConfiguracaoPonto>): Promise<ConfiguracaoPonto> {
+    try {
+      const response = await this.api.post('/configuracoes', config);
+      return response.data.data;
+    } catch (error: any) {
+      console.error('Erro ao criar configuração:', error);
+      throw new Error(error.response?.data?.error || 'Erro ao criar configuração');
+    }
   }
 
-  async atualizarConfiguracao(id: string, config: Partial<ConfiguracaoHorario>): Promise<ConfiguracaoHorario> {
-    const response = await api.put(`/ponto/configuracoes/${id}`, config);
-    return response.data;
+  // ============================================
+  // REGISTROS
+  // ============================================
+
+  async getRegistros(filtros?: FiltrosPonto): Promise<{ data: RegistroPonto[]; pagination: any }> {
+    try {
+      const response = await this.api.get('/', { params: filtros });
+      return response.data;
+    } catch (error: any) {
+      console.error('Erro ao buscar registros de ponto:', error);
+      throw new Error(error.response?.data?.error || 'Erro ao buscar registros');
+    }
   }
 
-  // JUSTIFICATIVAS
-  async listarJustificativas(status?: string): Promise<SolicitacaoJustificativa[]> {
-    const response = await api.get('/ponto/justificativas', { params: { status } });
-    return response.data;
+  async getRegistroById(id: string): Promise<RegistroPonto> {
+    try {
+      const response = await this.api.get(`/${id}`);
+      return response.data.data;
+    } catch (error: any) {
+      console.error('Erro ao buscar registro:', error);
+      throw new Error(error.response?.data?.error || 'Erro ao buscar registro');
+    }
   }
 
-  async criarJustificativa(justificativa: Partial<SolicitacaoJustificativa>): Promise<SolicitacaoJustificativa> {
-    const response = await api.post('/ponto/justificativas', justificativa);
-    return response.data;
+  async registrarPonto(registro: Partial<RegistroPonto>): Promise<RegistroPonto> {
+    try {
+      const response = await this.api.post('/', registro);
+      return response.data.data;
+    } catch (error: any) {
+      console.error('Erro ao registrar ponto:', error);
+      throw new Error(error.response?.data?.error || 'Erro ao registrar ponto');
+    }
   }
 
-  async avaliarJustificativa(
-    id: string,
-    aprovado: boolean,
-    observacao: string
-  ): Promise<SolicitacaoJustificativa> {
-    const response = await api.put(`/ponto/justificativas/${id}/avaliar`, {
-      aprovado,
-      observacao,
-    });
-    return response.data;
+  async aprovarPonto(id: string, aprovar: boolean): Promise<RegistroPonto> {
+    try {
+      const response = await this.api.put(`/${id}/aprovar`, { aprovar });
+      return response.data.data;
+    } catch (error: any) {
+      console.error('Erro ao aprovar ponto:', error);
+      throw new Error(error.response?.data?.error || 'Erro ao aprovar ponto');
+    }
   }
 
-  // EXPORTAÇÕES
-  async exportarEspelhoPonto(colaboradorId: string, mesReferencia: string): Promise<Blob> {
-    const response = await api.get(`/ponto/espelho/${colaboradorId}/${mesReferencia}`, {
-      responseType: 'blob',
-    });
-    return response.data;
+  async deleteRegistro(id: string): Promise<void> {
+    try {
+      await this.api.delete(`/${id}`);
+    } catch (error: any) {
+      console.error('Erro ao deletar registro:', error);
+      throw new Error(error.response?.data?.error || 'Erro ao deletar registro');
+    }
+  }
+
+  // ============================================
+  // RELATÓRIOS
+  // ============================================
+
+  async getEspelhoPonto(colaborador_id: string, mes: number, ano: number): Promise<EspelhoPonto> {
+    try {
+      const response = await this.api.get('/espelho', {
+        params: { colaborador_id, mes, ano }
+      });
+      return response.data.data;
+    } catch (error: any) {
+      console.error('Erro ao buscar espelho de ponto:', error);
+      throw new Error(error.response?.data?.error || 'Erro ao buscar espelho de ponto');
+    }
+  }
+
+  async getEstatisticas(): Promise<EstatisticasPonto> {
+    try {
+      const response = await this.api.get('/estatisticas');
+      return response.data.data;
+    } catch (error: any) {
+      console.error('Erro ao buscar estatísticas de ponto:', error);
+      throw new Error(error.response?.data?.error || 'Erro ao buscar estatísticas');
+    }
   }
 }
 
 export default new PontoService();
-*/
-
