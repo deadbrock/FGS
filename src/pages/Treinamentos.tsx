@@ -31,6 +31,7 @@ import { TipoTreinamento, TreinamentoColaborador, StatusTreinamento, AlertaTrein
 import { formatarData } from '../utils/statusUtils';
 import { getStatusColor, getStatusNome } from '../utils/treinamentosUtils';
 import treinamentosService from '../services/treinamentosService';
+import colaboradoresService from '../services/colaboradoresService';
 import { PageHeader, GradientButton, AnimatedCard, ActionButton } from '../components';
 
 interface TabPanelProps {
@@ -68,6 +69,9 @@ export const Treinamentos: React.FC = () => {
   const [busca, setBusca] = useState('');
   const [dialogTreinamentoAberto, setDialogTreinamentoAberto] = useState(false);
   const [treinamentoAtual, setTreinamentoAtual] = useState<Partial<TreinamentoColaborador>>({});
+  
+  // Estados - Colaboradores (para o formulário)
+  const [colaboradores, setColaboradores] = useState<any[]>([]);
 
   // Estados - Importação e Agendamento
   const [dialogImportacaoAberto, setDialogImportacaoAberto] = useState(false);
@@ -207,29 +211,52 @@ export const Treinamentos: React.FC = () => {
     }
   };
 
+  const carregarColaboradores = async () => {
+    try {
+      const resultado = await colaboradoresService.getAll({ status: 'ATIVO' });
+      setColaboradores(Array.isArray(resultado.data) ? resultado.data : []);
+    } catch (error) {
+      console.error('Erro ao carregar colaboradores:', error);
+      setColaboradores([]);
+    }
+  };
+
   const handleSalvarTreinamento = async () => {
     try {
       setLoading(true);
       
       // Validação básica
-      if (!treinamentoAtual.colaboradorNome || !treinamentoAtual.tipoTreinamentoNome) {
-        alert('Preencha todos os campos obrigatórios');
+      const dataRealizacao = treinamentoAtual.data_realizacao || treinamentoAtual.data_conclusao;
+      if (!treinamentoAtual.colaborador_id || !treinamentoAtual.treinamento_id || !dataRealizacao) {
+        alert('Preencha todos os campos obrigatórios: Colaborador, Tipo de Treinamento e Data de Realização');
         return;
       }
 
+      // Preparar dados para vincular
+      const dadosVinculo = {
+        colaborador_id: treinamentoAtual.colaborador_id,
+        treinamento_id: treinamentoAtual.treinamento_id,
+        data_realizacao: dataRealizacao,
+        data_validade: treinamentoAtual.data_validade || null,
+        status: treinamentoAtual.status || 'CONCLUIDO',
+        nota: treinamentoAtual.nota || null,
+        observacoes: treinamentoAtual.observacoes || null,
+      };
+
       if (treinamentoAtual.id) {
-        // Atualizar treinamento (simulado)
-        await treinamentosService.criarTreinamento(treinamentoAtual);
+        // Atualizar vínculo existente
+        await treinamentosService.updateVinculo(treinamentoAtual.id, dadosVinculo);
       } else {
-        await treinamentosService.criarTreinamento(treinamentoAtual);
+        // Criar novo vínculo
+        await treinamentosService.vincularColaborador(dadosVinculo);
       }
       
       setDialogTreinamentoAberto(false);
       setTreinamentoAtual({});
       carregarTreinamentos();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Erro ao salvar treinamento:', error);
-      alert('Erro ao salvar treinamento');
+      alert(error.message || 'Erro ao salvar treinamento');
     } finally {
       setLoading(false);
     }
@@ -576,7 +603,21 @@ export const Treinamentos: React.FC = () => {
       </Dialog>
 
       {/* Dialog Novo Treinamento */}
-      <Dialog open={dialogTreinamentoAberto} onClose={() => setDialogTreinamentoAberto(false)} maxWidth="md" fullWidth>
+      <Dialog 
+        open={dialogTreinamentoAberto} 
+        onClose={() => {
+          setDialogTreinamentoAberto(false);
+          setTreinamentoAtual({});
+        }} 
+        maxWidth="md" 
+        fullWidth
+        onEnter={() => {
+          // Carregar colaboradores quando abrir o dialog
+          if (colaboradores.length === 0) {
+            carregarColaboradores();
+          }
+        }}
+      >
         <DialogTitle>
           {treinamentoAtual.id ? 'Editar' : 'Novo'} Treinamento
         </DialogTitle>
@@ -586,24 +627,31 @@ export const Treinamentos: React.FC = () => {
               <Grid item xs={12}>
                 <TextField
                   fullWidth
-                  label="Nome do Colaborador"
-                  value={treinamentoAtual.colaboradorNome || ''}
-                  onChange={(e) => setTreinamentoAtual({ ...treinamentoAtual, colaboradorNome: e.target.value })}
+                  select
+                  label="Colaborador *"
+                  value={treinamentoAtual.colaborador_id || ''}
+                  onChange={(e) => setTreinamentoAtual({ ...treinamentoAtual, colaborador_id: e.target.value })}
                   required
-                />
+                >
+                  {colaboradores.map((colab) => (
+                    <MenuItem key={colab.id} value={colab.id}>
+                      {colab.nome_completo || colab.nome} - {colab.matricula || colab.cpf}
+                    </MenuItem>
+                  ))}
+                </TextField>
               </Grid>
               <Grid item xs={12}>
                 <TextField
                   fullWidth
                   select
-                  label="Tipo de Treinamento"
-                  value={treinamentoAtual.tipoTreinamentoNome || ''}
-                  onChange={(e) => setTreinamentoAtual({ ...treinamentoAtual, tipoTreinamentoNome: e.target.value })}
+                  label="Tipo de Treinamento *"
+                  value={treinamentoAtual.treinamento_id || ''}
+                  onChange={(e) => setTreinamentoAtual({ ...treinamentoAtual, treinamento_id: e.target.value })}
                   required
                 >
                   {tiposTreinamento.map((tipo) => (
-                    <MenuItem key={tipo.id} value={tipo.nome}>
-                      {tipo.nome}
+                    <MenuItem key={tipo.id} value={tipo.id}>
+                      {tipo.nome || tipo.titulo}
                     </MenuItem>
                   ))}
                 </TextField>
@@ -612,9 +660,9 @@ export const Treinamentos: React.FC = () => {
                 <TextField
                   fullWidth
                   type="date"
-                  label="Data de Realização"
-                  value={treinamentoAtual.dataRealizacao || ''}
-                  onChange={(e) => setTreinamentoAtual({ ...treinamentoAtual, dataRealizacao: e.target.value })}
+                  label="Data de Realização *"
+                  value={treinamentoAtual.data_realizacao || treinamentoAtual.data_conclusao || treinamentoAtual.dataRealizacao || ''}
+                  onChange={(e) => setTreinamentoAtual({ ...treinamentoAtual, data_realizacao: e.target.value })}
                   InputLabelProps={{ shrink: true }}
                   required
                 />
@@ -624,17 +672,10 @@ export const Treinamentos: React.FC = () => {
                   fullWidth
                   type="date"
                   label="Data de Validade"
-                  value={treinamentoAtual.dataValidade || ''}
-                  onChange={(e) => setTreinamentoAtual({ ...treinamentoAtual, dataValidade: e.target.value })}
+                  value={treinamentoAtual.data_validade || treinamentoAtual.dataValidade || ''}
+                  onChange={(e) => setTreinamentoAtual({ ...treinamentoAtual, data_validade: e.target.value })}
                   InputLabelProps={{ shrink: true }}
-                />
-              </Grid>
-              <Grid item xs={12} md={6}>
-                <TextField
-                  fullWidth
-                  label="Instrutor"
-                  value={treinamentoAtual.instrutor || ''}
-                  onChange={(e) => setTreinamentoAtual({ ...treinamentoAtual, instrutor: e.target.value })}
+                  helperText="Deixe vazio se for permanente"
                 />
               </Grid>
               <Grid item xs={12} md={6}>
@@ -643,8 +684,25 @@ export const Treinamentos: React.FC = () => {
                   type="number"
                   label="Nota"
                   value={treinamentoAtual.nota || ''}
-                  onChange={(e) => setTreinamentoAtual({ ...treinamentoAtual, nota: parseFloat(e.target.value) })}
+                  onChange={(e) => setTreinamentoAtual({ ...treinamentoAtual, nota: parseFloat(e.target.value) || null })}
+                  inputProps={{ min: 0, max: 10, step: 0.1 }}
+                  helperText="Nota de 0 a 10"
                 />
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <TextField
+                  fullWidth
+                  select
+                  label="Status"
+                  value={treinamentoAtual.status || 'CONCLUIDO'}
+                  onChange={(e) => setTreinamentoAtual({ ...treinamentoAtual, status: e.target.value })}
+                >
+                  <MenuItem value="INSCRITO">Inscrito</MenuItem>
+                  <MenuItem value="EM_ANDAMENTO">Em Andamento</MenuItem>
+                  <MenuItem value="CONCLUIDO">Concluído</MenuItem>
+                  <MenuItem value="REPROVADO">Reprovado</MenuItem>
+                  <MenuItem value="CANCELADO">Cancelado</MenuItem>
+                </TextField>
               </Grid>
               <Grid item xs={12}>
                 <TextField
