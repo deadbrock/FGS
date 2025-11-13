@@ -67,9 +67,11 @@ app.use((req, res, next) => {
 // Rotas
 import usuariosRoutes from './routes/usuariosRoutes.js';
 import authRoutes from './routes/authRoutes.js';
+import colaboradoresRoutes from './routes/colaboradoresRoutes.js';
 
 app.use('/api/usuarios', usuariosRoutes);
 app.use('/api/auth', authRoutes);
+app.use('/api/colaboradores', colaboradoresRoutes);
 
 // Rota de health check
 app.get('/health', (req, res) => {
