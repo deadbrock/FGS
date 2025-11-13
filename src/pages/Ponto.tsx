@@ -29,7 +29,7 @@ import PeopleIcon from '@mui/icons-material/People';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import WarningIcon from '@mui/icons-material/Warning';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
-import pontoService from '../services/pontoService.mock';
+import pontoService from '../services/pontoService';
 import { PageHeader, GradientButton, AnimatedCard } from '../components';
 
 interface TabPanelProps {

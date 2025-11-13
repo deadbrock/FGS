@@ -47,7 +47,7 @@ import {
 } from '@mui/icons-material';
 import { StatCard, LoadingSkeleton, PageHeader } from '../components';
 import { MapaRegioesList, CardEstadoDetalhes } from '../components/regionais';
-import regionaisService from '../services/regionaisService.mock';
+import regionaisService from '../services/regionaisService';
 import {
   EstadoBrasil,
   ColaboradorRegional,

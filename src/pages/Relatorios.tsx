@@ -21,7 +21,7 @@ import LocalHospitalIcon from '@mui/icons-material/LocalHospital';
 import SchoolIcon from '@mui/icons-material/School';
 import CardGiftcardIcon from '@mui/icons-material/CardGiftcard';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
-import relatoriosService from '../services/relatoriosService.mock';
+import relatoriosService from '../services/relatoriosService';
 
 export const Relatorios: React.FC = () => {
   useNavigationLog();

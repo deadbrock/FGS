@@ -63,7 +63,7 @@ import {
   BeneficiosColaboradorTab,
 } from '../components/prontuario';
 import { formatarData } from '../utils/statusUtils';
-import prontuarioService from '../services/prontuarioService.mock';
+import prontuarioService from '../services/prontuarioService';
 import {
   PageHeader,
   GradientButton,

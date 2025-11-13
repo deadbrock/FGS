@@ -30,7 +30,7 @@ import { AlertasVencimento } from '../components/treinamentos/AlertasVencimento'
 import { TipoTreinamento, TreinamentoColaborador, StatusTreinamento, AlertaTreinamento } from '../types/treinamentos';
 import { formatarData } from '../utils/statusUtils';
 import { getStatusColor, getStatusNome } from '../utils/treinamentosUtils';
-import treinamentosService from '../services/treinamentosService.mock';
+import treinamentosService from '../services/treinamentosService';
 import { PageHeader, GradientButton, AnimatedCard, ActionButton } from '../components';
 
 interface TabPanelProps {

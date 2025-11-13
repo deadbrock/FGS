@@ -36,7 +36,7 @@ import CardGiftcardIcon from '@mui/icons-material/CardGiftcard';
 import PeopleIcon from '@mui/icons-material/People';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
-import beneficiosService from '../services/beneficiosService.mock';
+import beneficiosService from '../services/beneficiosService';
 import { PageHeader, GradientButton, AnimatedCard, ActionButton } from '../components';
 
 interface TabPanelProps {

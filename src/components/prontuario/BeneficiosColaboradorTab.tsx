@@ -24,7 +24,7 @@ import {
 import AddIcon from '@mui/icons-material/Add';
 import { GradientButton, ActionButton } from '../';
 import { BeneficioColaborador, Beneficio } from '../../types/beneficios';
-import beneficiosService from '../../services/beneficiosService.mock';
+import beneficiosService from '../../services/beneficiosService';
 import { formatarData } from '../../utils/statusUtils';
 import { formatarMoeda, getTipoNome, getStatusNome } from '../../utils/beneficiosUtils';
 
