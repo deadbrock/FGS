@@ -414,10 +414,28 @@ class TreinamentosService {
   async getEstatisticas(): Promise<EstatisticasTreinamentos> {
     try {
       const response = await this.api.get('/estatisticas');
-      return response.data.data;
+      const data = response.data.data || {};
+      
+      // Garantir estrutura padrão mesmo se backend não retornar todos os campos
+      return {
+        totalTreinamentos: data.totalTreinamentos || 0,
+        totalTurmas: data.totalTurmas || 0,
+        totalColaboradoresTreinados: data.totalColaboradoresTreinados || data.totalRealizados || 0,
+        treinamentosPorTipo: Array.isArray(data.treinamentosPorTipo) ? data.treinamentosPorTipo : (Array.isArray(data.porTipo) ? data.porTipo : []),
+        treinamentosVencendo: data.treinamentosVencendo || (Array.isArray(data.nrsVencendo) ? data.nrsVencendo.length : 0),
+        treinamentosVencidos: data.treinamentosVencidos || 0,
+      };
     } catch (error: any) {
       console.error('Erro ao buscar estatísticas de treinamentos:', error);
-      throw new Error(error.response?.data?.error || 'Erro ao buscar estatísticas');
+      // Retornar estrutura vazia ao invés de lançar erro
+      return {
+        totalTreinamentos: 0,
+        totalTurmas: 0,
+        totalColaboradoresTreinados: 0,
+        treinamentosPorTipo: [],
+        treinamentosVencendo: 0,
+        treinamentosVencidos: 0,
+      };
     }
   }
 

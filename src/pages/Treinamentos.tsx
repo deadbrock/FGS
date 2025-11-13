@@ -91,6 +91,16 @@ export const Treinamentos: React.FC = () => {
 
   // Estados - Alertas
   const [alertas, setAlertas] = useState<AlertaTreinamento[]>([]);
+  
+  // Estados - Estatísticas (Relatórios)
+  const [estatisticas, setEstatisticas] = useState({
+    totalTreinamentos: 0,
+    totalTurmas: 0,
+    totalColaboradoresTreinados: 0,
+    treinamentosVencendo: 0,
+    treinamentosVencidos: 0,
+    treinamentosAtivos: 0, // Tipos de treinamento ativos
+  });
 
   useEffect(() => {
     carregarTipos();
@@ -100,6 +110,7 @@ export const Treinamentos: React.FC = () => {
   useEffect(() => {
     if (tabAtual === 1) carregarTreinamentos();
     if (tabAtual === 2) carregarAgendamentos();
+    if (tabAtual === 4) carregarEstatisticas();
   }, [tabAtual, paginaTreinamentos, itensPorPagina, filtroStatus, busca, paginaAgendamentos, itensPorPaginaAgendamentos, filtroStatusAgendamento, buscaAgendamentos]);
 
   const carregarTipos = async () => {
@@ -137,6 +148,52 @@ export const Treinamentos: React.FC = () => {
     } catch (error) {
       console.error('Erro ao carregar alertas:', error);
       setAlertas([]);
+    }
+  };
+
+  const carregarEstatisticas = async () => {
+    try {
+      // Buscar estatísticas do backend
+      const stats = await treinamentosService.getEstatisticas();
+      
+      // Buscar tipos de treinamento ativos
+      const tipos = await treinamentosService.getAll();
+      const tiposAtivos = tipos.filter(t => t.ativo !== false);
+      
+      // Buscar treinamentos realizados para calcular vencidos
+      const treinamentosRealizados = await treinamentosService.getColaboradorTreinamentos();
+      const hoje = new Date();
+      hoje.setHours(0, 0, 0, 0);
+      
+      const vencidos = treinamentosRealizados.filter((t: any) => {
+        if (!t.data_validade) return false;
+        const dataValidade = new Date(t.data_validade);
+        dataValidade.setHours(0, 0, 0, 0);
+        return dataValidade < hoje;
+      });
+      
+      const vencendo = treinamentosRealizados.filter((t: any) => {
+        if (!t.data_validade) return false;
+        const dataValidade = new Date(t.data_validade);
+        dataValidade.setHours(0, 0, 0, 0);
+        const diasRestantes = Math.ceil((dataValidade.getTime() - hoje.getTime()) / (1000 * 60 * 60 * 24));
+        return diasRestantes > 0 && diasRestantes <= 30;
+      });
+
+      // Buscar total de turmas
+      const turmas = await treinamentosService.getTurmas();
+
+      setEstatisticas({
+        totalTreinamentos: stats.totalTreinamentos || tipos.length,
+        totalTurmas: stats.totalTurmas || turmas.length,
+        totalColaboradoresTreinados: stats.totalColaboradoresTreinados || stats.totalRealizados || 0,
+        treinamentosVencendo: stats.treinamentosVencendo || vencendo.length,
+        treinamentosVencidos: stats.treinamentosVencidos || vencidos.length,
+        treinamentosAtivos: tiposAtivos.length,
+      });
+    } catch (error) {
+      console.error('Erro ao carregar estatísticas:', error);
+      // Manter valores padrão em caso de erro
     }
   };
 
@@ -627,33 +684,164 @@ export const Treinamentos: React.FC = () => {
             </Typography>
             
             <Grid container spacing={3}>
+              {/* Card: Treinamentos Vencidos */}
               <Grid item xs={12} md={4}>
-                <Card variant="outlined" sx={{ p: 2, textAlign: 'center' }}>
-                  <Typography variant="h3" color="error">
-                    {treinamentos.filter(t => t.status === StatusTreinamento.VENCIDO).length}
+                <Card 
+                  variant="outlined" 
+                  sx={{ 
+                    p: 3, 
+                    textAlign: 'center',
+                    border: '2px solid',
+                    borderColor: 'error.main',
+                    '&:hover': {
+                      boxShadow: 4,
+                      transform: 'translateY(-4px)',
+                      transition: 'all 0.3s ease',
+                    }
+                  }}
+                >
+                  <Typography variant="h2" color="error" fontWeight={700}>
+                    {estatisticas.treinamentosVencidos}
                   </Typography>
-                  <Typography variant="body2" color="text.secondary">
+                  <Typography variant="body1" color="text.secondary" mt={1}>
                     Treinamentos Vencidos
                   </Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    Requerem renovação imediata
+                  </Typography>
                 </Card>
               </Grid>
+
+              {/* Card: A Vencer */}
               <Grid item xs={12} md={4}>
-                <Card variant="outlined" sx={{ p: 2, textAlign: 'center' }}>
-                  <Typography variant="h3" color="warning.main">
-                    {treinamentos.filter(t => t.status === StatusTreinamento.A_VENCER).length}
+                <Card 
+                  variant="outlined" 
+                  sx={{ 
+                    p: 3, 
+                    textAlign: 'center',
+                    border: '2px solid',
+                    borderColor: 'warning.main',
+                    '&:hover': {
+                      boxShadow: 4,
+                      transform: 'translateY(-4px)',
+                      transition: 'all 0.3s ease',
+                    }
+                  }}
+                >
+                  <Typography variant="h2" color="warning.main" fontWeight={700}>
+                    {estatisticas.treinamentosVencendo}
                   </Typography>
-                  <Typography variant="body2" color="text.secondary">
+                  <Typography variant="body1" color="text.secondary" mt={1}>
                     A Vencer (30 dias)
                   </Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    Requerem atenção
+                  </Typography>
                 </Card>
               </Grid>
+
+              {/* Card: Tipos Ativos */}
               <Grid item xs={12} md={4}>
-                <Card variant="outlined" sx={{ p: 2, textAlign: 'center' }}>
-                  <Typography variant="h3" color="success.main">
-                    {treinamentos.filter(t => t.status === StatusTreinamento.ATIVO).length}
+                <Card 
+                  variant="outlined" 
+                  sx={{ 
+                    p: 3, 
+                    textAlign: 'center',
+                    border: '2px solid',
+                    borderColor: 'success.main',
+                    '&:hover': {
+                      boxShadow: 4,
+                      transform: 'translateY(-4px)',
+                      transition: 'all 0.3s ease',
+                    }
+                  }}
+                >
+                  <Typography variant="h2" color="success.main" fontWeight={700}>
+                    {estatisticas.treinamentosAtivos}
                   </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    Ativos
+                  <Typography variant="body1" color="text.secondary" mt={1}>
+                    Tipos de Treinamento Ativos
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    Cursos disponíveis
+                  </Typography>
+                </Card>
+              </Grid>
+
+              {/* Card: Total de Treinamentos */}
+              <Grid item xs={12} md={4}>
+                <Card 
+                  variant="outlined" 
+                  sx={{ 
+                    p: 3, 
+                    textAlign: 'center',
+                    '&:hover': {
+                      boxShadow: 4,
+                      transform: 'translateY(-4px)',
+                      transition: 'all 0.3s ease',
+                    }
+                  }}
+                >
+                  <Typography variant="h2" color="primary" fontWeight={700}>
+                    {estatisticas.totalTreinamentos}
+                  </Typography>
+                  <Typography variant="body1" color="text.secondary" mt={1}>
+                    Total de Treinamentos
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    Cursos cadastrados
+                  </Typography>
+                </Card>
+              </Grid>
+
+              {/* Card: Colaboradores Treinados */}
+              <Grid item xs={12} md={4}>
+                <Card 
+                  variant="outlined" 
+                  sx={{ 
+                    p: 3, 
+                    textAlign: 'center',
+                    '&:hover': {
+                      boxShadow: 4,
+                      transform: 'translateY(-4px)',
+                      transition: 'all 0.3s ease',
+                    }
+                  }}
+                >
+                  <Typography variant="h2" color="info.main" fontWeight={700}>
+                    {estatisticas.totalColaboradoresTreinados}
+                  </Typography>
+                  <Typography variant="body1" color="text.secondary" mt={1}>
+                    Colaboradores Treinados
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    Com treinamentos concluídos
+                  </Typography>
+                </Card>
+              </Grid>
+
+              {/* Card: Total de Turmas */}
+              <Grid item xs={12} md={4}>
+                <Card 
+                  variant="outlined" 
+                  sx={{ 
+                    p: 3, 
+                    textAlign: 'center',
+                    '&:hover': {
+                      boxShadow: 4,
+                      transform: 'translateY(-4px)',
+                      transition: 'all 0.3s ease',
+                    }
+                  }}
+                >
+                  <Typography variant="h2" color="secondary" fontWeight={700}>
+                    {estatisticas.totalTurmas}
+                  </Typography>
+                  <Typography variant="body1" color="text.secondary" mt={1}>
+                    Turmas Agendadas
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    Agendamentos ativos
                   </Typography>
                 </Card>
               </Grid>
