@@ -83,11 +83,31 @@ export const createUsuario = async (req, res) => {
   try {
     const { nome, email, senha, role, cargo, departamento, avatar } = req.body;
 
+    console.log('📝 CREATE USER REQUEST:', { 
+      nome, 
+      email, 
+      role, 
+      cargo, 
+      departamento,
+      hasAvatar: !!avatar 
+    });
+
     // Validações
     if (!nome || !email || !senha || !role) {
+      console.error('❌ Campos obrigatórios faltando:', { nome: !!nome, email: !!email, senha: !!senha, role: !!role });
       return res.status(400).json({
         success: false,
         error: 'Campos obrigatórios: nome, email, senha, role'
+      });
+    }
+
+    // Validar role
+    const rolesValidas = ['ADMINISTRADOR', 'RH', 'GESTOR', 'COLABORADOR'];
+    if (!rolesValidas.includes(role)) {
+      console.error('❌ Role inválida:', role);
+      return res.status(400).json({
+        success: false,
+        error: `Role inválida. Valores aceitos: ${rolesValidas.join(', ')}`
       });
     }
 
@@ -98,6 +118,7 @@ export const createUsuario = async (req, res) => {
     );
 
     if (emailCheck.rows.length > 0) {
+      console.error('❌ Email já cadastrado:', email);
       return res.status(400).json({
         success: false,
         error: 'Email já cadastrado'
@@ -108,6 +129,8 @@ export const createUsuario = async (req, res) => {
     const saltRounds = 10;
     const hashedPassword = await bcrypt.hash(senha, saltRounds);
 
+    console.log('🔐 Senha hashada com sucesso');
+
     // Inserir usuário
     const result = await pool.query(`
       INSERT INTO users (nome, email, senha, role, cargo, departamento, avatar)
@@ -115,17 +138,23 @@ export const createUsuario = async (req, res) => {
       RETURNING id, nome, email, role, cargo, departamento, avatar, created_at
     `, [nome, email, hashedPassword, role, cargo || null, departamento || null, avatar || null]);
 
+    console.log('✅ Usuário criado com sucesso:', result.rows[0].email);
+
     res.status(201).json({
       success: true,
       message: 'Usuário criado com sucesso',
       data: result.rows[0]
     });
   } catch (error) {
-    console.error('Erro ao criar usuário:', error);
+    console.error('❌ ERRO AO CRIAR USUÁRIO:', error);
+    console.error('Stack trace:', error.stack);
+    console.error('SQL Error Detail:', error.detail);
+    console.error('SQL Error Hint:', error.hint);
     res.status(500).json({
       success: false,
       error: 'Erro ao criar usuário',
-      message: error.message
+      message: error.message,
+      detail: error.detail
     });
   }
 };
