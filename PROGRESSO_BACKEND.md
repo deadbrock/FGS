@@ -195,18 +195,35 @@ Este documento resume o status atual do desenvolvimento do backend do sistema FG
 
 ---
 
-## ⏳ PENDENTES (1 módulo backend)
+### 9. 📄 MÓDULO: DOCUMENTOS
+- **Status:** ✅ **CONCLUÍDO**
 
-### 9. 📄 MÓDULO: DOCUMENTOS (TODO)
+**Rotas Implementadas:**
+- `GET /` - Listar documentos (com filtros)
+- `GET /:id` - Buscar por ID
+- `GET /:id/download` - Download de documento
+- `POST /` - Upload de documento (multipart/form-data)
+- `PUT /:id` - Atualizar metadados (número, datas, observações)
+- `DELETE /:id` - Deletar documento (arquivo + registro)
+- `GET /estatisticas` - Estatísticas (total, por tipo, vencidos)
 
-**Funcionalidades Previstas:**
-- Upload de documentos (RG, CPF, CNH, ASO, Atestados, etc.)
-- Download de documentos
-- Controle de validade
-- Alertas de vencimento
-- Armazenamento seguro (S3, Cloudinary ou local)
+**Funcionalidades:**
+- ✅ Upload de arquivos com Multer
+- ✅ Tipos permitidos: PDF, DOC, DOCX, XLS, XLSX, JPG, PNG, GIF, TXT, CSV
+- ✅ Limite de 10MB por arquivo
+- ✅ Armazenamento local (backend/uploads/)
+- ✅ Controle de validade (data_validade)
+- ✅ Alertas de vencimento (60 dias)
+- ✅ Download seguro de arquivos
+- ✅ Exclusão física + banco de dados
+- ✅ Estatísticas (vencidos, próximos vencimento)
 
-**Desafio:** Precisa de upload de arquivos (multer ou similar) e armazenamento externo
+**Arquivos:**
+- `backend/config/multer.js` (configuração upload)
+- `backend/controllers/documentosController.js` (447 linhas)
+- `backend/routes/documentosRoutes.js`
+- `backend/uploads/.gitkeep` (diretório de arquivos)
+- `backend/server.js` (integração + static files)
 
 ---
 
@@ -222,9 +239,9 @@ Este documento resume o status atual do desenvolvimento do backend do sistema FG
 | 🗺️ Regionais | ✅ Concluído | 5 | regionaisController.js | regionaisRoutes.js |
 | ⏰ Ponto | ✅ Concluído | 9 | pontoController.js | pontoRoutes.js |
 | 📊 Relatórios | ✅ Concluído | 6 | relatoriosController.js | relatoriosRoutes.js |
-| 📄 Documentos | ⏳ Pendente | - | - | - |
+| 📄 Documentos | ✅ Concluído | 7 | documentosController.js | documentosRoutes.js |
 
-**Total de Rotas Implementadas:** 54 rotas
+**Total de Rotas Implementadas:** 61 rotas
 
 ---
 
@@ -239,7 +256,9 @@ Este documento resume o status atual do desenvolvimento do backend do sistema FG
 6. ✅ ~~Regionais~~
 7. ✅ ~~Ponto Eletrônico~~
 8. ✅ ~~Relatórios~~
-9. ⏳ **Documentos** (PENDENTE - precisa de upload)
+9. ✅ ~~Documentos~~
+
+**🎉 BACKEND 100% COMPLETO!**
 
 ### FRONTEND:
 1. ⏳ Remover todos os services mock
@@ -254,8 +273,8 @@ Este documento resume o status atual do desenvolvimento do backend do sistema FG
 
 ## 📝 OBSERVAÇÕES
 
-- **Backend está 89% completo** (8 de 9 módulos)
-- **Apenas Documentos pendente** (necessita implementação de upload)
+- **🎉 Backend está 100% COMPLETO** (9 de 9 módulos)
+- **61 rotas REST implementadas**
 - **Todos os controllers incluem:**
   - ✅ Validações de entrada
   - ✅ Tratamento de erros
@@ -263,7 +282,15 @@ Este documento resume o status atual do desenvolvimento do backend do sistema FG
   - ✅ Paginação (onde aplicável)
   - ✅ Filtros avançados
   - ✅ Estatísticas
+  - ✅ Suporte para transações (onde necessário)
+
+**Recursos Avançados:**
+- ✅ Upload de arquivos (Multer)
+- ✅ Cálculos automáticos (horas, custos)
+- ✅ Alertas de vencimento (documentos, treinamentos)
+- ✅ Exportação CSV
+- ✅ Download seguro de arquivos
 
 ---
 
-**Última atualização:** 13/11/2024
+**Última atualização:** 13/11/2024 - 13h15

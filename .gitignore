@@ -28,3 +28,7 @@ dist-ssr
 .env.local
 .env.production
 
+# Uploads (arquivos enviados pelos usuários)
+backend/uploads/
+uploads/
+

@@ -64,6 +64,13 @@ app.use((req, res, next) => {
   next();
 });
 
+// Servir arquivos estáticos (uploads)
+import { fileURLToPath } from 'url';
+import path from 'path';
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
 // Rotas
 import usuariosRoutes from './routes/usuariosRoutes.js';
 import authRoutes from './routes/authRoutes.js';
@@ -73,6 +80,7 @@ import treinamentosRoutes from './routes/treinamentosRoutes.js';
 import regionaisRoutes from './routes/regionaisRoutes.js';
 import pontoRoutes from './routes/pontoRoutes.js';
 import relatoriosRoutes from './routes/relatoriosRoutes.js';
+import documentosRoutes from './routes/documentosRoutes.js';
 
 app.use('/api/usuarios', usuariosRoutes);
 app.use('/api/auth', authRoutes);
@@ -82,6 +90,7 @@ app.use('/api/treinamentos', treinamentosRoutes);
 app.use('/api/regionais', regionaisRoutes);
 app.use('/api/ponto', pontoRoutes);
 app.use('/api/relatorios', relatoriosRoutes);
+app.use('/api/documentos', documentosRoutes);
 
 // Rota de health check
 app.get('/health', (req, res) => {
