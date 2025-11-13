@@ -31,18 +31,10 @@ INSERT INTO ponto_configuracoes (nome, descricao, tipo_jornada, horas_dia, horas
 ('Turno Noite', 'Turno das 22h às 6h', 'TURNO', 8.00, 44.00, '22:00', '02:00', '02:15', '06:00', 15, 10, true);
 
 -- =============================================
--- 3. TREINAMENTOS NR OBRIGATÓRIOS
+-- 3. TREINAMENTOS
 -- =============================================
-
-INSERT INTO treinamentos (titulo, descricao, tipo, nr, carga_horaria, modalidade, validade_meses, ativo) VALUES
-('NR-10 - Segurança em Instalações e Serviços em Eletricidade', 'Treinamento obrigatório para trabalhos com eletricidade', 'NR', 'NR-10', 40, 'PRESENCIAL', 24, true),
-('NR-12 - Segurança no Trabalho em Máquinas e Equipamentos', 'Operação segura de máquinas e equipamentos', 'NR', 'NR-12', 8, 'PRESENCIAL', 24, true),
-('NR-18 - Condições e Meio Ambiente de Trabalho na Indústria da Construção', 'Segurança na construção civil', 'NR', 'NR-18', 6, 'PRESENCIAL', 24, true),
-('NR-35 - Trabalho em Altura', 'Trabalho acima de 2 metros do nível inferior', 'NR', 'NR-35', 8, 'PRESENCIAL', 24, true),
-('NR-33 - Segurança e Saúde nos Trabalhos em Espaços Confinados', 'Trabalho em espaços confinados', 'NR', 'NR-33', 16, 'PRESENCIAL', 12, true),
-('NR-06 - Equipamento de Proteção Individual - EPI', 'Uso correto de EPIs', 'NR', 'NR-06', 4, 'PRESENCIAL', 12, true),
-('NR-05 - Comissão Interna de Prevenção de Acidentes - CIPA', 'Formação de membros da CIPA', 'NR', 'NR-05', 20, 'PRESENCIAL', 12, true),
-('Integração de Novos Colaboradores', 'Treinamento inicial para todos os novos colaboradores', 'INTEGRACAO', null, 4, 'HIBRIDO', null, true);
+-- Tabela vazia - os usuários irão cadastrar os treinamentos conforme necessário
+-- (Anteriormente continha 8 treinamentos NR, mas foram removidos para permitir cadastro personalizado)
 
 -- =============================================
 -- 4. EPIs COMUNS
@@ -71,9 +63,9 @@ BEGIN
   RAISE NOTICE '📊 Resumo:';
   RAISE NOTICE '   • 8 tipos de benefícios';
   RAISE NOTICE '   • 6 configurações de jornada';
-  RAISE NOTICE '   • 8 treinamentos (incluindo NRs)';
+  RAISE NOTICE '   • 0 treinamentos (cadastrar conforme necessário)';
   RAISE NOTICE '   • 10 EPIs comuns';
   RAISE NOTICE '';
-  RAISE NOTICE '🎯 Sistema pronto para cadastrar colaboradores!';
+  RAISE NOTICE '🎯 Sistema pronto para cadastrar colaboradores e treinamentos!';
 END $$;
 
