@@ -238,9 +238,9 @@ export const Treinamentos: React.FC = () => {
 
   const colunasTipos: Coluna<TipoTreinamento>[] = [
     { id: 'nome', label: 'Nome', minWidth: 200, sortable: true },
-    { id: 'categoria', label: 'Categoria', minWidth: 150 },
-    { id: 'cargaHoraria', label: 'Carga Horária', minWidth: 100, format: (v) => `${v}h` },
-    { id: 'validadeDias', label: 'Validade', minWidth: 100, format: (v) => v === 0 ? 'Permanente' : `${v} dias` },
+    { id: 'categoria', label: 'Categoria', minWidth: 150, format: (v) => v || '-' },
+    { id: 'cargaHoraria', label: 'Carga Horária', minWidth: 100, format: (v) => v ? `${v}h` : '-' },
+    { id: 'validadeDias', label: 'Validade', minWidth: 100, format: (v) => v === 0 ? 'Permanente' : v ? `${v} dias` : '-' },
     { id: 'obrigatorio', label: 'Obrigatório', minWidth: 100, format: (v) => v ? 'Sim' : 'Não' },
   ];
 

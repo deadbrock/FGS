@@ -10,6 +10,7 @@ import {
   Paper,
   TableSortLabel,
   Box,
+  Typography,
 } from '@mui/material';
 
 export interface Coluna<T> {
@@ -91,18 +92,33 @@ export function TabelaPaginada<T extends { id: string }>({
             </TableRow>
           </TableHead>
           <TableBody>
-            {dados.map((row) => (
-              <TableRow hover key={row.id}>
-                {colunas.map((coluna) => {
-                  const valor = coluna.id === 'actions' ? row : (row as any)[coluna.id];
-                  return (
-                    <TableCell key={String(coluna.id)} align={coluna.align}>
-                      {coluna.format ? coluna.format(valor, row) : valor}
-                    </TableCell>
-                  );
-                })}
+            {dados.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={colunas.length} align="center">
+                  <Box sx={{ py: 8 }}>
+                    <Typography variant="h6" color="text.secondary" gutterBottom>
+                      Nenhum registro encontrado
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      Não há dados para exibir no momento
+                    </Typography>
+                  </Box>
+                </TableCell>
               </TableRow>
-            ))}
+            ) : (
+              dados.map((row) => (
+                <TableRow hover key={row.id}>
+                  {colunas.map((coluna) => {
+                    const valor = coluna.id === 'actions' ? row : (row as any)[coluna.id];
+                    return (
+                      <TableCell key={String(coluna.id)} align={coluna.align}>
+                        {coluna.format ? coluna.format(valor, row) : valor || '-'}
+                      </TableCell>
+                    );
+                  })}
+                </TableRow>
+              ))
+            )}
           </TableBody>
         </Table>
       </TableContainer>
