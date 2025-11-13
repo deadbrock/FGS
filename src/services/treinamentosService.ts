@@ -86,11 +86,51 @@ class TreinamentosService {
     try {
       const response = await this.api.get('/');
       // Fix: garantir que sempre retorna array
-      return Array.isArray(response.data.data) ? response.data.data : [];
+      const dados = Array.isArray(response.data.data) ? response.data.data : [];
+      
+      // Mapear campos do backend para frontend
+      return dados.map((item: any) => ({
+        id: item.id,
+        nome: item.titulo || item.nome, // Backend usa 'titulo', frontend espera 'nome'
+        titulo: item.titulo, // Manter também para compatibilidade
+        descricao: item.descricao,
+        carga_horaria: item.carga_horaria,
+        cargaHoraria: item.carga_horaria, // Alias para compatibilidade
+        tipo: item.tipo,
+        nr: item.nr, // Número da NR (ex: NR-10, NR-35)
+        categoria: this.mapearTipoParaCategoria(item.tipo), // Converter tipo para categoria
+        validade_dias: item.validade_meses ? item.validade_meses * 30 : null, // Converter meses para dias
+        validadeDias: item.validade_meses ? item.validade_meses * 30 : null, // Alias
+        validade_meses: item.validade_meses,
+        obrigatorio: item.obrigatorio !== undefined ? item.obrigatorio : (item.tipo === 'NR' || !!item.nr), // NR são obrigatórios
+        modalidade: item.modalidade,
+        local: item.local,
+        instrutor: item.instrutor,
+        instituicao: item.instituicao,
+        ativo: item.ativo !== false,
+        created_at: item.created_at,
+        updated_at: item.updated_at,
+      }));
     } catch (error: any) {
       console.error('Erro ao buscar treinamentos:', error);
       throw new Error(error.response?.data?.error || 'Erro ao buscar treinamentos');
     }
+  }
+
+  // Mapear tipo do backend para categoria do frontend
+  private mapearTipoParaCategoria(tipo?: string): string {
+    const mapeamento: Record<string, string> = {
+      'NR': 'Segurança do Trabalho',
+      'TECNICO': 'Técnico',
+      'COMPORTAMENTAL': 'Comportamental',
+      'LIDERANCA': 'Gestão',
+      'GESTAO': 'Gestão',
+      'COMPLIANCE': 'Compliance',
+      'OPERACIONAL': 'Operacional',
+      'OUTROS': 'Outro',
+      'OUTRO': 'Outro',
+    };
+    return mapeamento[tipo || ''] || tipo || 'Outro';
   }
 
   // Alias para criar treinamento (compatibilidade)
@@ -326,6 +366,7 @@ class TreinamentosService {
 
   async listarTipos() {
     // No contexto antigo, tipos = treinamentos/cursos
+    // Já faz mapeamento de campos no getAll()
     return this.getAll();
   }
 
