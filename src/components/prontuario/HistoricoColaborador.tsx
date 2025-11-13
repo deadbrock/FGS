@@ -37,7 +37,7 @@ import {
   Add as AddIcon,
 } from '@mui/icons-material';
 import { EventoHistorico, TipoEventoHistorico } from '../../types';
-import prontuarioService from '../../services/prontuarioService.mock';
+import prontuarioService from '../../services/prontuarioService';
 import { AdicionarEventoModal } from './AdicionarEventoModal';
 
 interface HistoricoColaboradorProps {

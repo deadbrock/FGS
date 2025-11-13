@@ -22,7 +22,7 @@ import {
   TipoAdvertencia,
   EventoHistorico,
 } from '../../types';
-import prontuarioService from '../../services/prontuarioService.mock';
+import prontuarioService from '../../services/prontuarioService';
 import { useAuth } from '../../hooks/useAuth';
 
 interface AdicionarEventoModalProps {
