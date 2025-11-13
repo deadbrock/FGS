@@ -310,7 +310,34 @@ class TreinamentosService {
 
       const response = await this.api.get('/colaboradores', { params });
       // Fix: garantir que sempre retorna array
-      return Array.isArray(response.data.data) ? response.data.data : [];
+      const dados = Array.isArray(response.data.data) ? response.data.data : [];
+      
+      // Mapear campos do backend (snake_case) para frontend (camelCase)
+      return dados.map((item: any) => ({
+        id: item.id,
+        colaborador_id: item.colaborador_id,
+        colaboradorNome: item.colaborador_nome || item.nome_completo || '-',
+        colaborador_cpf: item.colaborador_cpf,
+        treinamento_id: item.treinamento_id,
+        tipoTreinamentoNome: item.treinamento_titulo || item.titulo || '-',
+        treinamento_tipo: item.treinamento_tipo,
+        treinamento_nr: item.treinamento_nr,
+        turma_id: item.turma_id,
+        data_realizacao: item.data_realizacao,
+        dataRealizacao: item.data_realizacao, // Alias
+        data_validade: item.data_validade,
+        dataValidade: item.data_validade, // Alias
+        presenca: item.presenca,
+        percentual_presenca: item.percentual_presenca,
+        status: item.status,
+        nota: item.nota,
+        aprovado: item.aprovado,
+        certificado_url: item.certificado_url,
+        certificado_numero: item.certificado_numero,
+        observacoes: item.observacoes,
+        created_at: item.created_at,
+        updated_at: item.updated_at,
+      }));
     } catch (error: any) {
       console.error('Erro ao buscar treinamentos de colaboradores:', error);
       throw new Error(error.response?.data?.error || 'Erro ao buscar treinamento');
@@ -380,19 +407,21 @@ class TreinamentosService {
   }
 
   async listarTreinamentos(colaboradorId?: string | any, filtros?: any) {
-    // Se colaboradorId é um objeto (paginação), ignore e busque todos
+    // Se colaboradorId é um objeto (paginação), busca todos os treinamentos realizados
     if (typeof colaboradorId === 'object') {
-      return { dados: await this.getAll(), total: 0 };
+      // Buscar treinamentos realizados (colaboradores_treinamentos)
+      const dados = await this.getColaboradorTreinamentos();
+      return { dados, total: dados.length };
     }
     
-    // Se tem colaboradorId string, busca treinamentos do colaborador
+    // Se tem colaboradorId string, busca treinamentos do colaborador específico
     if (colaboradorId && typeof colaboradorId === 'string') {
       const dados = await this.getColaboradorTreinamentos(colaboradorId);
       return { dados, total: dados.length };
     }
     
-    // Senão, busca todos os treinamentos (cursos)
-    const dados = await this.getAll();
+    // Senão, busca todos os treinamentos realizados (não os cursos)
+    const dados = await this.getColaboradorTreinamentos();
     return { dados, total: dados.length };
   }
 
