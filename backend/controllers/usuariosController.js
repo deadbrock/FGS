@@ -102,7 +102,7 @@ export const createUsuario = async (req, res) => {
     }
 
     // Validar role
-    const rolesValidas = ['ADMINISTRADOR', 'RH', 'GESTOR', 'COLABORADOR'];
+    const rolesValidas = ['ADMINISTRADOR', 'RH', 'GESTOR', 'COLABORADOR', 'SEGURANCA_TRABALHO'];
     if (!rolesValidas.includes(role)) {
       console.error('❌ Role inválida:', role);
       return res.status(400).json({
