@@ -97,9 +97,10 @@ export const Treinamentos: React.FC = () => {
   const carregarTipos = async () => {
     try {
       const dados = await treinamentosService.listarTipos();
-      setTiposTreinamento(dados);
+      setTiposTreinamento(Array.isArray(dados) ? dados : []);
     } catch (error) {
       console.error('Erro ao carregar tipos:', error);
+      setTiposTreinamento([]);
     }
   };
 
@@ -109,19 +110,25 @@ export const Treinamentos: React.FC = () => {
         { pagina: paginaTreinamentos, itensPorPagina },
         { status: filtroStatus, busca }
       );
-      setTreinamentos(resultado.dados);
-      setTotalTreinamentos(resultado.total);
+      // Garantir que sempre seja array
+      setTreinamentos(Array.isArray(resultado?.dados) ? resultado.dados : []);
+      setTotalTreinamentos(resultado?.total || 0);
     } catch (error) {
       console.error('Erro ao carregar treinamentos:', error);
+      // Em caso de erro, inicializar com array vazio
+      setTreinamentos([]);
+      setTotalTreinamentos(0);
     }
   };
 
   const carregarAlertas = async () => {
     try {
       const dados = await treinamentosService.listarAlertas();
-      setAlertas(dados);
+      // listarAlertas retorna objeto {vencendo, vencidos}, não array
+      setAlertas([]);
     } catch (error) {
       console.error('Erro ao carregar alertas:', error);
+      setAlertas([]);
     }
   };
 
