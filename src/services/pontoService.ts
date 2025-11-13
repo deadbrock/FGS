@@ -95,7 +95,8 @@ class PontoService {
       const response = await this.api.get('/configuracoes', {
         params: { ativo }
       });
-      return response.data.data;
+      // Fix: garantir que sempre retorna array
+      return Array.isArray(response.data.data) ? response.data.data : [];
     } catch (error: any) {
       console.error('Erro ao buscar configurações de ponto:', error);
       throw new Error(error.response?.data?.error || 'Erro ao buscar configurações');
@@ -119,7 +120,11 @@ class PontoService {
   async getRegistros(filtros?: FiltrosPonto): Promise<{ data: RegistroPonto[]; pagination: any }> {
     try {
       const response = await this.api.get('/', { params: filtros });
-      return response.data;
+      // Fix: garantir que sempre retorna array
+      return {
+        data: Array.isArray(response.data.data) ? response.data.data : [],
+        pagination: response.data.pagination || {}
+      };
     } catch (error: any) {
       console.error('Erro ao buscar registros de ponto:', error);
       throw new Error(error.response?.data?.error || 'Erro ao buscar registros');
@@ -184,7 +189,13 @@ class PontoService {
   async getEstatisticas(): Promise<EstatisticasPonto> {
     try {
       const response = await this.api.get('/estatisticas');
-      return response.data.data;
+      const data = response.data.data || {};
+      // Fix: garantir estrutura padrão
+      return {
+        totalRegistros: data.totalRegistros || 0,
+        porStatus: Array.isArray(data.porStatus) ? data.porStatus : [],
+        faltasNaoJustificadas: Array.isArray(data.faltasNaoJustificadas) ? data.faltasNaoJustificadas : []
+      };
     } catch (error: any) {
       console.error('Erro ao buscar estatísticas de ponto:', error);
       throw new Error(error.response?.data?.error || 'Erro ao buscar estatísticas');

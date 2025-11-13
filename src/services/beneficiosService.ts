@@ -63,7 +63,8 @@ class BeneficiosService {
   async getTipos(): Promise<TipoBeneficio[]> {
     try {
       const response = await this.api.get('/tipos');
-      return response.data.data;
+      // Fix: garantir que sempre retorna array
+      return Array.isArray(response.data.data) ? response.data.data : [];
     } catch (error: any) {
       console.error('Erro ao buscar tipos de benefícios:', error);
       throw new Error(error.response?.data?.error || 'Erro ao buscar tipos de benefícios');
@@ -107,7 +108,8 @@ class BeneficiosService {
     try {
       const params = colaboradorId ? { colaboradorId } : {};
       const response = await this.api.get('/', { params });
-      return response.data.data;
+      // Fix: garantir que sempre retorna array
+      return Array.isArray(response.data.data) ? response.data.data : [];
     } catch (error: any) {
       console.error('Erro ao buscar benefícios de colaboradores:', error);
       throw new Error(error.response?.data?.error || 'Erro ao buscar benefícios');

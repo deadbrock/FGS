@@ -85,11 +85,17 @@ class TreinamentosService {
   async getAll(): Promise<Treinamento[]> {
     try {
       const response = await this.api.get('/');
-      return response.data.data;
+      // Fix: garantir que sempre retorna array
+      return Array.isArray(response.data.data) ? response.data.data : [];
     } catch (error: any) {
       console.error('Erro ao buscar treinamentos:', error);
       throw new Error(error.response?.data?.error || 'Erro ao buscar treinamentos');
     }
+  }
+
+  // Alias para criar treinamento (compatibilidade)
+  async criarTipo(treinamento: Partial<Treinamento>): Promise<Treinamento> {
+    return this.create(treinamento);
   }
 
   async getById(id: string): Promise<Treinamento> {
@@ -186,15 +192,16 @@ class TreinamentosService {
   ): Promise<TreinamentoColaborador[]> {
     try {
       const params: any = {};
-      if (colaboradorId) params.colaboradorId = colaboradorId;
-      if (treinamentoId) params.treinamentoId = treinamentoId;
-      if (turmaId) params.turmaId = turmaId;
+      if (colaboradorId) params.colaborador_id = colaboradorId; // Fix: usar snake_case
+      if (treinamentoId) params.treinamento_id = treinamentoId;
+      if (turmaId) params.turma_id = turmaId;
 
       const response = await this.api.get('/colaboradores', { params });
-      return response.data.data;
+      // Fix: garantir que sempre retorna array
+      return Array.isArray(response.data.data) ? response.data.data : [];
     } catch (error: any) {
       console.error('Erro ao buscar treinamentos de colaboradores:', error);
-      throw new Error(error.response?.data?.error || 'Erro ao buscar treinamentos de colaboradores');
+      throw new Error(error.response?.data?.error || 'Erro ao buscar treinamento');
     }
   }
 
