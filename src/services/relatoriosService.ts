@@ -65,10 +65,45 @@ class RelatoriosService {
   async getDashboard(): Promise<DashboardData> {
     try {
       const response = await this.api.get('/dashboard');
-      return response.data.data;
+      const data = response.data.data || {};
+      // Garantir estrutura padrão
+      return {
+        totais: {
+          colaboradoresAtivos: data.totais?.colaboradoresAtivos || 0,
+          colaboradoresInativos: data.totais?.colaboradoresInativos || 0,
+          beneficiosAtivos: data.totais?.beneficiosAtivos || 0,
+          colaboradoresTreinados: data.totais?.colaboradoresTreinados || 0,
+        },
+        ultimos30Dias: {
+          admissoes: data.ultimos30Dias?.admissoes || 0,
+          demissoes: data.ultimos30Dias?.demissoes || 0,
+        },
+        distribuicao: {
+          porEstado: Array.isArray(data.distribuicao?.porEstado) ? data.distribuicao.porEstado : [],
+          porDepartamento: Array.isArray(data.distribuicao?.porDepartamento) ? data.distribuicao.porDepartamento : [],
+          porGenero: Array.isArray(data.distribuicao?.porGenero) ? data.distribuicao.porGenero : [],
+        },
+      };
     } catch (error: any) {
       console.error('Erro ao buscar dashboard:', error);
-      throw new Error(error.response?.data?.error || 'Erro ao buscar dashboard');
+      // Retornar estrutura vazia ao invés de lançar erro
+      return {
+        totais: {
+          colaboradoresAtivos: 0,
+          colaboradoresInativos: 0,
+          beneficiosAtivos: 0,
+          colaboradoresTreinados: 0,
+        },
+        ultimos30Dias: {
+          admissoes: 0,
+          demissoes: 0,
+        },
+        distribuicao: {
+          porEstado: [],
+          porDepartamento: [],
+          porGenero: [],
+        },
+      };
     }
   }
 

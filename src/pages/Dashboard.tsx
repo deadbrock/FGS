@@ -11,6 +11,7 @@ import {
   alpha,
   Paper,
   useTheme,
+  CircularProgress,
 } from '@mui/material';
 import {
   LineChart,
@@ -46,6 +47,10 @@ import { useAuth } from '../hooks/useAuth';
 import { useNavigationLog } from '../hooks/useNavigationLog';
 import { useNavigate } from 'react-router-dom';
 import { PageHeader, AnimatedCard } from '../components';
+import relatoriosService from '../services/relatoriosService';
+import colaboradoresService from '../services/colaboradoresService';
+import treinamentosService from '../services/treinamentosService';
+import beneficiosService from '../services/beneficiosService';
 
 interface QuickAction {
   title: string;
@@ -54,31 +59,6 @@ interface QuickAction {
   color: string;
   count?: number;
 }
-
-// Dados para gráficos
-const presencaData = [
-  { mes: 'Jan', presenca: 92 },
-  { mes: 'Fev', presenca: 89 },
-  { mes: 'Mar', presenca: 94 },
-  { mes: 'Abr', presenca: 91 },
-  { mes: 'Mai', presenca: 95 },
-  { mes: 'Jun', presenca: 94.5 },
-];
-
-const treinamentosData = [
-  { nome: 'Segurança', valor: 45 },
-  { nome: 'Técnicos', valor: 30 },
-  { nome: 'Soft Skills', valor: 25 },
-];
-
-const colaboradoresData = [
-  { mes: 'Jan', novos: 8, saidas: 3 },
-  { mes: 'Fev', novos: 12, saidas: 5 },
-  { mes: 'Mar', novos: 10, saidas: 2 },
-  { mes: 'Abr', novos: 15, saidas: 4 },
-  { mes: 'Mai', novos: 9, saidas: 3 },
-  { mes: 'Jun', novos: 12, saidas: 2 },
-];
 
 const COLORS = ['#354a80', '#a2122a', '#f57c00', '#388e3c'];
 
@@ -118,16 +98,91 @@ export const Dashboard: React.FC = () => {
   const navigate = useNavigate();
   const theme = useTheme();
 
-  const [stats] = useState({
-    totalColaboradores: 245,
-    colaboradoresAtivos: 238,
-    novosColaboradores: 12,
-    taxaPresenca: 94.5,
-    treinamentosPendentes: 8,
-    atestadosMes: 15,
-    beneficiosAtivos: 180,
-    aniversariantes: 3,
+  const [stats, setStats] = useState({
+    totalColaboradores: 0,
+    colaboradoresAtivos: 0,
+    novosColaboradores: 0,
+    taxaPresenca: 0,
+    treinamentosPendentes: 0,
+    atestadosMes: 0,
+    beneficiosAtivos: 0,
+    aniversariantes: 0,
   });
+  const [loading, setLoading] = useState(true);
+  const [presencaData, setPresencaData] = useState([
+    { mes: 'Jan', presenca: 0 },
+    { mes: 'Fev', presenca: 0 },
+    { mes: 'Mar', presenca: 0 },
+    { mes: 'Abr', presenca: 0 },
+    { mes: 'Mai', presenca: 0 },
+    { mes: 'Jun', presenca: 0 },
+  ]);
+  const [treinamentosData, setTreinamentosData] = useState([
+    { nome: 'Segurança', valor: 0 },
+    { nome: 'Técnicos', valor: 0 },
+    { nome: 'Soft Skills', valor: 0 },
+  ]);
+  const [colaboradoresData, setColaboradoresData] = useState([
+    { mes: 'Jan', novos: 0, saidas: 0 },
+    { mes: 'Fev', novos: 0, saidas: 0 },
+    { mes: 'Mar', novos: 0, saidas: 0 },
+    { mes: 'Abr', novos: 0, saidas: 0 },
+    { mes: 'Mai', novos: 0, saidas: 0 },
+    { mes: 'Jun', novos: 0, saidas: 0 },
+  ]);
+
+  useEffect(() => {
+    carregarDados();
+  }, []);
+
+  const carregarDados = async () => {
+    try {
+      setLoading(true);
+      
+      // Carregar dashboard geral
+      const dashboard = await relatoriosService.getDashboard();
+      
+      // Carregar estatísticas de colaboradores
+      const statsColab = await colaboradoresService.getEstatisticas();
+      
+      // Carregar estatísticas de treinamentos
+      const statsTrein = await treinamentosService.getEstatisticas();
+      
+      // Carregar estatísticas de benefícios
+      const statsBenef = await beneficiosService.getEstatisticas();
+
+      // Atualizar stats principais
+      setStats({
+        totalColaboradores: dashboard.totais.colaboradoresAtivos + dashboard.totais.colaboradoresInativos,
+        colaboradoresAtivos: dashboard.totais.colaboradoresAtivos,
+        novosColaboradores: dashboard.ultimos30Dias.admissoes,
+        taxaPresenca: 95, // TODO: calcular com base em dados de ponto
+        treinamentosPendentes: statsTrein.treinamentosVencendo || 0,
+        atestadosMes: 0, // TODO: implementar quando tiver módulo de atestados
+        beneficiosAtivos: dashboard.totais.beneficiosAtivos,
+        aniversariantes: 0, // TODO: calcular aniversariantes do mês
+      });
+
+      // Atualizar gráfico de treinamentos por tipo
+      if (statsTrein.treinamentosPorTipo && Array.isArray(statsTrein.treinamentosPorTipo)) {
+        setTreinamentosData(
+          statsTrein.treinamentosPorTipo.slice(0, 3).map((item: any) => ({
+            nome: item.tipo || item.nome || 'Outros',
+            valor: parseInt(item.count || item.total || 0),
+          }))
+        );
+      }
+
+      // Atualizar gráfico de colaboradores (últimos 6 meses)
+      // TODO: implementar quando tiver histórico de admissões/demissões por mês
+      
+    } catch (error) {
+      console.error('Erro ao carregar dados do dashboard:', error);
+      // Manter valores padrão (0) em caso de erro
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const quickActions: QuickAction[] = [
     {
@@ -168,6 +223,14 @@ export const Dashboard: React.FC = () => {
       color: '#6e0c1d',
     },
   ];
+
+  if (loading) {
+    return (
+      <Box display="flex" justifyContent="center" alignItems="center" minHeight="400px">
+        <CircularProgress />
+      </Box>
+    );
+  }
 
   return (
     <Box>
