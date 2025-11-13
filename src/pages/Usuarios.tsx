@@ -394,7 +394,6 @@ export const Usuarios: React.FC = () => {
             <MenuItem value={UserRole.RH}>RH</MenuItem>
             <MenuItem value={UserRole.GESTOR}>Gestor</MenuItem>
             <MenuItem value={UserRole.COLABORADOR}>Colaborador</MenuItem>
-            <MenuItem value={UserRole.SEGURANCA_TRABALHO}>Segurança do Trabalho</MenuItem>
           </TextField>
 
           <TextField

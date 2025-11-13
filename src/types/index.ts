@@ -4,7 +4,6 @@ export enum UserRole {
   RH = 'RH',
   GESTOR = 'GESTOR',
   COLABORADOR = 'COLABORADOR',
-  SEGURANCA_TRABALHO = 'SEGURANCA_TRABALHO',
 }
 
 // Interface de usuário
