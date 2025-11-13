@@ -138,10 +138,44 @@ class TreinamentosService {
     return this.create(treinamento);
   }
 
+  // Alias para atualizar treinamento (compatibilidade)
+  async atualizarTipo(id: string, treinamento: Partial<Treinamento>): Promise<Treinamento> {
+    return this.update(id, treinamento);
+  }
+
+  // Alias para deletar treinamento (compatibilidade)
+  async deletarTipo(id: string): Promise<void> {
+    return this.delete(id);
+  }
+
   async getById(id: string): Promise<Treinamento> {
     try {
       const response = await this.api.get(`/${id}`);
-      return response.data.data;
+      const item = response.data.data;
+      
+      // Mapear campos do backend para frontend (mesmo mapeamento do getAll)
+      return {
+        id: item.id,
+        nome: item.titulo || item.nome,
+        titulo: item.titulo,
+        descricao: item.descricao,
+        carga_horaria: item.carga_horaria,
+        cargaHoraria: item.carga_horaria,
+        tipo: item.tipo,
+        nr: item.nr,
+        categoria: this.mapearTipoParaCategoria(item.tipo),
+        validade_dias: item.validade_meses ? item.validade_meses * 30 : null,
+        validadeDias: item.validade_meses ? item.validade_meses * 30 : null,
+        validade_meses: item.validade_meses,
+        obrigatorio: item.obrigatorio !== undefined ? item.obrigatorio : (item.tipo === 'NR' || !!item.nr),
+        modalidade: item.modalidade,
+        local: item.local,
+        instrutor: item.instrutor,
+        instituicao: item.instituicao,
+        ativo: item.ativo !== false,
+        created_at: item.created_at,
+        updated_at: item.updated_at,
+      };
     } catch (error: any) {
       console.error('Erro ao buscar treinamento:', error);
       throw new Error(error.response?.data?.error || 'Erro ao buscar treinamento');

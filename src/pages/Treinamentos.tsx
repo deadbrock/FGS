@@ -15,10 +15,14 @@ import {
   MenuItem,
   Chip,
   Button,
+  IconButton,
+  Tooltip,
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import FileUploadIcon from '@mui/icons-material/FileUpload';
 import AssignmentIcon from '@mui/icons-material/Assignment';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
 import { useNavigationLog } from '../hooks/useNavigationLog';
 import { TabelaPaginada, Coluna } from '../components/TabelaPaginada';
 import { FiltrosTabela } from '../components/FiltrosTabela';
@@ -203,9 +207,58 @@ export const Treinamentos: React.FC = () => {
         await treinamentosService.criarTipo(tipoAtual);
       }
       setDialogTipoAberto(false);
+      setTipoAtual({});
       carregarTipos();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Erro ao salvar tipo:', error);
+      alert(error.message || 'Erro ao salvar tipo de treinamento');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleEditarTipo = async (tipo: TipoTreinamento) => {
+    try {
+      // Buscar dados completos do treinamento
+      const treinamentoCompleto = await treinamentosService.getById(tipo.id);
+      
+      // Mapear dados do backend para o formato do formulário
+      setTipoAtual({
+        id: treinamentoCompleto.id,
+        nome: treinamentoCompleto.nome || treinamentoCompleto.titulo,
+        descricao: treinamentoCompleto.descricao,
+        categoria: treinamentoCompleto.categoria,
+        cargaHoraria: treinamentoCompleto.cargaHoraria || treinamentoCompleto.carga_horaria,
+        validadeDias: treinamentoCompleto.validadeDias || treinamentoCompleto.validade_dias,
+        obrigatorio: treinamentoCompleto.obrigatorio,
+        nr: treinamentoCompleto.nr,
+        modalidade: treinamentoCompleto.modalidade,
+        local: treinamentoCompleto.local,
+        instrutor: treinamentoCompleto.instrutor,
+        instituicao: treinamentoCompleto.instituicao,
+        ativo: treinamentoCompleto.ativo,
+      });
+      
+      setDialogTipoAberto(true);
+    } catch (error: any) {
+      console.error('Erro ao carregar tipo para edição:', error);
+      alert(error.message || 'Erro ao carregar tipo de treinamento');
+    }
+  };
+
+  const handleExcluirTipo = async (tipo: TipoTreinamento) => {
+    if (!window.confirm(`Tem certeza que deseja excluir o tipo de treinamento "${tipo.nome || tipo.titulo}"?\n\nEsta ação não pode ser desfeita.`)) {
+      return;
+    }
+
+    try {
+      setLoading(true);
+      await treinamentosService.deletarTipo(tipo.id);
+      carregarTipos();
+      alert('Tipo de treinamento excluído com sucesso!');
+    } catch (error: any) {
+      console.error('Erro ao excluir tipo:', error);
+      alert(error.message || 'Erro ao excluir tipo de treinamento');
     } finally {
       setLoading(false);
     }
@@ -279,6 +332,36 @@ export const Treinamentos: React.FC = () => {
     { id: 'cargaHoraria', label: 'Carga Horária', minWidth: 100, format: (v) => v ? `${v}h` : '-' },
     { id: 'validadeDias', label: 'Validade', minWidth: 100, format: (v) => v === 0 ? 'Permanente' : v ? `${v} dias` : '-' },
     { id: 'obrigatorio', label: 'Obrigatório', minWidth: 100, format: (v) => v ? 'Sim' : 'Não' },
+    {
+      id: 'actions',
+      label: 'Ações',
+      minWidth: 120,
+      align: 'center',
+      format: (_, row) => (
+        <Box display="flex" gap={1} justifyContent="center">
+          <Tooltip title="Editar">
+            <IconButton
+              size="small"
+              color="primary"
+              onClick={() => handleEditarTipo(row)}
+              disabled={loading}
+            >
+              <EditIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
+          <Tooltip title="Excluir">
+            <IconButton
+              size="small"
+              color="error"
+              onClick={() => handleExcluirTipo(row)}
+              disabled={loading}
+            >
+              <DeleteIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
+        </Box>
+      ),
+    },
   ];
 
   const colunasTreinamentos: Coluna<TreinamentoColaborador>[] = [
@@ -580,7 +663,15 @@ export const Treinamentos: React.FC = () => {
       </AnimatedCard>
 
       {/* Dialog Tipo de Treinamento */}
-      <Dialog open={dialogTipoAberto} onClose={() => setDialogTipoAberto(false)} maxWidth="md" fullWidth>
+      <Dialog 
+        open={dialogTipoAberto} 
+        onClose={() => {
+          setDialogTipoAberto(false);
+          setTipoAtual({});
+        }} 
+        maxWidth="md" 
+        fullWidth
+      >
         <DialogTitle>
           {tipoAtual.id ? 'Editar' : 'Novo'} Tipo de Treinamento
         </DialogTitle>
