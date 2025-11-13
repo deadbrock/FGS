@@ -266,11 +266,21 @@ class TreinamentosService {
     };
   }
 
-  async listarTreinamentos(colaboradorId?: string) {
-    if (colaboradorId) {
-      return this.getColaboradorTreinamentos(colaboradorId);
+  async listarTreinamentos(colaboradorId?: string | any, filtros?: any) {
+    // Se colaboradorId é um objeto (paginação), ignore e busque todos
+    if (typeof colaboradorId === 'object') {
+      return { dados: await this.getAll(), total: 0 };
     }
-    return this.getAll();
+    
+    // Se tem colaboradorId string, busca treinamentos do colaborador
+    if (colaboradorId && typeof colaboradorId === 'string') {
+      const dados = await this.getColaboradorTreinamentos(colaboradorId);
+      return { dados, total: dados.length };
+    }
+    
+    // Senão, busca todos os treinamentos (cursos)
+    const dados = await this.getAll();
+    return { dados, total: dados.length };
   }
 
   async buscarEstatisticas() {
