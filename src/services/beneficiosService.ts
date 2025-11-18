@@ -102,12 +102,16 @@ class BeneficiosService {
       const categoriasValidas = ['TRANSPORTE', 'ALIMENTACAO', 'SAUDE', 'EDUCACAO', 'OUTROS'];
       let categoria: string;
       
+      console.log('🔍 Debug - tipo recebido:', { tipo: tipo.tipo, categoria: tipo.categoria, nome: tipo.nome });
+      
       if (tipo.categoria && categoriasValidas.includes(tipo.categoria)) {
         // Já é uma categoria válida
         categoria = tipo.categoria;
+        console.log('✅ Usando categoria válida diretamente:', categoria);
       } else {
         // Precisa mapear do enum para categoria
         categoria = mapearCategoria(tipoBeneficio);
+        console.log('🔄 Mapeando', tipoBeneficio, '→', categoria);
       }
 
       // Mapear campos do frontend (Beneficio) para campos do backend (TipoBeneficio)
