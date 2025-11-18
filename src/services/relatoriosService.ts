@@ -191,7 +191,57 @@ class RelatoriosService {
   // ============================================
 
   async buscarDashboard() {
-    return this.getDashboard();
+    const dashboardData = await this.getDashboard();
+    
+    // Mapear DashboardData para DashboardGeral esperado pelo componente Relatorios
+    const totalFuncionarios = dashboardData.totais.colaboradoresAtivos + dashboardData.totais.colaboradoresInativos;
+    const percentualAtivos = totalFuncionarios > 0 
+      ? (dashboardData.totais.colaboradoresAtivos / totalFuncionarios) * 100 
+      : 0;
+    
+    // Calcular turnover mensal (demissões / média de funcionários * 100)
+    const headcountMedio = totalFuncionarios; // Simplificado
+    const turnoverMensal = headcountMedio > 0 
+      ? (dashboardData.ultimos30Dias.demissoes / headcountMedio) * 100 
+      : 0;
+    
+    return {
+      indicadoresPrincipais: {
+        totalFuncionarios,
+        funcionariosAtivos: dashboardData.totais.colaboradoresAtivos,
+        funcionariosInativos: dashboardData.totais.colaboradoresInativos,
+        percentualAtivos,
+        turnoverMensal: Math.round(turnoverMensal * 100) / 100, // Arredondar para 2 casas decimais
+        turnoverAcumulado: 0, // TODO: implementar quando tiver histórico
+        admissoesMes: dashboardData.ultimos30Dias.admissoes,
+        demissoesMes: dashboardData.ultimos30Dias.demissoes,
+        diasPerdidosAtestados: 0, // TODO: implementar quando tiver módulo de atestados
+        totalAtestadosMes: 0, // TODO: implementar quando tiver módulo de atestados
+        mediaDiasPorAtestado: 0, // TODO: implementar quando tiver módulo de atestados
+        treinamentosVencidos: 0, // TODO: buscar de treinamentosService
+        treinamentosAVencer: 0, // TODO: buscar de treinamentosService
+        percentualTreinamentosOk: 0, // TODO: calcular
+        custoTotalBeneficios: 0, // TODO: buscar de beneficiosService
+        custoMedioPorFuncionario: 0, // TODO: calcular
+        beneficiosMaisUtilizados: [], // TODO: buscar de beneficiosService
+        mediaHorasTrabalhadas: 0, // TODO: buscar de pontoService
+        totalHorasExtras: 0, // TODO: buscar de pontoService
+        taxaPontualidade: 0, // TODO: buscar de pontoService
+      },
+      graficos: {
+        funcionariosPorSetor: dashboardData.distribuicao.porDepartamento.map((item: any) => ({
+          setor: item.departamento || item.setor || 'N/A',
+          ativos: item.total || 0,
+          inativos: 0,
+          total: item.total || 0,
+          percentual: totalFuncionarios > 0 ? ((item.total || 0) / totalFuncionarios) * 100 : 0,
+        })),
+        turnoverMensal: [], // TODO: implementar quando tiver histórico
+        atestadosMensal: [], // TODO: implementar quando tiver módulo de atestados
+        custoBeneficiosMensal: [], // TODO: implementar quando tiver histórico
+      },
+      alertas: [], // TODO: implementar sistema de alertas
+    };
   }
 
   async gerarRelatorio(tipo: string, filtros?: any) {
