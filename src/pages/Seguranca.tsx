@@ -741,6 +741,7 @@ export const Seguranca: React.FC = () => {
                 </TableBody>
               </Table>
             </TableContainer>
+            )}
           </Box>
         </TabPanel>
       </Card>

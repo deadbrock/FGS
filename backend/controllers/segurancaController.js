@@ -18,11 +18,9 @@ export const getEstatisticas = async (req, res) => {
     `);
     const ativos = parseInt(usuariosAtivos.rows[0]?.total || '0');
 
-    // Usuários bloqueados (se houver campo bloqueado)
-    const usuariosBloqueados = await pool.query(`
-      SELECT COUNT(*) as total FROM users WHERE bloqueado = true
-    `).catch(() => ({ rows: [{ total: '0' }] }));
-    const bloqueados = parseInt(usuariosBloqueados.rows[0]?.total || '0');
+    // Usuários bloqueados (assumindo que não há campo bloqueado, retornamos 0)
+    // Se houver campo bloqueado ou ativo = false, ajustar aqui
+    const bloqueados = 0;
 
     // Acessos hoje
     const hoje = new Date().toISOString().split('T')[0];
@@ -139,10 +137,7 @@ export const getUsuariosSeguranca = async (req, res) => {
         departamento,
         avatar,
         created_at,
-        updated_at,
-        bloqueado,
-        tentativas_login,
-        ultimo_acesso
+        updated_at
       FROM users
       ORDER BY created_at DESC
     `);
