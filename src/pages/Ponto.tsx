@@ -70,7 +70,13 @@ export const Ponto: React.FC = () => {
     graficoAtrasos: [],
   });
   const [resumosDias, setResumosDias] = useState<ResumoDia[]>([]);
-  const [ranking, setRanking] = useState<RankingPontualidade | null>(null);
+  const [ranking, setRanking] = useState<RankingPontualidade>({
+    periodo: {
+      inicio: dataInicio,
+      fim: dataFim,
+    },
+    ranking: []
+  });
   const [relatorioAtrasos, setRelatorioAtrasos] = useState<RelatorioAtrasos | null>(null);
   const [dataInicio, setDataInicio] = useState('2024-10-01');
   const [dataFim, setDataFim] = useState('2024-10-31');
@@ -108,10 +114,20 @@ export const Ponto: React.FC = () => {
 
   const carregarRanking = async () => {
     try {
+      console.log('📊 Carregando ranking de pontualidade...');
       const dados = await pontoService.buscarRanking(dataInicio, dataFim);
+      console.log('✅ Ranking carregado:', dados);
       setRanking(dados);
     } catch (error) {
-      console.error('Erro ao carregar ranking:', error);
+      console.error('❌ Erro ao carregar ranking:', error);
+      // Definir estrutura vazia em caso de erro
+      setRanking({
+        periodo: {
+          inicio: dataInicio,
+          fim: dataFim,
+        },
+        ranking: []
+      });
     }
   };
 
@@ -304,7 +320,11 @@ export const Ponto: React.FC = () => {
               />
             </Box>
 
-            {ranking && <RankingCard ranking={ranking.ranking} topN={10} />}
+            {ranking && ranking.ranking && Array.isArray(ranking.ranking) ? (
+              <RankingCard ranking={ranking.ranking} topN={10} />
+            ) : (
+              <Alert severity="info">Nenhum dado de ranking disponível para o período selecionado.</Alert>
+            )}
           </Box>
         </TabPanel>
 

@@ -26,7 +26,9 @@ export const RankingCard: React.FC<RankingCardProps> = ({
   titulo = 'Ranking de Pontualidade',
   topN = 10,
 }) => {
-  const topRanking = ranking.slice(0, topN);
+  // Garantir que ranking seja sempre um array
+  const rankingArray = Array.isArray(ranking) ? ranking : [];
+  const topRanking = rankingArray.slice(0, topN);
 
   const getMedalha = (posicao: number) => {
     switch (posicao) {

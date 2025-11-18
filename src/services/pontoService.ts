@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { RankingPontualidade } from '../types/ponto';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3333';
 
@@ -246,12 +247,27 @@ class PontoService {
     return this.getRegistros({ colaborador_id: colaboradorId, data_inicio: dataInicio, data_fim: dataFim });
   }
 
-  async buscarRanking() {
-    // Não implementado no backend - retorna mock vazio
-    return {
-      maisPresentes: [],
-      menosPresentes: []
-    };
+  async buscarRanking(dataInicio?: string, dataFim?: string): Promise<RankingPontualidade> {
+    try {
+      // TODO: Implementar endpoint no backend quando disponível
+      // Por enquanto retorna estrutura vazia
+      return {
+        periodo: {
+          inicio: dataInicio || new Date().toISOString().split('T')[0],
+          fim: dataFim || new Date().toISOString().split('T')[0],
+        },
+        ranking: []
+      };
+    } catch (error: any) {
+      console.error('Erro ao buscar ranking:', error);
+      return {
+        periodo: {
+          inicio: dataInicio || new Date().toISOString().split('T')[0],
+          fim: dataFim || new Date().toISOString().split('T')[0],
+        },
+        ranking: []
+      };
+    }
   }
 
   async gerarRelatorioAtrasos(dataInicio: string, dataFim: string) {
