@@ -140,6 +140,10 @@ app.listen(PORT, () => {
   console.log(`   - POST   /api/usuarios`);
   console.log(`   - PUT    /api/usuarios/:id`);
   console.log(`   - DELETE /api/usuarios/:id`);
+  console.log(`   - GET    /api/seguranca/estatisticas`);
+  console.log(`   - GET    /api/seguranca/usuarios`);
+  console.log(`   - GET    /api/seguranca/logs-acesso`);
+  console.log(`   - GET    /api/seguranca/logs-alteracoes`);
   console.log(`\n✨ Pronto para receber requisições!\n`);
 });
 
