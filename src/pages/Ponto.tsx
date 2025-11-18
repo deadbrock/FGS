@@ -51,6 +51,8 @@ export const Ponto: React.FC = () => {
   useNavigationLog();
 
   const [tabAtual, setTabAtual] = useState(0);
+  const [dataInicio, setDataInicio] = useState('2024-10-01');
+  const [dataFim, setDataFim] = useState('2024-10-31');
   const [estatisticas, setEstatisticas] = useState<EstatisticasPonto>({
     hoje: {
       presentes: 0,
@@ -72,14 +74,12 @@ export const Ponto: React.FC = () => {
   const [resumosDias, setResumosDias] = useState<ResumoDia[]>([]);
   const [ranking, setRanking] = useState<RankingPontualidade>({
     periodo: {
-      inicio: dataInicio,
-      fim: dataFim,
+      inicio: '2024-10-01',
+      fim: '2024-10-31',
     },
     ranking: []
   });
   const [relatorioAtrasos, setRelatorioAtrasos] = useState<RelatorioAtrasos | null>(null);
-  const [dataInicio, setDataInicio] = useState('2024-10-01');
-  const [dataFim, setDataFim] = useState('2024-10-31');
 
   useEffect(() => {
     carregarEstatisticas();
