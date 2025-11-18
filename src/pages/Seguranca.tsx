@@ -51,6 +51,8 @@ import PeopleIcon from '@mui/icons-material/People';
 import SecurityIcon from '@mui/icons-material/Security';
 import WarningIcon from '@mui/icons-material/Warning';
 import HistoryIcon from '@mui/icons-material/History';
+import segurancaService from '../services/segurancaService';
+import { CircularProgress } from '@mui/material';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -67,273 +69,29 @@ function TabPanel(props: TabPanelProps) {
   );
 }
 
-// Mock data
-const estatisticasMock: EstatisticasSeguranca = {
-  totalUsuarios: 15,
-  usuariosAtivos: 12,
-  usuariosInativos: 2,
-  usuariosBloqueados: 1,
-  acessosHoje: 48,
-  tentativasFalhasHoje: 3,
-  acessosUltimos7Dias: [
-    { data: '2024-10-13', sucessos: 45, falhas: 2 },
-    { data: '2024-10-14', sucessos: 52, falhas: 1 },
-    { data: '2024-10-15', sucessos: 48, falhas: 3 },
-  ],
-  totalLogsAcesso: 1250,
-  totalLogsAlteracao: 3840,
-  usuariosPorPerfil: [
-    { perfil: UserRole.ADMINISTRADOR, quantidade: 2, percentual: 13.3 },
-    { perfil: UserRole.RH, quantidade: 3, percentual: 20 },
-    { perfil: UserRole.GESTOR, quantidade: 5, percentual: 33.3 },
-    { perfil: UserRole.COLABORADOR, quantidade: 5, percentual: 33.3 },
-  ],
-  alertas: [
-    {
-      id: '1',
-      tipo: 'AVISO',
-      titulo: 'Tentativas de Login Falhadas',
-      mensagem: '3 tentativas falhadas detectadas hoje',
-      dataHora: new Date().toISOString(),
-    },
-  ],
-};
-
-const usuariosMock: Usuario[] = [
-  {
-    id: '1',
-    nome: 'Admin Sistema',
-    email: 'admin@fgs.com',
-    role: UserRole.ADMINISTRADOR,
-    status: StatusUsuario.ATIVO,
-    departamento: 'TI',
-    cargo: 'Administrador',
-    ultimoAcesso: '2024-10-19T10:30:00',
-    tentativasLogin: 0,
-    senhaExpirada: false,
-    permissoesCustomizadas: [],
-    criadoPor: 'Sistema',
-    criadoEm: '2024-01-01T00:00:00',
-  },
-];
-
-const logsAcessoMock: LogAcesso[] = [
-  {
-    id: '1',
-    usuarioId: '1',
-    usuarioNome: 'Admin Sistema',
-    email: 'admin@fgs.com',
-    role: UserRole.ADMINISTRADOR,
-    dataHora: '2024-10-19T10:30:00',
-    ip: '192.168.1.100',
-    navegador: 'Chrome 118',
-    dispositivo: 'Desktop',
-    sucesso: true,
-    acao: 'LOGIN',
-  },
-  {
-    id: '2',
-    usuarioId: '2',
-    usuarioNome: 'João Silva',
-    email: 'joao@fgs.com',
-    role: UserRole.RH,
-    dataHora: '2024-10-19T09:15:00',
-    ip: '192.168.1.105',
-    navegador: 'Firefox 119',
-    dispositivo: 'Desktop',
-    sucesso: false,
-    motivoFalha: 'Senha incorreta',
-    acao: 'TENTATIVA_FALHA',
-  },
-];
-
-const logsAlteracaoMock: LogAlteracao[] = [
-  {
-    id: '1',
-    usuarioId: '1',
-    usuarioNome: 'Admin Sistema',
-    role: UserRole.ADMINISTRADOR,
-    dataHora: '2024-11-11T14:30:00',
-    modulo: 'Prontuário',
-    acao: TipoAcao.EDITAR,
-    entidade: 'Colaborador',
-    entidadeId: 'COL-001',
-    camposAlterados: [
-      { campo: 'Salário', valorAnterior: 'R$ 3.500,00', valorNovo: 'R$ 4.200,00' },
-      { campo: 'Cargo', valorAnterior: 'Assistente', valorNovo: 'Analista Jr' },
-    ],
-    ip: '192.168.1.100',
-    navegador: 'Chrome 118',
-  },
-  {
-    id: '2',
-    usuarioId: '2',
-    usuarioNome: 'Maria RH',
-    role: UserRole.RH,
-    dataHora: '2024-11-11T13:15:00',
-    modulo: 'Benefícios',
-    acao: TipoAcao.CRIAR,
-    entidade: 'Benefício',
-    entidadeId: 'BEN-045',
-    camposAlterados: [
-      { campo: 'Nome', valorAnterior: '', valorNovo: 'Vale Alimentação Premium' },
-      { campo: 'Valor', valorAnterior: '', valorNovo: 'R$ 800,00' },
-      { campo: 'Tipo', valorAnterior: '', valorNovo: 'Mensal' },
-    ],
-    ip: '192.168.1.105',
-    navegador: 'Firefox 119',
-  },
-  {
-    id: '3',
-    usuarioId: '1',
-    usuarioNome: 'Admin Sistema',
-    role: UserRole.ADMINISTRADOR,
-    dataHora: '2024-11-11T11:45:00',
-    modulo: 'Segurança',
-    acao: TipoAcao.EDITAR,
-    entidade: 'Usuário',
-    entidadeId: 'USR-015',
-    camposAlterados: [
-      { campo: 'Perfil', valorAnterior: 'COLABORADOR', valorNovo: 'GESTOR' },
-      { campo: 'Status', valorAnterior: 'PENDENTE', valorNovo: 'ATIVO' },
-    ],
-    ip: '192.168.1.100',
-    navegador: 'Chrome 118',
-  },
-  {
-    id: '4',
-    usuarioId: '3',
-    usuarioNome: 'João Gestor',
-    role: UserRole.GESTOR,
-    dataHora: '2024-11-11T10:20:00',
-    modulo: 'Treinamentos',
-    acao: TipoAcao.CRIAR,
-    entidade: 'Treinamento',
-    entidadeId: 'TRE-123',
-    camposAlterados: [
-      { campo: 'Título', valorAnterior: '', valorNovo: 'Segurança no Trabalho 2024' },
-      { campo: 'Data', valorAnterior: '', valorNovo: '15/11/2024' },
-      { campo: 'Participantes', valorAnterior: '', valorNovo: '25' },
-    ],
-    ip: '192.168.1.110',
-    navegador: 'Edge 119',
-  },
-  {
-    id: '5',
-    usuarioId: '2',
-    usuarioNome: 'Maria RH',
-    role: UserRole.RH,
-    dataHora: '2024-11-11T09:30:00',
-    modulo: 'Ponto',
-    acao: TipoAcao.EDITAR,
-    entidade: 'Registro de Ponto',
-    entidadeId: 'PNT-789',
-    camposAlterados: [
-      { campo: 'Hora Entrada', valorAnterior: '09:15', valorNovo: '08:00' },
-      { campo: 'Justificativa', valorAnterior: '', valorNovo: 'Ajuste aprovado pelo gestor' },
-    ],
-    ip: '192.168.1.105',
-    navegador: 'Firefox 119',
-  },
-  {
-    id: '6',
-    usuarioId: '1',
-    usuarioNome: 'Admin Sistema',
-    role: UserRole.ADMINISTRADOR,
-    dataHora: '2024-11-10T16:45:00',
-    modulo: 'Usuários',
-    acao: TipoAcao.EXCLUIR,
-    entidade: 'Usuário',
-    entidadeId: 'USR-099',
-    camposAlterados: [
-      { campo: 'Nome', valorAnterior: 'Carlos Teste', valorNovo: '[EXCLUÍDO]' },
-      { campo: 'Email', valorAnterior: 'carlos@teste.com', valorNovo: '[EXCLUÍDO]' },
-      { campo: 'Motivo', valorAnterior: '', valorNovo: 'Desligamento da empresa' },
-    ],
-    ip: '192.168.1.100',
-    navegador: 'Chrome 118',
-  },
-  {
-    id: '7',
-    usuarioId: '2',
-    usuarioNome: 'Maria RH',
-    role: UserRole.RH,
-    dataHora: '2024-11-10T15:20:00',
-    modulo: 'Prontuário',
-    acao: TipoAcao.CRIAR,
-    entidade: 'Evento Histórico',
-    entidadeId: 'EVT-234',
-    camposAlterados: [
-      { campo: 'Tipo', valorAnterior: '', valorNovo: 'ADVERTÊNCIA' },
-      { campo: 'Colaborador', valorAnterior: '', valorNovo: 'João Silva' },
-      { campo: 'Motivo', valorAnterior: '', valorNovo: 'Atraso recorrente' },
-    ],
-    ip: '192.168.1.105',
-    navegador: 'Firefox 119',
-  },
-  {
-    id: '8',
-    usuarioId: '3',
-    usuarioNome: 'João Gestor',
-    role: UserRole.GESTOR,
-    dataHora: '2024-11-10T14:10:00',
-    modulo: 'Comunicação',
-    acao: TipoAcao.CRIAR,
-    entidade: 'Comunicado',
-    entidadeId: 'COM-056',
-    camposAlterados: [
-      { campo: 'Título', valorAnterior: '', valorNovo: 'Reunião Geral - Novembro' },
-      { campo: 'Destinatários', valorAnterior: '', valorNovo: 'Todos os colaboradores' },
-      { campo: 'Prioridade', valorAnterior: '', valorNovo: 'Alta' },
-    ],
-    ip: '192.168.1.110',
-    navegador: 'Edge 119',
-  },
-  {
-    id: '9',
-    usuarioId: '1',
-    usuarioNome: 'Admin Sistema',
-    role: UserRole.ADMINISTRADOR,
-    dataHora: '2024-11-10T11:30:00',
-    modulo: 'Configurações',
-    acao: TipoAcao.EDITAR,
-    entidade: 'Configuração Sistema',
-    entidadeId: 'CFG-001',
-    camposAlterados: [
-      { campo: 'Backup Automático', valorAnterior: false, valorNovo: true },
-      { campo: 'Intervalo Backup', valorAnterior: '24h', valorNovo: '12h' },
-    ],
-    ip: '192.168.1.100',
-    navegador: 'Chrome 118',
-  },
-  {
-    id: '10',
-    usuarioId: '2',
-    usuarioNome: 'Maria RH',
-    role: UserRole.RH,
-    dataHora: '2024-11-10T10:00:00',
-    modulo: 'Relatórios',
-    acao: TipoAcao.EXPORTAR,
-    entidade: 'Relatório',
-    entidadeId: 'REL-089',
-    camposAlterados: [
-      { campo: 'Tipo', valorAnterior: '', valorNovo: 'Folha de Pagamento' },
-      { campo: 'Período', valorAnterior: '', valorNovo: 'Outubro 2024' },
-      { campo: 'Formato', valorAnterior: '', valorNovo: 'PDF' },
-    ],
-    ip: '192.168.1.105',
-    navegador: 'Firefox 119',
-  },
-];
 
 export const Seguranca: React.FC = () => {
   useNavigationLog();
   
   const [tabAtual, setTabAtual] = useState(0);
-  const [estatisticas] = useState<EstatisticasSeguranca>(estatisticasMock);
-  const [usuarios] = useState<Usuario[]>(usuariosMock);
-  const [logsAcesso] = useState<LogAcesso[]>(logsAcessoMock);
-  const [logsAlteracao, setLogsAlteracao] = useState<LogAlteracao[]>(logsAlteracaoMock);
+  const [estatisticas, setEstatisticas] = useState<EstatisticasSeguranca>({
+    totalUsuarios: 0,
+    usuariosAtivos: 0,
+    usuariosInativos: 0,
+    usuariosBloqueados: 0,
+    acessosHoje: 0,
+    tentativasFalhasHoje: 0,
+    acessosUltimos7Dias: [],
+    totalLogsAcesso: 0,
+    totalLogsAlteracao: 0,
+    usuariosPorPerfil: [],
+    alertas: [],
+  });
+  const [usuarios, setUsuarios] = useState<Usuario[]>([]);
+  const [logsAcesso, setLogsAcesso] = useState<LogAcesso[]>([]);
+  const [logsAlteracao, setLogsAlteracao] = useState<LogAlteracao[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [loadingLogs, setLoadingLogs] = useState(false);
   
   // Estados para filtros e busca de Logs de Alterações
   const [buscaLog, setBuscaLog] = useState('');
@@ -341,6 +99,71 @@ export const Seguranca: React.FC = () => {
   const [filtroAcao, setFiltroAcao] = useState('TODOS');
   const [logExpandido, setLogExpandido] = useState<string | null>(null);
   const [detalhesDialog, setDetalhesDialog] = useState<LogAlteracao | null>(null);
+
+  // Carregar dados iniciais
+  useEffect(() => {
+    carregarDados();
+  }, []);
+
+  // Carregar dados quando mudar de aba
+  useEffect(() => {
+    if (tabAtual === 1) {
+      carregarUsuarios();
+    } else if (tabAtual === 2) {
+      carregarLogsAcesso();
+    } else if (tabAtual === 3) {
+      carregarLogsAlteracao();
+    }
+  }, [tabAtual]);
+
+  const carregarDados = async () => {
+    try {
+      setLoading(true);
+      const [estatisticasData, usuariosData] = await Promise.all([
+        segurancaService.getEstatisticas(),
+        segurancaService.getUsuarios(),
+      ]);
+      setEstatisticas(estatisticasData);
+      setUsuarios(usuariosData);
+    } catch (error) {
+      console.error('Erro ao carregar dados:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const carregarUsuarios = async () => {
+    try {
+      const usuariosData = await segurancaService.getUsuarios();
+      setUsuarios(usuariosData);
+    } catch (error) {
+      console.error('Erro ao carregar usuários:', error);
+    }
+  };
+
+  const carregarLogsAcesso = async () => {
+    try {
+      setLoadingLogs(true);
+      const logs = await segurancaService.getLogsAcesso();
+      setLogsAcesso(logs);
+    } catch (error) {
+      console.error('Erro ao carregar logs de acesso:', error);
+    } finally {
+      setLoadingLogs(false);
+    }
+  };
+
+  const carregarLogsAlteracao = async () => {
+    try {
+      setLoadingLogs(true);
+      const logs = await segurancaService.getLogsAlteracao();
+      setLogsAlteracao(logs);
+    } catch (error) {
+      console.error('Erro ao carregar logs de alterações:', error);
+    } finally {
+      setLoadingLogs(false);
+    }
+  };
 
   const getStatusColor = (status: StatusUsuario): string => {
     const cores: Record<StatusUsuario, string> = {
@@ -388,8 +211,8 @@ export const Seguranca: React.FC = () => {
     return matchBusca && matchModulo && matchAcao;
   });
 
-  // Obter módulos únicos
-  const modulosUnicos = ['TODOS', ...Array.from(new Set(logsAlteracaoMock.map(l => l.modulo)))];
+  // Obter módulos únicos dos logs reais
+  const modulosUnicos = ['TODOS', ...Array.from(new Set(logsAlteracao.map(l => l.modulo)))];
 
   // Exportar logs
   const handleExportarLogs = () => {
@@ -414,10 +237,15 @@ export const Seguranca: React.FC = () => {
     link.click();
   };
 
-  // Atualizar logs (simular)
-  const handleAtualizarLogs = () => {
-    setLogsAlteracao([...logsAlteracaoMock]);
-    alert('Logs atualizados com sucesso!');
+  // Atualizar logs
+  const handleAtualizarLogs = async () => {
+    try {
+      await carregarLogsAlteracao();
+      alert('Logs atualizados com sucesso!');
+    } catch (error) {
+      console.error('Erro ao atualizar logs:', error);
+      alert('Erro ao atualizar logs. Tente novamente.');
+    }
   };
 
   return (
@@ -444,6 +272,12 @@ export const Seguranca: React.FC = () => {
         {/* Aba 0: Dashboard */}
         <TabPanel value={tabAtual} index={0}>
           <Box p={3}>
+            {loading ? (
+              <Box display="flex" justifyContent="center" alignItems="center" minHeight="400px">
+                <CircularProgress />
+              </Box>
+            ) : (
+              <>
             <Grid container spacing={3} mb={4}>
               <Grid item xs={12} sm={6} md={3}>
                 <StatCard
@@ -542,6 +376,8 @@ export const Seguranca: React.FC = () => {
                 </Card>
               </Grid>
             </Grid>
+              </>
+            )}
           </Box>
         </TabPanel>
 
@@ -608,7 +444,12 @@ export const Seguranca: React.FC = () => {
               Logs de Acesso
             </Typography>
 
-            <TableContainer component={Paper} variant="outlined">
+            {loadingLogs ? (
+              <Box display="flex" justifyContent="center" alignItems="center" minHeight="200px">
+                <CircularProgress />
+              </Box>
+            ) : (
+              <TableContainer component={Paper} variant="outlined">
               <Table>
                 <TableHead>
                   <TableRow>
@@ -642,6 +483,7 @@ export const Seguranca: React.FC = () => {
                 </TableBody>
               </Table>
             </TableContainer>
+            )}
           </Box>
         </TabPanel>
 
@@ -734,7 +576,12 @@ export const Seguranca: React.FC = () => {
             </Grid>
 
             {/* Tabela de Logs */}
-            <TableContainer component={Paper} variant="outlined">
+            {loadingLogs ? (
+              <Box display="flex" justifyContent="center" alignItems="center" minHeight="200px">
+                <CircularProgress />
+              </Box>
+            ) : (
+              <TableContainer component={Paper} variant="outlined">
               <Table>
                 <TableHead>
                   <TableRow>

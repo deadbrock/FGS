@@ -81,6 +81,7 @@ import regionaisRoutes from './routes/regionaisRoutes.js';
 import pontoRoutes from './routes/pontoRoutes.js';
 import relatoriosRoutes from './routes/relatoriosRoutes.js';
 import documentosRoutes from './routes/documentosRoutes.js';
+import segurancaRoutes from './routes/segurancaRoutes.js';
 
 app.use('/api/usuarios', usuariosRoutes);
 app.use('/api/auth', authRoutes);
@@ -91,6 +92,7 @@ app.use('/api/regionais', regionaisRoutes);
 app.use('/api/ponto', pontoRoutes);
 app.use('/api/relatorios', relatoriosRoutes);
 app.use('/api/documentos', documentosRoutes);
+app.use('/api/seguranca', segurancaRoutes);
 
 // Rota de health check
 app.get('/health', (req, res) => {
