@@ -264,24 +264,50 @@ class BeneficiosService {
       const response = await this.api.get('/estatisticas');
       const data = response.data.data || {};
       
+      console.log('📊 Dados recebidos do backend:', data);
+      
+      // Calcular custos do backend
+      const custoTotal = parseFloat(data.custoTotal?.total || '0') || 0;
+      const custoCoparticipacao = parseFloat(data.custoTotal?.total_coparticipacao || '0') || 0;
+      const custoMensalEmpresa = custoTotal - custoCoparticipacao; // O que a empresa paga (total - coparticipação)
+      const custoMensalColaborador = custoCoparticipacao; // O que o colaborador paga
+      const custoMensalTotal = custoTotal; // Total geral
+      
+      // Calcular total de colaboradores atendidos (contar colaboradores únicos com benefícios ativos)
+      // Como não temos isso no backend, vamos usar uma estimativa baseada nos benefícios
+      // ou buscar separadamente se necessário
+      const totalColaboradoresAtendidos = data.totalAtivos || 0; // Por enquanto, usar total de benefícios como estimativa
+      
+      // Calcular percentuais para distribuição por tipo
+      const porTipoArray = Array.isArray(data.porTipo) ? data.porTipo : [];
+      const totalGeral = porTipoArray.reduce((sum: number, item: any) => sum + (parseInt(item.total) || 0), 0);
+      
       // Mapear estrutura do backend para estrutura esperada pelo frontend
-      return {
-        totalAtivos: data.totalBeneficiosAtivos || data.totalAtivos || 0,
-        totalInativos: data.totalInativos || 0,
-        totalColaboradoresAtendidos: data.totalColaboradoresAtendidos || 0,
-        custoMensalEmpresa: data.custoMensalEmpresa || data.custoTotalMensal || 0,
-        custoMensalColaborador: data.custoMensalColaborador || 0,
-        custoMensalTotal: data.custoMensalTotal || data.custoTotalMensal || 0,
-        distribuicaoPorTipo: Array.isArray(data.porTipo) ? data.porTipo.map((item: any) => ({
-          tipo: item.tipo || item.nome,
-          nome: item.nome || item.tipo || 'Outros',
-          quantidade: item.total || item.quantidade || 0,
-          percentual: item.percentual || 0,
-        })) : [],
+      const estatisticas = {
+        totalAtivos: data.totalAtivos || 0,
+        totalInativos: 0, // Não temos no backend ainda
+        totalColaboradoresAtendidos: totalColaboradoresAtendidos,
+        custoMensalEmpresa: custoMensalEmpresa,
+        custoMensalColaborador: custoMensalColaborador,
+        custoMensalTotal: custoMensalTotal,
+        distribuicaoPorTipo: porTipoArray.map((item: any) => {
+          const quantidade = parseInt(item.total) || 0;
+          const percentual = totalGeral > 0 ? (quantidade / totalGeral) * 100 : 0;
+          return {
+            tipo: item.nome || 'Outros',
+            nome: item.nome || 'Outros',
+            quantidade: quantidade,
+            percentual: percentual,
+          };
+        }),
         evolucaoCustos: Array.isArray(data.evolucaoCustos) ? data.evolucaoCustos : [],
         beneficiosProximosVencimento: Array.isArray(data.beneficiosProximosVencimento) ? data.beneficiosProximosVencimento : [],
         beneficiosSemComprovacao: Array.isArray(data.beneficiosSemComprovacao) ? data.beneficiosSemComprovacao : [],
       };
+      
+      console.log('✅ Estatísticas mapeadas:', estatisticas);
+      
+      return estatisticas;
     } catch (error: any) {
       console.error('Erro ao buscar estatísticas de benefícios:', error);
       // Retornar estrutura vazia ao invés de lançar erro
