@@ -129,9 +129,9 @@ export const Beneficios: React.FC = () => {
   const handleSaveBeneficio = async (beneficio: Partial<Beneficio>) => {
     try {
       if (beneficioEdit) {
-        await beneficiosService.atualizarBeneficio(beneficioEdit.id, beneficio);
+        await beneficiosService.updateTipo(beneficioEdit.id, beneficio);
       } else {
-        await beneficiosService.criarBeneficio(beneficio);
+        await beneficiosService.createTipo(beneficio);
       }
       setDialogOpen(false);
       setBeneficioEdit(undefined);
@@ -149,7 +149,7 @@ export const Beneficios: React.FC = () => {
     }
 
     try {
-      await beneficiosService.excluirBeneficio(id);
+      await beneficiosService.deleteTipo(id);
       await carregarBeneficios();
       await carregarEstatisticas();
     } catch (error) {
