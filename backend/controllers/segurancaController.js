@@ -44,6 +44,10 @@ export const getEstatisticas = async (req, res) => {
       acessos = parseInt(acessosHoje.rows[0]?.total || '0');
     } catch (err) {
       console.error('Erro ao buscar acessos hoje:', err.message);
+      // Se a tabela não existir, manter valores padrão (0)
+      if (err.code === '42P01' || err.message.includes('does not exist')) {
+        acessos = 0;
+      }
     }
 
     // Tentativas falhas hoje
@@ -56,6 +60,10 @@ export const getEstatisticas = async (req, res) => {
       falhas = parseInt(tentativasFalhas.rows[0]?.total || '0');
     } catch (err) {
       console.error('Erro ao buscar tentativas falhas:', err.message);
+      // Se a tabela não existir, manter valores padrão (0)
+      if (err.code === '42P01' || err.message.includes('does not exist')) {
+        falhas = 0;
+      }
     }
 
     // Acessos últimos 7 dias
@@ -78,6 +86,10 @@ export const getEstatisticas = async (req, res) => {
       }));
     } catch (err) {
       console.error('Erro ao buscar acessos últimos 7 dias:', err.message);
+      // Se a tabela não existir, manter array vazio
+      if (err.code === '42P01' || err.message.includes('does not exist')) {
+        acessosUltimos7Dias = [];
+      }
     }
 
     // Total de logs de acesso
@@ -89,6 +101,10 @@ export const getEstatisticas = async (req, res) => {
       totalAcesso = parseInt(totalLogsAcesso.rows[0]?.total || '0');
     } catch (err) {
       console.error('Erro ao buscar total de logs de acesso:', err.message);
+      // Se a tabela não existir, manter valor padrão (0)
+      if (err.code === '42P01' || err.message.includes('does not exist')) {
+        totalAcesso = 0;
+      }
     }
 
     // Total de logs de alterações
@@ -100,6 +116,10 @@ export const getEstatisticas = async (req, res) => {
       totalAlteracao = parseInt(totalLogsAlteracao.rows[0]?.total || '0');
     } catch (err) {
       console.error('Erro ao buscar total de logs de alterações:', err.message);
+      // Se a tabela não existir, manter valor padrão (0)
+      if (err.code === '42P01' || err.message.includes('does not exist')) {
+        totalAlteracao = 0;
+      }
     }
 
     // Usuários por perfil
@@ -251,8 +271,8 @@ export const getLogsAcesso = async (req, res) => {
       result = await pool.query(query, params);
     } catch (err) {
       console.error('Erro na query de logs de acesso:', err.message);
-      // Se a tabela não existir, retornar array vazio
-      if (err.message.includes('does not exist') || err.message.includes('não existe')) {
+      // Se a tabela não existir (código 42P01), retornar array vazio
+      if (err.code === '42P01' || err.message.includes('does not exist') || err.message.includes('não existe')) {
         return res.json({
           success: true,
           data: [],
@@ -340,8 +360,8 @@ export const getLogsAlteracao = async (req, res) => {
       result = await pool.query(query, params);
     } catch (err) {
       console.error('Erro na query de logs de alterações:', err.message);
-      // Se a tabela não existir, retornar array vazio
-      if (err.message.includes('does not exist') || err.message.includes('não existe')) {
+      // Se a tabela não existir (código 42P01), retornar array vazio
+      if (err.code === '42P01' || err.message.includes('does not exist') || err.message.includes('não existe')) {
         return res.json({
           success: true,
           data: [],
