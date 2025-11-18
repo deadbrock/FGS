@@ -45,7 +45,7 @@ export const Relatorios: React.FC = () => {
     }
   };
 
-  const handleExportarPDF = () => {
+  const handleExportarPDF = async () => {
     if (!dashboard || !dashboard.indicadoresPrincipais) return;
     
     const indicadores = dashboard.indicadoresPrincipais;
@@ -60,7 +60,12 @@ export const Relatorios: React.FC = () => {
       ],
     };
     
-    exportarPDF('Relatório Geral - FGS', dados, 'relatorio_geral');
+    try {
+      await exportarPDF('Relatório Geral - FGS', dados, 'relatorio_geral');
+    } catch (error) {
+      console.error('Erro ao exportar PDF:', error);
+      alert('Erro ao exportar PDF. Tente novamente.');
+    }
   };
 
   const handleExportarExcel = () => {
