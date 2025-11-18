@@ -73,10 +73,35 @@ class BeneficiosService {
 
   async createTipo(tipo: Partial<TipoBeneficio> | any): Promise<TipoBeneficio> {
     try {
+      // Função para mapear TipoBeneficio enum para categoria do banco
+      const mapearCategoria = (tipoBeneficio: string): string => {
+        const mapeamento: Record<string, string> = {
+          'VALE_TRANSPORTE': 'TRANSPORTE',
+          'VALE_COMBUSTIVEL': 'TRANSPORTE',
+          'VALE_REFEICAO': 'ALIMENTACAO',
+          'VALE_ALIMENTACAO': 'ALIMENTACAO',
+          'PLANO_SAUDE': 'SAUDE',
+          'PLANO_ODONTOLOGICO': 'SAUDE',
+          'SEGURO_VIDA': 'SAUDE',
+          'AUXILIO_EDUCACAO': 'EDUCACAO',
+          'AUXILIO_CRECHE': 'EDUCACAO',
+          'PARTICIPACAO_LUCROS': 'OUTROS',
+          'BONUS': 'OUTROS',
+          'INCENTIVO_PERFORMANCE': 'OUTROS',
+          'GYM_PASS': 'OUTROS',
+          'OUTROS': 'OUTROS',
+        };
+        return mapeamento[tipoBeneficio] || 'OUTROS';
+      };
+
+      // Obter categoria do tipo ou usar a categoria fornecida
+      const tipoBeneficio = tipo.tipo || tipo.categoria || '';
+      const categoria = tipo.categoria || mapearCategoria(tipoBeneficio);
+
       // Mapear campos do frontend (Beneficio) para campos do backend (TipoBeneficio)
       const dadosBackend: any = {
         nome: tipo.nome || tipo.tipo || '',
-        categoria: tipo.tipo || tipo.categoria || 'OUTROS',
+        categoria: categoria,
         descricao: tipo.descricao || '',
         valor_padrao: tipo.valorFixo || tipo.custoEmpresa || tipo.valor_padrao || 0,
         coparticipacao: tipo.custoColaborador ? tipo.custoColaborador > 0 : false,
@@ -93,22 +118,54 @@ class BeneficiosService {
         throw new Error('Categoria do benefício é obrigatória');
       }
 
+      console.log('📤 Enviando dados para backend:', dadosBackend);
+
       const response = await this.api.post('/tipos', dadosBackend);
       return response.data.data;
     } catch (error: any) {
       console.error('Erro ao criar tipo de benefício:', error);
-      throw new Error(error.response?.data?.error || error.message || 'Erro ao criar tipo de benefício');
+      console.error('Detalhes do erro:', error.response?.data);
+      throw new Error(error.response?.data?.error || error.response?.data?.message || error.message || 'Erro ao criar tipo de benefício');
     }
   }
 
   async updateTipo(id: string, tipo: Partial<TipoBeneficio> | any): Promise<TipoBeneficio> {
     try {
+      // Função para mapear TipoBeneficio enum para categoria do banco
+      const mapearCategoria = (tipoBeneficio: string): string => {
+        const mapeamento: Record<string, string> = {
+          'VALE_TRANSPORTE': 'TRANSPORTE',
+          'VALE_COMBUSTIVEL': 'TRANSPORTE',
+          'VALE_REFEICAO': 'ALIMENTACAO',
+          'VALE_ALIMENTACAO': 'ALIMENTACAO',
+          'PLANO_SAUDE': 'SAUDE',
+          'PLANO_ODONTOLOGICO': 'SAUDE',
+          'SEGURO_VIDA': 'SAUDE',
+          'AUXILIO_EDUCACAO': 'EDUCACAO',
+          'AUXILIO_CRECHE': 'EDUCACAO',
+          'PARTICIPACAO_LUCROS': 'OUTROS',
+          'BONUS': 'OUTROS',
+          'INCENTIVO_PERFORMANCE': 'OUTROS',
+          'GYM_PASS': 'OUTROS',
+          'OUTROS': 'OUTROS',
+        };
+        return mapeamento[tipoBeneficio] || 'OUTROS';
+      };
+
       // Mapear campos do frontend (Beneficio) para campos do backend (TipoBeneficio)
       const dadosBackend: any = {};
       
       if (tipo.nome !== undefined) dadosBackend.nome = tipo.nome;
-      if (tipo.tipo !== undefined) dadosBackend.categoria = tipo.tipo;
-      if (tipo.categoria !== undefined) dadosBackend.categoria = tipo.categoria;
+      if (tipo.tipo !== undefined) {
+        dadosBackend.categoria = mapearCategoria(tipo.tipo);
+      }
+      if (tipo.categoria !== undefined) {
+        // Se já é uma categoria válida, usar diretamente, senão mapear
+        const categoriasValidas = ['TRANSPORTE', 'ALIMENTACAO', 'SAUDE', 'EDUCACAO', 'OUTROS'];
+        dadosBackend.categoria = categoriasValidas.includes(tipo.categoria) 
+          ? tipo.categoria 
+          : mapearCategoria(tipo.categoria);
+      }
       if (tipo.descricao !== undefined) dadosBackend.descricao = tipo.descricao;
       if (tipo.valorFixo !== undefined) dadosBackend.valor_padrao = tipo.valorFixo;
       if (tipo.custoEmpresa !== undefined) dadosBackend.valor_padrao = tipo.custoEmpresa;
@@ -123,7 +180,8 @@ class BeneficiosService {
       return response.data.data;
     } catch (error: any) {
       console.error('Erro ao atualizar tipo de benefício:', error);
-      throw new Error(error.response?.data?.error || error.message || 'Erro ao atualizar tipo de benefício');
+      console.error('Detalhes do erro:', error.response?.data);
+      throw new Error(error.response?.data?.error || error.response?.data?.message || error.message || 'Erro ao atualizar tipo de benefício');
     }
   }
 
