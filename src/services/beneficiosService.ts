@@ -94,9 +94,21 @@ class BeneficiosService {
         return mapeamento[tipoBeneficio] || 'OUTROS';
       };
 
-      // Obter categoria do tipo ou usar a categoria fornecida
+      // Obter tipo de benefício (pode vir como tipo ou categoria)
       const tipoBeneficio = tipo.tipo || tipo.categoria || '';
-      const categoria = tipo.categoria || mapearCategoria(tipoBeneficio);
+      
+      // SEMPRE mapear para categoria válida do banco
+      // Se tipo.categoria já for uma categoria válida, usar diretamente
+      const categoriasValidas = ['TRANSPORTE', 'ALIMENTACAO', 'SAUDE', 'EDUCACAO', 'OUTROS'];
+      let categoria: string;
+      
+      if (tipo.categoria && categoriasValidas.includes(tipo.categoria)) {
+        // Já é uma categoria válida
+        categoria = tipo.categoria;
+      } else {
+        // Precisa mapear do enum para categoria
+        categoria = mapearCategoria(tipoBeneficio);
+      }
 
       // Mapear campos do frontend (Beneficio) para campos do backend (TipoBeneficio)
       const dadosBackend: any = {
