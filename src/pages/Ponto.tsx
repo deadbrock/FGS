@@ -202,7 +202,6 @@ export const Ponto: React.FC = () => {
                         <Typography variant="h6" mb={2}>
                           Estatísticas do Mês
                         </Typography>
-                        {estatisticas.mes && (
                         <Box display="flex" flexDirection="column" gap={2}>
                           <Box>
                             <Typography variant="caption" color="text.secondary">
@@ -237,19 +236,16 @@ export const Ponto: React.FC = () => {
                             </Typography>
                           </Box>
                         </Box>
-                        )}
                       </Box>
                     </Card>
                   </Grid>
                 </Grid>
 
-                <Box mt={3}>
-                  <Alert severity="info">
-                    <strong>Regra de Atrasos:</strong> Atrasos menores que 15 minutos não são contabilizados
-                  </Alert>
-                </Box>
-              </>
-            )}
+            <Box mt={3}>
+              <Alert severity="info">
+                <strong>Regra de Atrasos:</strong> Atrasos menores que 15 minutos não são contabilizados
+              </Alert>
+            </Box>
           </Box>
         </TabPanel>
 
