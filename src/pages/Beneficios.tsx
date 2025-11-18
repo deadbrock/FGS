@@ -110,10 +110,25 @@ export const Beneficios: React.FC = () => {
 
   const carregarHistorico = async () => {
     try {
-      const dados = await beneficiosService.buscarHistorico();
-      setHistorico(dados);
+      // buscarHistorico precisa de colaboradorId, mas como não temos, retornamos array vazio
+      // ou podemos buscar todos os benefícios de colaboradores
+      const dados = await beneficiosService.getAll();
+      // Converter BeneficioColaborador[] para HistoricoBeneficio[]
+      setHistorico(dados.map((b: any) => ({
+        id: b.id,
+        tipoAlteracao: 'CONCESSAO',
+        dataAlteracao: b.data_inicio || b.created_at,
+        beneficioNome: b.tipo_beneficio_nome || 'Benefício',
+        colaboradorNome: b.colaborador_nome || 'N/A',
+        valorAnterior: undefined,
+        valorNovo: b.valor,
+        motivo: 'Concessão inicial',
+        observacoes: b.observacoes,
+        alteradoPor: 'Sistema',
+      })));
     } catch (error) {
       console.error('Erro:', error);
+      setHistorico([]);
     }
   };
 
