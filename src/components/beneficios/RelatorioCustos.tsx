@@ -134,7 +134,16 @@ export const RelatorioCustos: React.FC<RelatorioCustosProps> = ({ relatorio }) =
                       </Box>
                     </TableCell>
                   </TableRow>
-                ))}
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell colSpan={6} align="center">
+                      <Typography variant="body2" color="text.secondary">
+                        Nenhum dado disponível
+                      </Typography>
+                    </TableCell>
+                  </TableRow>
+                )}
               </TableBody>
             </Table>
           </TableContainer>
