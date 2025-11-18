@@ -22,6 +22,11 @@ interface RelatorioCustosProps {
 }
 
 export const RelatorioCustos: React.FC<RelatorioCustosProps> = ({ relatorio }) => {
+  // Garantir que arrays existam
+  const porTipo = Array.isArray(relatorio?.porTipo) ? relatorio.porTipo : [];
+  const porDepartamento = Array.isArray(relatorio?.porDepartamento) ? relatorio.porDepartamento : [];
+  const topColaboradores = Array.isArray(relatorio?.topColaboradores) ? relatorio.topColaboradores : [];
+
   return (
     <Box>
       {/* Cards de Resumo */}
@@ -99,7 +104,8 @@ export const RelatorioCustos: React.FC<RelatorioCustosProps> = ({ relatorio }) =
                 </TableRow>
               </TableHead>
               <TableBody>
-                {relatorio.porTipo.map((item) => (
+                {porTipo.length > 0 ? (
+                  porTipo.map((item) => (
                   <TableRow key={item.tipo}>
                     <TableCell>
                       <Box display="flex" alignItems="center" gap={1}>
@@ -154,7 +160,8 @@ export const RelatorioCustos: React.FC<RelatorioCustosProps> = ({ relatorio }) =
                 </TableRow>
               </TableHead>
               <TableBody>
-                {relatorio.porDepartamento.map((item) => (
+                {porDepartamento.length > 0 ? (
+                  porDepartamento.map((item) => (
                   <TableRow key={item.departamento}>
                     <TableCell>{item.departamento}</TableCell>
                     <TableCell align="right">{item.quantidade}</TableCell>
@@ -168,7 +175,16 @@ export const RelatorioCustos: React.FC<RelatorioCustosProps> = ({ relatorio }) =
                       {formatarMoeda(item.custoTotal / item.colaboradoresAtendidos)}
                     </TableCell>
                   </TableRow>
-                ))}
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell colSpan={5} align="center">
+                      <Typography variant="body2" color="text.secondary">
+                        Nenhum dado disponível
+                      </Typography>
+                    </TableCell>
+                  </TableRow>
+                )}
               </TableBody>
             </Table>
           </TableContainer>

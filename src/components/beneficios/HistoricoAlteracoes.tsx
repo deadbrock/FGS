@@ -23,6 +23,9 @@ interface HistoricoAlteracoesProps {
 }
 
 export const HistoricoAlteracoes: React.FC<HistoricoAlteracoesProps> = ({ historico }) => {
+  // Garantir que historico seja sempre um array
+  const historicoArray = Array.isArray(historico) ? historico : [];
+
   const getIcone = (tipo: string) => {
     switch (tipo) {
       case 'CONCESSAO':
@@ -68,7 +71,7 @@ export const HistoricoAlteracoes: React.FC<HistoricoAlteracoesProps> = ({ histor
     return nomes[tipo] || tipo;
   };
 
-  if (historico.length === 0) {
+  if (historicoArray.length === 0) {
     return (
       <Card>
         <CardContent>
@@ -91,7 +94,7 @@ export const HistoricoAlteracoes: React.FC<HistoricoAlteracoesProps> = ({ histor
         </Typography>
 
         <Stack spacing={2} mt={2}>
-          {historico.map((item, index) => (
+          {historicoArray.map((item, index) => (
             <Paper key={item.id} elevation={1} sx={{ p: 2 }}>
               <Box display="flex" gap={2}>
                 {/* Ícone e Data */}
@@ -159,7 +162,7 @@ export const HistoricoAlteracoes: React.FC<HistoricoAlteracoesProps> = ({ histor
                 </Box>
               </Box>
               
-              {index < historico.length - 1 && <Divider sx={{ mt: 2 }} />}
+              {index < historicoArray.length - 1 && <Divider sx={{ mt: 2 }} />}
             </Paper>
           ))}
         </Stack>
