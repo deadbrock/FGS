@@ -149,13 +149,44 @@ class BeneficiosService {
   // ESTATÍSTICAS
   // ==========================================
 
-  async getEstatisticas(): Promise<EstatisticasBeneficios> {
+  async getEstatisticas(): Promise<any> {
     try {
       const response = await this.api.get('/estatisticas');
-      return response.data.data;
+      const data = response.data.data || {};
+      
+      // Mapear estrutura do backend para estrutura esperada pelo frontend
+      return {
+        totalAtivos: data.totalBeneficiosAtivos || data.totalAtivos || 0,
+        totalInativos: data.totalInativos || 0,
+        totalColaboradoresAtendidos: data.totalColaboradoresAtendidos || 0,
+        custoMensalEmpresa: data.custoMensalEmpresa || data.custoTotalMensal || 0,
+        custoMensalColaborador: data.custoMensalColaborador || 0,
+        custoMensalTotal: data.custoMensalTotal || data.custoTotalMensal || 0,
+        distribuicaoPorTipo: Array.isArray(data.porTipo) ? data.porTipo.map((item: any) => ({
+          tipo: item.tipo || item.nome,
+          nome: item.nome || item.tipo || 'Outros',
+          quantidade: item.total || item.quantidade || 0,
+          percentual: item.percentual || 0,
+        })) : [],
+        evolucaoCustos: Array.isArray(data.evolucaoCustos) ? data.evolucaoCustos : [],
+        beneficiosProximosVencimento: Array.isArray(data.beneficiosProximosVencimento) ? data.beneficiosProximosVencimento : [],
+        beneficiosSemComprovacao: Array.isArray(data.beneficiosSemComprovacao) ? data.beneficiosSemComprovacao : [],
+      };
     } catch (error: any) {
       console.error('Erro ao buscar estatísticas de benefícios:', error);
-      throw new Error(error.response?.data?.error || 'Erro ao buscar estatísticas');
+      // Retornar estrutura vazia ao invés de lançar erro
+      return {
+        totalAtivos: 0,
+        totalInativos: 0,
+        totalColaboradoresAtendidos: 0,
+        custoMensalEmpresa: 0,
+        custoMensalColaborador: 0,
+        custoMensalTotal: 0,
+        distribuicaoPorTipo: [],
+        evolucaoCustos: [],
+        beneficiosProximosVencimento: [],
+        beneficiosSemComprovacao: [],
+      };
     }
   }
 

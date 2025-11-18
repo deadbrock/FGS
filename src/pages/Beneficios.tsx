@@ -300,34 +300,40 @@ export const Beneficios: React.FC = () => {
                         <Typography variant="h6" mb={2}>
                           Distribuição por Tipo
                         </Typography>
-                        {estatisticas.distribuicaoPorTipo.map((item) => (
-                          <Box key={item.tipo} mb={2}>
-                            <Box display="flex" justifyContent="space-between" mb={0.5}>
-                              <Typography variant="body2">
-                                {getTipoIcone(item.tipo)} {item.nome}
-                              </Typography>
-                              <Typography variant="body2" fontWeight={600}>
-                                {item.quantidade}
-                              </Typography>
-                            </Box>
-                            <Box
-                              sx={{
-                                height: 8,
-                                bgcolor: '#e0e0e0',
-                                borderRadius: 1,
-                                overflow: 'hidden',
-                              }}
-                            >
+                        {estatisticas.distribuicaoPorTipo && Array.isArray(estatisticas.distribuicaoPorTipo) && estatisticas.distribuicaoPorTipo.length > 0 ? (
+                          estatisticas.distribuicaoPorTipo.map((item) => (
+                            <Box key={item.tipo} mb={2}>
+                              <Box display="flex" justifyContent="space-between" mb={0.5}>
+                                <Typography variant="body2">
+                                  {getTipoIcone(item.tipo)} {item.nome}
+                                </Typography>
+                                <Typography variant="body2" fontWeight={600}>
+                                  {item.quantidade}
+                                </Typography>
+                              </Box>
                               <Box
                                 sx={{
-                                  height: '100%',
-                                  width: `${item.percentual}%`,
-                                  bgcolor: '#388e3c',
+                                  height: 8,
+                                  bgcolor: '#e0e0e0',
+                                  borderRadius: 1,
+                                  overflow: 'hidden',
                                 }}
-                              />
+                              >
+                                <Box
+                                  sx={{
+                                    height: '100%',
+                                    width: `${item.percentual || 0}%`,
+                                    bgcolor: '#388e3c',
+                                  }}
+                                />
+                              </Box>
                             </Box>
-                          </Box>
-                        ))}
+                          ))
+                        ) : (
+                          <Typography variant="body2" color="text.secondary">
+                            Nenhum dado disponível
+                          </Typography>
+                        )}
                       </Box>
                     </Card>
                   </Grid>
@@ -338,14 +344,20 @@ export const Beneficios: React.FC = () => {
                         <Typography variant="h6" mb={2}>
                           Evolução de Custos
                         </Typography>
-                        {estatisticas.evolucaoCustos.map((item) => (
-                          <Box key={item.mes} display="flex" justifyContent="space-between" mb={1}>
-                            <Typography variant="body2">{item.mes}/2024</Typography>
-                            <Typography variant="body2" fontWeight={600}>
-                              {formatarMoeda(item.custoTotal)}
-                            </Typography>
-                          </Box>
-                        ))}
+                        {estatisticas.evolucaoCustos && Array.isArray(estatisticas.evolucaoCustos) && estatisticas.evolucaoCustos.length > 0 ? (
+                          estatisticas.evolucaoCustos.map((item) => (
+                            <Box key={item.mes} display="flex" justifyContent="space-between" mb={1}>
+                              <Typography variant="body2">{item.mes}/2024</Typography>
+                              <Typography variant="body2" fontWeight={600}>
+                                {formatarMoeda(item.custoTotal || 0)}
+                              </Typography>
+                            </Box>
+                          ))
+                        ) : (
+                          <Typography variant="body2" color="text.secondary">
+                            Nenhum dado disponível
+                          </Typography>
+                        )}
                       </Box>
                     </Card>
                   </Grid>
