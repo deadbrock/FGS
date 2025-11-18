@@ -94,6 +94,13 @@ app.use('/api/relatorios', relatoriosRoutes);
 app.use('/api/documentos', documentosRoutes);
 app.use('/api/seguranca', segurancaRoutes);
 
+// Debug: Log de rotas registradas
+console.log('✅ Rotas de segurança registradas:');
+console.log('   - GET /api/seguranca/estatisticas');
+console.log('   - GET /api/seguranca/usuarios');
+console.log('   - GET /api/seguranca/logs-acesso');
+console.log('   - GET /api/seguranca/logs-alteracoes');
+
 // Rota de health check
 app.get('/health', (req, res) => {
   res.json({ 
