@@ -71,23 +71,59 @@ class BeneficiosService {
     }
   }
 
-  async createTipo(tipo: Partial<TipoBeneficio>): Promise<TipoBeneficio> {
+  async createTipo(tipo: Partial<TipoBeneficio> | any): Promise<TipoBeneficio> {
     try {
-      const response = await this.api.post('/tipos', tipo);
+      // Mapear campos do frontend (Beneficio) para campos do backend (TipoBeneficio)
+      const dadosBackend: any = {
+        nome: tipo.nome || tipo.tipo || '',
+        categoria: tipo.tipo || tipo.categoria || 'OUTROS',
+        descricao: tipo.descricao || '',
+        valor_padrao: tipo.valorFixo || tipo.custoEmpresa || tipo.valor_padrao || 0,
+        coparticipacao: tipo.custoColaborador ? tipo.custoColaborador > 0 : false,
+        percentual_coparticipacao: tipo.percentualSalario || tipo.percentual_coparticipacao || 0,
+        fornecedor: tipo.fornecedor || '',
+        ativo: tipo.status !== 'INATIVO' && tipo.status !== 'CANCELADO',
+      };
+
+      // Validar campos obrigatórios
+      if (!dadosBackend.nome) {
+        throw new Error('Nome do benefício é obrigatório');
+      }
+      if (!dadosBackend.categoria) {
+        throw new Error('Categoria do benefício é obrigatória');
+      }
+
+      const response = await this.api.post('/tipos', dadosBackend);
       return response.data.data;
     } catch (error: any) {
       console.error('Erro ao criar tipo de benefício:', error);
-      throw new Error(error.response?.data?.error || 'Erro ao criar tipo de benefício');
+      throw new Error(error.response?.data?.error || error.message || 'Erro ao criar tipo de benefício');
     }
   }
 
-  async updateTipo(id: string, tipo: Partial<TipoBeneficio>): Promise<TipoBeneficio> {
+  async updateTipo(id: string, tipo: Partial<TipoBeneficio> | any): Promise<TipoBeneficio> {
     try {
-      const response = await this.api.put(`/tipos/${id}`, tipo);
+      // Mapear campos do frontend (Beneficio) para campos do backend (TipoBeneficio)
+      const dadosBackend: any = {};
+      
+      if (tipo.nome !== undefined) dadosBackend.nome = tipo.nome;
+      if (tipo.tipo !== undefined) dadosBackend.categoria = tipo.tipo;
+      if (tipo.categoria !== undefined) dadosBackend.categoria = tipo.categoria;
+      if (tipo.descricao !== undefined) dadosBackend.descricao = tipo.descricao;
+      if (tipo.valorFixo !== undefined) dadosBackend.valor_padrao = tipo.valorFixo;
+      if (tipo.custoEmpresa !== undefined) dadosBackend.valor_padrao = tipo.custoEmpresa;
+      if (tipo.valor_padrao !== undefined) dadosBackend.valor_padrao = tipo.valor_padrao;
+      if (tipo.custoColaborador !== undefined) dadosBackend.coparticipacao = tipo.custoColaborador > 0;
+      if (tipo.percentualSalario !== undefined) dadosBackend.percentual_coparticipacao = tipo.percentualSalario;
+      if (tipo.percentual_coparticipacao !== undefined) dadosBackend.percentual_coparticipacao = tipo.percentual_coparticipacao;
+      if (tipo.fornecedor !== undefined) dadosBackend.fornecedor = tipo.fornecedor;
+      if (tipo.status !== undefined) dadosBackend.ativo = tipo.status !== 'INATIVO' && tipo.status !== 'CANCELADO';
+
+      const response = await this.api.put(`/tipos/${id}`, dadosBackend);
       return response.data.data;
     } catch (error: any) {
       console.error('Erro ao atualizar tipo de benefício:', error);
-      throw new Error(error.response?.data?.error || 'Erro ao atualizar tipo de benefício');
+      throw new Error(error.response?.data?.error || error.message || 'Erro ao atualizar tipo de benefício');
     }
   }
 
