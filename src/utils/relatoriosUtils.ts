@@ -93,11 +93,14 @@ export const exportarExcel = (dados: unknown[], nomeArquivo: string): void => {
 };
 
 // Exporta para PDF
-export const exportarPDF = (
+export const exportarPDF = async (
   titulo: string,
   dados: { cabecalho: string[]; linhas: (string | number)[][] },
   nomeArquivo: string
-): void => {
+): Promise<void> => {
+  // Importação dinâmica para garantir que o plugin seja carregado
+  await import('jspdf-autotable');
+  
   const doc = new jsPDF();
   
   // Título
@@ -110,13 +113,30 @@ export const exportarPDF = (
   
   // Tabela - jspdf-autotable estende o jsPDF
   // @ts-ignore - autoTable é adicionado dinamicamente pelo plugin
-  (doc as any).autoTable({
-    head: [dados.cabecalho],
-    body: dados.linhas,
-    startY: 30,
-    styles: { fontSize: 8 },
-    headStyles: { fillColor: [162, 18, 42] },
-  });
+  if (typeof (doc as any).autoTable === 'function') {
+    (doc as any).autoTable({
+      head: [dados.cabecalho],
+      body: dados.linhas,
+      startY: 30,
+      styles: { fontSize: 8 },
+      headStyles: { fillColor: [162, 18, 42] },
+    });
+  } else {
+    // Fallback: criar tabela simples sem autoTable
+    console.warn('jspdf-autotable não está disponível, criando PDF sem tabela formatada');
+    let y = 30;
+    doc.setFontSize(10);
+    doc.text(dados.cabecalho.join(' | '), 14, y);
+    y += 10;
+    dados.linhas.forEach((linha) => {
+      doc.text(linha.join(' | '), 14, y);
+      y += 7;
+      if (y > 280) {
+        doc.addPage();
+        y = 20;
+      }
+    });
+  }
   
   doc.save(`${nomeArquivo}_${new Date().toISOString().split('T')[0]}.pdf`);
 };
