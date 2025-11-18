@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   Typography,
@@ -17,6 +17,8 @@ import {
   Chip,
   IconButton,
   Tooltip,
+  CircularProgress,
+  Alert,
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import SyncIcon from '@mui/icons-material/Sync';
@@ -45,6 +47,7 @@ import { ConfiguracaoPonto } from '../components/integracoes/ConfiguracaoPonto';
 import { ConfiguracaoEmailComponent } from '../components/integracoes/ConfiguracaoEmail';
 import { ConfiguracaoWhatsAppComponent } from '../components/integracoes/ConfiguracaoWhatsApp';
 import { ImportacaoExportacao } from '../components/integracoes/ImportacaoExportacao';
+import integracoesService from '../services/integracoesService';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -61,131 +64,65 @@ function TabPanel(props: TabPanelProps) {
   );
 }
 
-// Mock data
-const estatisticasMock: EstatisticasIntegracoes = {
-  totalIntegracoes: 4,
-  integracoesAtivas: 2,
-  integracoesInativas: 1,
-  integracoesComErro: 1,
-  sincronizacoesHoje: 24,
-  sincronizacoesSemana: 168,
-  sincronizacoesMes: 720,
-  registrosProcessadosHoje: 1250,
-  registrosProcessadosSemana: 8750,
-  errosHoje: 3,
-  errosSemana: 12,
-  tempoMedioResposta: 1.8,
-  sucessoRate: 98.5,
-  integracoesPorTipo: [
-    { tipo: TipoIntegracao.PONTO_ELETRONICO, quantidade: 1, ativas: 1 },
-    { tipo: TipoIntegracao.EMAIL, quantidade: 1, ativas: 1 },
-    { tipo: TipoIntegracao.WHATSAPP, quantidade: 1, ativas: 0 },
-    { tipo: TipoIntegracao.API_EXTERNA, quantidade: 1, ativas: 0 },
-  ],
-  sincronizacoesPorDia: [
-    { data: '2024-10-13', total: 22, sucesso: 22, falha: 0 },
-    { data: '2024-10-14', total: 24, sucesso: 23, falha: 1 },
-    { data: '2024-10-15', total: 24, sucesso: 24, falha: 0 },
-  ],
-};
-
-const integracoesMock: Integracao[] = [
-  {
-    id: '1',
-    nome: 'Ponto Eletrônico IDClass',
-    tipo: TipoIntegracao.PONTO_ELETRONICO,
-    status: StatusIntegracao.ATIVA,
-    descricao: 'Integração com relógio de ponto facial IDClass',
-    icone: 'access_time',
-    cor: '#1976d2',
-    configuracoes: {
-      tipoAutenticacao: TipoAutenticacao.API_KEY,
-    },
-    ultimaSincronizacao: '2024-10-19T14:30:00',
-    proximaSincronizacao: '2024-10-19T14:45:00',
-    totalRegistros: 1250,
-    registrosHoje: 48,
-    errosHoje: 0,
-    ativa: true,
-    testeRealizado: true,
-    dataUltimoTeste: '2024-10-15T10:00:00',
-    criadoEm: '2024-01-01T00:00:00',
-    criadoPor: 'Admin Sistema',
-  },
-  {
-    id: '2',
-    nome: 'E-mail Corporativo',
-    tipo: TipoIntegracao.EMAIL,
-    status: StatusIntegracao.ATIVA,
-    descricao: 'Servidor SMTP para envio de e-mails',
-    icone: 'email',
-    cor: '#d32f2f',
-    configuracoes: {
-      tipoAutenticacao: TipoAutenticacao.BASIC,
-    },
-    totalRegistros: 3500,
-    registrosHoje: 85,
-    errosHoje: 2,
-    ativa: true,
-    testeRealizado: true,
-    dataUltimoTeste: '2024-10-18T15:20:00',
-    criadoEm: '2024-01-01T00:00:00',
-    criadoPor: 'Admin Sistema',
-  },
-  {
-    id: '3',
-    nome: 'WhatsApp Business API',
-    tipo: TipoIntegracao.WHATSAPP,
-    status: StatusIntegracao.CONFIGURANDO,
-    descricao: 'Envio de notificações via WhatsApp',
-    icone: 'whatsapp',
-    cor: '#25D366',
-    configuracoes: {
-      tipoAutenticacao: TipoAutenticacao.TOKEN,
-    },
-    totalRegistros: 0,
-    registrosHoje: 0,
-    errosHoje: 0,
-    ativa: false,
-    testeRealizado: false,
-    criadoEm: '2024-10-15T00:00:00',
-    criadoPor: 'Admin Sistema',
-  },
-  {
-    id: '4',
-    nome: 'API Externa - ERP',
-    tipo: TipoIntegracao.API_EXTERNA,
-    status: StatusIntegracao.ERRO,
-    descricao: 'Integração com sistema ERP corporativo',
-    icone: 'api',
-    cor: '#f57c00',
-    configuracoes: {
-      tipoAutenticacao: TipoAutenticacao.OAUTH2,
-    },
-    totalRegistros: 520,
-    registrosHoje: 0,
-    errosHoje: 1,
-    ativa: false,
-    testeRealizado: true,
-    dataUltimoTeste: '2024-10-19T08:00:00',
-    resultadoTeste: {
-      sucesso: false,
-      mensagem: 'Falha na autenticação',
-      detalhes: 'Token expirado',
-      tempoResposta: 2.5,
-      dataHoraTeste: '2024-10-19T08:00:00',
-    },
-    criadoEm: '2024-09-01T00:00:00',
-    criadoPor: 'João Silva',
-  },
-];
-
 export const Integracoes: React.FC = () => {
   useNavigationLog();
 
   const [tabAtual, setTabAtual] = useState(0);
-  const [estatisticas] = useState<EstatisticasIntegracoes>(estatisticasMock);
-  const [integracoes] = useState<Integracao[]>(integracoesMock);
+  const [estatisticas, setEstatisticas] = useState<EstatisticasIntegracoes>({
+    totalIntegracoes: 0,
+    integracoesAtivas: 0,
+    integracoesInativas: 0,
+    integracoesComErro: 0,
+    sincronizacoesHoje: 0,
+    sincronizacoesSemana: 0,
+    sincronizacoesMes: 0,
+    registrosProcessadosHoje: 0,
+    registrosProcessadosSemana: 0,
+    errosHoje: 0,
+    errosSemana: 0,
+    tempoMedioResposta: 0,
+    sucessoRate: 100,
+    integracoesPorTipo: [],
+    sincronizacoesPorDia: [],
+  });
+  const [integracoes, setIntegracoes] = useState<Integracao[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Carregar dados ao montar o componente
+  useEffect(() => {
+    carregarDados();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Carregar dados quando mudar de aba
+  useEffect(() => {
+    if (tabAtual === 0 || tabAtual === 1) {
+      carregarDados();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tabAtual]);
+
+  const carregarDados = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      // Carregar estatísticas e integrações em paralelo
+      const [estatisticasData, integracoesData] = await Promise.all([
+        integracoesService.getEstatisticas(),
+        integracoesService.getAll(),
+      ]);
+
+      setEstatisticas(estatisticasData);
+      setIntegracoes(integracoesData);
+    } catch (err: any) {
+      console.error('Erro ao carregar dados:', err);
+      setError(err.message || 'Erro ao carregar dados de integrações');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const getStatusColor = (status: StatusIntegracao): string => {
     const cores: Record<StatusIntegracao, string> = {
@@ -209,24 +146,95 @@ export const Integracoes: React.FC = () => {
     return icons[tipo];
   };
 
-  const handleSalvarConfigPonto = (config: any) => {
-    console.log('Salvando config ponto:', config);
-    alert('Configurações salvas com sucesso!');
+  const handleSalvarConfigPonto = async (config: any) => {
+    try {
+      await integracoesService.salvarConfigPonto(config);
+      alert('Configurações salvas com sucesso!');
+      carregarDados();
+    } catch (err: any) {
+      alert(`Erro ao salvar configurações: ${err.message}`);
+    }
   };
 
-  const handleSalvarConfigEmail = (config: any) => {
-    console.log('Salvando config email:', config);
-    alert('Configurações salvas com sucesso!');
+  const handleSalvarConfigEmail = async (config: any) => {
+    try {
+      await integracoesService.salvarConfigEmail(config);
+      alert('Configurações salvas com sucesso!');
+      carregarDados();
+    } catch (err: any) {
+      alert(`Erro ao salvar configurações: ${err.message}`);
+    }
   };
 
-  const handleSalvarConfigWhatsApp = (config: any) => {
-    console.log('Salvando config whatsapp:', config);
-    alert('Configurações salvas com sucesso!');
+  const handleSalvarConfigWhatsApp = async (config: any) => {
+    try {
+      await integracoesService.salvarConfigWhatsApp(config);
+      alert('Configurações salvas com sucesso!');
+      carregarDados();
+    } catch (err: any) {
+      alert(`Erro ao salvar configurações: ${err.message}`);
+    }
   };
 
-  const handleTestar = () => {
-    alert('Testando conexão...');
+  const handleTestar = async (id?: string) => {
+    if (!id) {
+      alert('ID da integração não informado');
+      return;
+    }
+    try {
+      await integracoesService.testar(id);
+      alert('Teste realizado com sucesso!');
+      carregarDados();
+    } catch (err: any) {
+      alert(`Erro ao testar integração: ${err.message}`);
+    }
   };
+
+  const handleSincronizar = async (id: string) => {
+    try {
+      await integracoesService.sincronizar(id);
+      alert('Sincronização iniciada!');
+      carregarDados();
+    } catch (err: any) {
+      alert(`Erro ao sincronizar: ${err.message}`);
+    }
+  };
+
+  const handleAtivarDesativar = async (integracao: Integracao) => {
+    try {
+      if (integracao.ativa) {
+        await integracoesService.desativar(integracao.id);
+        alert('Integração desativada com sucesso!');
+      } else {
+        await integracoesService.ativar(integracao.id);
+        alert('Integração ativada com sucesso!');
+      }
+      carregarDados();
+    } catch (err: any) {
+      alert(`Erro ao alterar status: ${err.message}`);
+    }
+  };
+
+  if (loading) {
+    return (
+      <Box display="flex" justifyContent="center" alignItems="center" minHeight="400px">
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  if (error) {
+    return (
+      <Box p={3}>
+        <Alert severity="error" sx={{ mb: 2 }}>
+          {error}
+        </Alert>
+        <Button variant="contained" onClick={carregarDados}>
+          Tentar Novamente
+        </Button>
+      </Box>
+    );
+  }
 
   return (
     <Box>
@@ -401,7 +409,7 @@ export const Integracoes: React.FC = () => {
                       </TableCell>
                       <TableCell align="center">
                         <Tooltip title="Sincronizar Agora">
-                          <IconButton size="small">
+                          <IconButton size="small" onClick={() => handleSincronizar(integracao.id)}>
                             <SyncIcon fontSize="small" />
                           </IconButton>
                         </Tooltip>
@@ -411,7 +419,7 @@ export const Integracoes: React.FC = () => {
                           </IconButton>
                         </Tooltip>
                         <Tooltip title={integracao.ativa ? 'Desativar' : 'Ativar'}>
-                          <IconButton size="small">
+                          <IconButton size="small" onClick={() => handleAtivarDesativar(integracao)}>
                             {integracao.ativa ? (
                               <StopIcon fontSize="small" />
                             ) : (
@@ -431,7 +439,17 @@ export const Integracoes: React.FC = () => {
         {/* Aba 2: Ponto Eletrônico */}
         <TabPanel value={tabAtual} index={2}>
           <Box p={3}>
-            <ConfiguracaoPonto onSalvar={handleSalvarConfigPonto} onTestar={handleTestar} />
+            <ConfiguracaoPonto 
+              onSalvar={handleSalvarConfigPonto} 
+              onTestar={() => {
+                const pontoIntegracao = integracoes.find(i => i.tipo === TipoIntegracao.PONTO_ELETRONICO);
+                if (pontoIntegracao) {
+                  handleTestar(pontoIntegracao.id);
+                } else {
+                  alert('Nenhuma integração de ponto eletrônico encontrada');
+                }
+              }} 
+            />
           </Box>
         </TabPanel>
 
@@ -440,7 +458,14 @@ export const Integracoes: React.FC = () => {
           <Box p={3}>
             <ConfiguracaoEmailComponent
               onSalvar={handleSalvarConfigEmail}
-              onTestar={handleTestar}
+              onTestar={() => {
+                const emailIntegracao = integracoes.find(i => i.tipo === TipoIntegracao.EMAIL);
+                if (emailIntegracao) {
+                  handleTestar(emailIntegracao.id);
+                } else {
+                  alert('Nenhuma integração de e-mail encontrada');
+                }
+              }}
             />
           </Box>
         </TabPanel>
@@ -450,7 +475,14 @@ export const Integracoes: React.FC = () => {
           <Box p={3}>
             <ConfiguracaoWhatsAppComponent
               onSalvar={handleSalvarConfigWhatsApp}
-              onTestar={handleTestar}
+              onTestar={() => {
+                const whatsappIntegracao = integracoes.find(i => i.tipo === TipoIntegracao.WHATSAPP);
+                if (whatsappIntegracao) {
+                  handleTestar(whatsappIntegracao.id);
+                } else {
+                  alert('Nenhuma integração de WhatsApp encontrada');
+                }
+              }}
             />
           </Box>
         </TabPanel>
