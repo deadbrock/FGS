@@ -52,6 +52,7 @@ export interface DadosContratuais {
   jornadaTrabalho: string;
   horarioEntrada: string;
   horarioSaida: string;
+  ctps?: string; // CTPS – Carteira profissional Digital
   status: StatusProntuario;
   contratoAnexo?: Anexo;
 }
@@ -179,6 +180,11 @@ export enum CategoriaDocumento {
   DIPLOMA = 'Diploma',
   HISTORICO_ESCOLAR = 'Histórico Escolar',
   FOTO_3X4 = 'Foto 3x4',
+  CERTIFICADO_RESERVISTA = 'Certificado de Reservista',
+  CERTIDAO_NASCIMENTO_FILHOS = 'Certidão de Nascimento dos Filhos',
+  CARTAO_VACINA_FILHOS = 'Cartão de Vacina (Filhos)',
+  CPF_FILHOS = 'CPF (Filhos)',
+  NADA_CONSTA_RECENTE = 'Nada Consta Recente',
   OUTROS = 'Outros',
 }
 

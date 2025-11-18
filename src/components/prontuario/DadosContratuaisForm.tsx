@@ -151,6 +151,18 @@ export const DadosContratuaisForm: React.FC<DadosContratuaisFormProps> = ({
         />
       </Grid>
 
+      <Grid item xs={12} md={4}>
+        <TextField
+          fullWidth
+          label="CTPS – Carteira Profissional Digital"
+          value={dados.ctps || ''}
+          onChange={(e) => onChange('ctps', e.target.value)}
+          placeholder="Número da CTPS Digital"
+          disabled={readonly}
+          helperText="Carteira de Trabalho e Previdência Social Digital"
+        />
+      </Grid>
+
       <Grid item xs={12} md={2}>
         <TextField
           fullWidth
