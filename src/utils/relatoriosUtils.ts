@@ -1,6 +1,4 @@
 import jsPDF from 'jspdf';
-// @ts-ignore - jspdf-autotable não tem tipos TypeScript completos
-import 'jspdf-autotable';
 
 // Formata percentual
 export const formatarPercentual = (valor: number): string => {
