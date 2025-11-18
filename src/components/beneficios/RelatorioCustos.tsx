@@ -27,6 +27,12 @@ export const RelatorioCustos: React.FC<RelatorioCustosProps> = ({ relatorio }) =
   const porDepartamento = Array.isArray(relatorio?.porDepartamento) ? relatorio.porDepartamento : [];
   const topColaboradores = Array.isArray(relatorio?.topColaboradores) ? relatorio.topColaboradores : [];
 
+  // Função auxiliar para garantir valores numéricos válidos
+  const safeNumber = (value: any): number => {
+    const num = Number(value);
+    return isNaN(num) || !isFinite(num) ? 0 : num;
+  };
+
   return (
     <Box>
       {/* Cards de Resumo */}
@@ -38,7 +44,7 @@ export const RelatorioCustos: React.FC<RelatorioCustosProps> = ({ relatorio }) =
                 Custo Total Empresa
               </Typography>
               <Typography variant="h5" color="primary">
-                {formatarMoeda(relatorio.custoTotalEmpresa)}
+                {formatarMoeda(safeNumber(relatorio?.custoTotalEmpresa))}
               </Typography>
             </CardContent>
           </Card>
@@ -51,7 +57,7 @@ export const RelatorioCustos: React.FC<RelatorioCustosProps> = ({ relatorio }) =
                 Custo Total Colaborador
               </Typography>
               <Typography variant="h5" color="secondary">
-                {formatarMoeda(relatorio.custoTotalColaborador)}
+                {formatarMoeda(safeNumber(relatorio?.custoTotalColaborador))}
               </Typography>
             </CardContent>
           </Card>
@@ -64,7 +70,7 @@ export const RelatorioCustos: React.FC<RelatorioCustosProps> = ({ relatorio }) =
                 Total de Benefícios
               </Typography>
               <Typography variant="h5">
-                {relatorio.totalBeneficios}
+                {safeNumber(relatorio?.totalBeneficios)}
               </Typography>
             </CardContent>
           </Card>
@@ -77,7 +83,7 @@ export const RelatorioCustos: React.FC<RelatorioCustosProps> = ({ relatorio }) =
                 Colaboradores Atendidos
               </Typography>
               <Typography variant="h5">
-                {relatorio.totalColaboradores}
+                {safeNumber(relatorio?.totalColaboradores)}
               </Typography>
             </CardContent>
           </Card>
@@ -113,23 +119,23 @@ export const RelatorioCustos: React.FC<RelatorioCustosProps> = ({ relatorio }) =
                         <span>{getTipoNome(item.tipo)}</span>
                       </Box>
                     </TableCell>
-                    <TableCell align="right">{item.quantidade}</TableCell>
-                    <TableCell align="right">{formatarMoeda(item.custoEmpresa)}</TableCell>
-                    <TableCell align="right">{formatarMoeda(item.custoColaborador)}</TableCell>
+                    <TableCell align="right">{safeNumber(item.quantidade)}</TableCell>
+                    <TableCell align="right">{formatarMoeda(safeNumber(item.custoEmpresa))}</TableCell>
+                    <TableCell align="right">{formatarMoeda(safeNumber(item.custoColaborador))}</TableCell>
                     <TableCell align="right">
                       <Typography fontWeight={600}>
-                        {formatarMoeda(item.custoTotal)}
+                        {formatarMoeda(safeNumber(item.custoTotal))}
                       </Typography>
                     </TableCell>
                     <TableCell align="right">
                       <Box display="flex" alignItems="center" gap={1}>
                         <LinearProgress
                           variant="determinate"
-                          value={item.percentualTotal}
+                          value={Math.min(100, Math.max(0, safeNumber(item.percentualTotal)))}
                           sx={{ flex: 1, height: 6, borderRadius: 1 }}
                         />
                         <Typography variant="caption">
-                          {item.percentualTotal.toFixed(1)}%
+                          {safeNumber(item.percentualTotal).toFixed(1)}%
                         </Typography>
                       </Box>
                     </TableCell>
@@ -172,16 +178,21 @@ export const RelatorioCustos: React.FC<RelatorioCustosProps> = ({ relatorio }) =
                 {porDepartamento.length > 0 ? (
                   porDepartamento.map((item) => (
                   <TableRow key={item.departamento}>
-                    <TableCell>{item.departamento}</TableCell>
-                    <TableCell align="right">{item.quantidade}</TableCell>
-                    <TableCell align="right">{item.colaboradoresAtendidos}</TableCell>
+                    <TableCell>{item.departamento || '-'}</TableCell>
+                    <TableCell align="right">{safeNumber(item.quantidade)}</TableCell>
+                    <TableCell align="right">{safeNumber(item.colaboradoresAtendidos)}</TableCell>
                     <TableCell align="right">
                       <Typography fontWeight={600}>
-                        {formatarMoeda(item.custoTotal)}
+                        {formatarMoeda(safeNumber(item.custoTotal))}
                       </Typography>
                     </TableCell>
                     <TableCell align="right">
-                      {formatarMoeda(item.custoTotal / item.colaboradoresAtendidos)}
+                      {(() => {
+                        const custoTotal = safeNumber(item.custoTotal);
+                        const colaboradores = safeNumber(item.colaboradoresAtendidos);
+                        const media = colaboradores > 0 ? custoTotal / colaboradores : 0;
+                        return formatarMoeda(media);
+                      })()}
                     </TableCell>
                   </TableRow>
                   ))

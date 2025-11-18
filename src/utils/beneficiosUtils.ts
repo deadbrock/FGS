@@ -110,11 +110,19 @@ export const getFrequenciaNome = (frequencia: FrequenciaBeneficio): string => {
 };
 
 // Formata valor monetário
-export const formatarMoeda = (valor: number): string => {
+export const formatarMoeda = (valor: number | undefined | null): string => {
+  // Garantir que o valor seja numérico válido
+  const num = Number(valor);
+  if (isNaN(num) || !isFinite(num)) {
+    return new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL',
+    }).format(0);
+  }
   return new Intl.NumberFormat('pt-BR', {
     style: 'currency',
     currency: 'BRL',
-  }).format(valor);
+  }).format(num);
 };
 
 // Calcula valor do benefício para um colaborador
