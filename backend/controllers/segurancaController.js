@@ -246,7 +246,20 @@ export const getLogsAcesso = async (req, res) => {
 
     query += ` ORDER BY data_hora DESC LIMIT 1000`;
 
-    const result = await pool.query(query, params);
+    let result;
+    try {
+      result = await pool.query(query, params);
+    } catch (err) {
+      console.error('Erro na query de logs de acesso:', err.message);
+      // Se a tabela não existir, retornar array vazio
+      if (err.message.includes('does not exist') || err.message.includes('não existe')) {
+        return res.json({
+          success: true,
+          data: [],
+        });
+      }
+      throw err;
+    }
 
     res.json({
       success: true,
