@@ -173,8 +173,8 @@ export const Relatorios: React.FC = () => {
             <Grid item xs={12} sm={6} md={4}>
               <StatCard
                 title="Taxa de Pontualidade"
-                value={`${dashboard.indicadoresPrincipais.taxaPontualidade}%`}
-                subtitle={`${dashboard.indicadoresPrincipais.totalHorasExtras}h extras`}
+                value={`${dashboard.indicadoresPrincipais.taxaPontualidade || 0}%`}
+                subtitle={`${dashboard.indicadoresPrincipais.totalHorasExtras || 0}h extras`}
                 icon={<AccessTimeIcon />}
                 color="#00796b"
               />
