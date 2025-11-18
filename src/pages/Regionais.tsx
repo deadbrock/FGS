@@ -606,7 +606,11 @@ export const Regionais: React.FC = () => {
                       <Box>
                         <Typography variant="caption" sx={{ opacity: 0.9 }}>Masculino</Typography>
                         <Typography variant="h4" fontWeight={700}>{totalMasculino}</Typography>
-                        <Typography variant="caption">{((totalMasculino / colaboradoresGlobaisFiltrados.length) * 100).toFixed(1)}%</Typography>
+                        <Typography variant="caption">
+                          {colaboradoresGlobaisFiltrados.length > 0 
+                            ? ((totalMasculino / colaboradoresGlobaisFiltrados.length) * 100).toFixed(1) 
+                            : '0.0'}%
+                        </Typography>
                       </Box>
                       <MaleIcon sx={{ fontSize: 48, opacity: 0.3 }} />
                     </Box>
@@ -629,7 +633,11 @@ export const Regionais: React.FC = () => {
                       <Box>
                         <Typography variant="caption" sx={{ opacity: 0.9 }}>Feminino</Typography>
                         <Typography variant="h4" fontWeight={700}>{totalFeminino}</Typography>
-                        <Typography variant="caption">{((totalFeminino / colaboradoresGlobaisFiltrados.length) * 100).toFixed(1)}%</Typography>
+                        <Typography variant="caption">
+                          {colaboradoresGlobaisFiltrados.length > 0 
+                            ? ((totalFeminino / colaboradoresGlobaisFiltrados.length) * 100).toFixed(1) 
+                            : '0.0'}%
+                        </Typography>
                       </Box>
                       <FemaleIcon sx={{ fontSize: 48, opacity: 0.3 }} />
                     </Box>
@@ -879,7 +887,9 @@ export const Regionais: React.FC = () => {
                         <Typography variant="caption" sx={{ opacity: 0.9 }}>Supervisores</Typography>
                         <Typography variant="h4" fontWeight={700}>{totalSupervisores}</Typography>
                         <Typography variant="caption">
-                          {((totalSupervisores / colaboradoresAdministrativosFiltrados.length) * 100).toFixed(1)}%
+                          {colaboradoresAdministrativosFiltrados.length > 0 
+                            ? ((totalSupervisores / colaboradoresAdministrativosFiltrados.length) * 100).toFixed(1) 
+                            : '0.0'}%
                         </Typography>
                       </Box>
                       <SupervisorAccountIcon sx={{ fontSize: 48, opacity: 0.3 }} />
@@ -904,7 +914,9 @@ export const Regionais: React.FC = () => {
                         <Typography variant="caption" sx={{ opacity: 0.9 }}>Encarregados</Typography>
                         <Typography variant="h4" fontWeight={700}>{totalEncarregados}</Typography>
                         <Typography variant="caption">
-                          {((totalEncarregados / colaboradoresAdministrativosFiltrados.length) * 100).toFixed(1)}%
+                          {colaboradoresAdministrativosFiltrados.length > 0 
+                            ? ((totalEncarregados / colaboradoresAdministrativosFiltrados.length) * 100).toFixed(1) 
+                            : '0.0'}%
                         </Typography>
                       </Box>
                       <BusinessIcon sx={{ fontSize: 48, opacity: 0.3 }} />
@@ -929,7 +941,9 @@ export const Regionais: React.FC = () => {
                         <Typography variant="caption" sx={{ opacity: 0.9 }}>Coordenadores</Typography>
                         <Typography variant="h4" fontWeight={700}>{totalCoordenadores}</Typography>
                         <Typography variant="caption">
-                          {((totalCoordenadores / colaboradoresAdministrativosFiltrados.length) * 100).toFixed(1)}%
+                          {colaboradoresAdministrativosFiltrados.length > 0 
+                            ? ((totalCoordenadores / colaboradoresAdministrativosFiltrados.length) * 100).toFixed(1) 
+                            : '0.0'}%
                         </Typography>
                       </Box>
                       <TrendingUpIcon sx={{ fontSize: 48, opacity: 0.3 }} />
