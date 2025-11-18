@@ -7,81 +7,120 @@ import { pool } from '../server.js';
 export const getEstatisticas = async (req, res) => {
   try {
     // Total de usuários
-    const totalUsuarios = await pool.query(`
-      SELECT COUNT(*) as total FROM users
-    `);
-    const total = parseInt(totalUsuarios.rows[0]?.total || '0');
+    let total = 0;
+    try {
+      const totalUsuarios = await pool.query(`
+        SELECT COUNT(*) as total FROM users
+      `);
+      total = parseInt(totalUsuarios.rows[0]?.total || '0');
+    } catch (err) {
+      console.error('Erro ao buscar total de usuários:', err.message);
+    }
 
     // Usuários ativos (assumindo que não há campo status, consideramos todos como ativos)
-    const usuariosAtivos = await pool.query(`
-      SELECT COUNT(*) as total FROM users
-    `);
-    const ativos = parseInt(usuariosAtivos.rows[0]?.total || '0');
+    let ativos = 0;
+    try {
+      const usuariosAtivos = await pool.query(`
+        SELECT COUNT(*) as total FROM users
+      `);
+      ativos = parseInt(usuariosAtivos.rows[0]?.total || '0');
+    } catch (err) {
+      console.error('Erro ao buscar usuários ativos:', err.message);
+    }
 
     // Usuários bloqueados (assumindo que não há campo bloqueado, retornamos 0)
-    // Se houver campo bloqueado ou ativo = false, ajustar aqui
     const bloqueados = 0;
 
     // Acessos hoje
     const hoje = new Date().toISOString().split('T')[0];
-    const acessosHoje = await pool.query(`
-      SELECT COUNT(*) as total 
-      FROM logs_acesso 
-      WHERE DATE(data_hora) = $1 AND sucesso = true
-    `, [hoje]);
-    const acessos = parseInt(acessosHoje.rows[0]?.total || '0');
+    let acessos = 0;
+    let falhas = 0;
+    try {
+      const acessosHoje = await pool.query(`
+        SELECT COUNT(*) as total 
+        FROM logs_acesso 
+        WHERE DATE(data_hora) = $1 AND sucesso = true
+      `, [hoje]);
+      acessos = parseInt(acessosHoje.rows[0]?.total || '0');
+    } catch (err) {
+      console.error('Erro ao buscar acessos hoje:', err.message);
+    }
 
     // Tentativas falhas hoje
-    const tentativasFalhas = await pool.query(`
-      SELECT COUNT(*) as total 
-      FROM logs_acesso 
-      WHERE DATE(data_hora) = $1 AND sucesso = false
-    `, [hoje]);
-    const falhas = parseInt(tentativasFalhas.rows[0]?.total || '0');
+    try {
+      const tentativasFalhas = await pool.query(`
+        SELECT COUNT(*) as total 
+        FROM logs_acesso 
+        WHERE DATE(data_hora) = $1 AND sucesso = false
+      `, [hoje]);
+      falhas = parseInt(tentativasFalhas.rows[0]?.total || '0');
+    } catch (err) {
+      console.error('Erro ao buscar tentativas falhas:', err.message);
+    }
 
     // Acessos últimos 7 dias
-    const acessos7Dias = await pool.query(`
-      SELECT 
-        DATE(data_hora) as data,
-        COUNT(*) FILTER (WHERE sucesso = true) as sucessos,
-        COUNT(*) FILTER (WHERE sucesso = false) as falhas
-      FROM logs_acesso
-      WHERE data_hora >= CURRENT_DATE - INTERVAL '7 days'
-      GROUP BY DATE(data_hora)
-      ORDER BY data DESC
-    `);
-    const acessosUltimos7Dias = acessos7Dias.rows.map(row => ({
-      data: row.data,
-      sucessos: parseInt(row.sucessos || '0'),
-      falhas: parseInt(row.falhas || '0'),
-    }));
+    let acessosUltimos7Dias = [];
+    try {
+      const acessos7Dias = await pool.query(`
+        SELECT 
+          DATE(data_hora) as data,
+          COUNT(*) FILTER (WHERE sucesso = true) as sucessos,
+          COUNT(*) FILTER (WHERE sucesso = false) as falhas
+        FROM logs_acesso
+        WHERE data_hora >= CURRENT_DATE - INTERVAL '7 days'
+        GROUP BY DATE(data_hora)
+        ORDER BY data DESC
+      `);
+      acessosUltimos7Dias = acessos7Dias.rows.map(row => ({
+        data: row.data,
+        sucessos: parseInt(row.sucessos || '0'),
+        falhas: parseInt(row.falhas || '0'),
+      }));
+    } catch (err) {
+      console.error('Erro ao buscar acessos últimos 7 dias:', err.message);
+    }
 
     // Total de logs de acesso
-    const totalLogsAcesso = await pool.query(`
-      SELECT COUNT(*) as total FROM logs_acesso
-    `);
-    const totalAcesso = parseInt(totalLogsAcesso.rows[0]?.total || '0');
+    let totalAcesso = 0;
+    try {
+      const totalLogsAcesso = await pool.query(`
+        SELECT COUNT(*) as total FROM logs_acesso
+      `);
+      totalAcesso = parseInt(totalLogsAcesso.rows[0]?.total || '0');
+    } catch (err) {
+      console.error('Erro ao buscar total de logs de acesso:', err.message);
+    }
 
     // Total de logs de alterações
-    const totalLogsAlteracao = await pool.query(`
-      SELECT COUNT(*) as total FROM logs_alteracoes
-    `);
-    const totalAlteracao = parseInt(totalLogsAlteracao.rows[0]?.total || '0');
+    let totalAlteracao = 0;
+    try {
+      const totalLogsAlteracao = await pool.query(`
+        SELECT COUNT(*) as total FROM logs_alteracoes
+      `);
+      totalAlteracao = parseInt(totalLogsAlteracao.rows[0]?.total || '0');
+    } catch (err) {
+      console.error('Erro ao buscar total de logs de alterações:', err.message);
+    }
 
     // Usuários por perfil
-    const usuariosPorPerfil = await pool.query(`
-      SELECT 
-        role as perfil,
-        COUNT(*) as quantidade
-      FROM users
-      GROUP BY role
-      ORDER BY quantidade DESC
-    `);
-    const usuariosPorPerfilMapeados = usuariosPorPerfil.rows.map(row => ({
-      perfil: row.perfil,
-      quantidade: parseInt(row.quantidade || '0'),
-      percentual: total > 0 ? (parseInt(row.quantidade || '0') / total) * 100 : 0,
-    }));
+    let usuariosPorPerfilMapeados = [];
+    try {
+      const usuariosPorPerfil = await pool.query(`
+        SELECT 
+          role as perfil,
+          COUNT(*) as quantidade
+        FROM users
+        GROUP BY role
+        ORDER BY quantidade DESC
+      `);
+      usuariosPorPerfilMapeados = usuariosPorPerfil.rows.map(row => ({
+        perfil: row.perfil,
+        quantidade: parseInt(row.quantidade || '0'),
+        percentual: total > 0 ? (parseInt(row.quantidade || '0') / total) * 100 : 0,
+      }));
+    } catch (err) {
+      console.error('Erro ao buscar usuários por perfil:', err.message);
+    }
 
     // Alertas (tentativas falhadas recentes)
     const alertas = [];
@@ -170,12 +209,10 @@ export const getLogsAcesso = async (req, res) => {
         usuario_id,
         usuario_nome,
         email,
-        role,
         acao,
         ip,
         navegador,
         sucesso,
-        motivo_falha,
         data_hora
       FROM logs_acesso
       WHERE 1=1
@@ -285,7 +322,20 @@ export const getLogsAlteracao = async (req, res) => {
 
     query += ` ORDER BY data_hora DESC LIMIT 1000`;
 
-    const result = await pool.query(query, params);
+    let result;
+    try {
+      result = await pool.query(query, params);
+    } catch (err) {
+      console.error('Erro na query de logs de alterações:', err.message);
+      // Se a tabela não existir, retornar array vazio
+      if (err.message.includes('does not exist') || err.message.includes('não existe')) {
+        return res.json({
+          success: true,
+          data: [],
+        });
+      }
+      throw err;
+    }
 
     res.json({
       success: true,
