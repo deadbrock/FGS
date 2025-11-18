@@ -1,5 +1,5 @@
 import jsPDF from 'jspdf';
-import 'jspdf-autotable';
+import autoTable from 'jspdf-autotable';
 
 // Formata percentual
 export const formatarPercentual = (valor: number): string => {
@@ -108,7 +108,7 @@ export const exportarPDF = (
   doc.text(`Gerado em: ${new Date().toLocaleDateString('pt-BR')}`, 14, 22);
   
   // Tabela
-  (doc as any).autoTable({
+  autoTable(doc, {
     head: [dados.cabecalho],
     body: dados.linhas,
     startY: 30,
