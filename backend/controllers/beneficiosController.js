@@ -544,6 +544,13 @@ export const getEstatisticasBeneficios = async (req, res) => {
       WHERE ativo = true
     `);
 
+    // Total de colaboradores únicos atendidos
+    const totalColaboradoresAtendidos = await pool.query(`
+      SELECT COUNT(DISTINCT colaborador_id) as total
+      FROM colaboradores_beneficios
+      WHERE ativo = true
+    `);
+
     // Por categoria
     const porCategoria = await pool.query(`
       SELECT 
@@ -574,8 +581,8 @@ export const getEstatisticasBeneficios = async (req, res) => {
     // Custo total mensal
     const custoTotal = await pool.query(`
       SELECT 
-        SUM(valor) as total,
-        SUM(valor_coparticipacao) as total_coparticipacao
+        COALESCE(SUM(valor), 0) as total,
+        COALESCE(SUM(valor_coparticipacao), 0) as total_coparticipacao
       FROM colaboradores_beneficios
       WHERE ativo = true
     `);
@@ -583,10 +590,11 @@ export const getEstatisticasBeneficios = async (req, res) => {
     res.json({
       success: true,
       data: {
-        totalAtivos: parseInt(totalAtivos.rows[0].count),
-        porCategoria: porCategoria.rows,
-        porTipo: porTipo.rows,
-        custoTotal: custoTotal.rows[0]
+        totalAtivos: parseInt(totalAtivos.rows[0]?.count || '0'),
+        totalColaboradoresAtendidos: parseInt(totalColaboradoresAtendidos.rows[0]?.total || '0'),
+        porCategoria: porCategoria.rows || [],
+        porTipo: porTipo.rows || [],
+        custoTotal: custoTotal.rows[0] || { total: '0', total_coparticipacao: '0' }
       }
     });
 

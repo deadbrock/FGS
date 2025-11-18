@@ -273,10 +273,8 @@ class BeneficiosService {
       const custoMensalColaborador = custoCoparticipacao; // O que o colaborador paga
       const custoMensalTotal = custoTotal; // Total geral
       
-      // Calcular total de colaboradores atendidos (contar colaboradores únicos com benefícios ativos)
-      // Como não temos isso no backend, vamos usar uma estimativa baseada nos benefícios
-      // ou buscar separadamente se necessário
-      const totalColaboradoresAtendidos = data.totalAtivos || 0; // Por enquanto, usar total de benefícios como estimativa
+      // Total de colaboradores únicos atendidos (vem do backend)
+      const totalColaboradoresAtendidos = data.totalColaboradoresAtendidos || 0;
       
       // Calcular percentuais para distribuição por tipo
       const porTipoArray = Array.isArray(data.porTipo) ? data.porTipo : [];
