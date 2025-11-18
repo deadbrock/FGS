@@ -14,6 +14,15 @@ import {
   salvarConfigEmail,
   salvarConfigWhatsApp,
 } from '../controllers/integracoesController.js';
+import {
+  uploadMiddleware,
+  importarArquivo,
+  exportarDados,
+  getHistoricoImportacoes,
+  getDetalhesImportacao,
+  downloadRelatorioImportacao,
+  getTemplatesExportacao,
+} from '../controllers/importacaoExportacaoController.js';
 
 const router = express.Router();
 
@@ -71,6 +80,28 @@ router.post('/configuracoes/email', salvarConfigEmail);
 
 // POST /api/integracoes/configuracoes/whatsapp - Salvar configuração de WhatsApp
 router.post('/configuracoes/whatsapp', salvarConfigWhatsApp);
+
+// ==========================================
+// IMPORTAÇÃO/EXPORTAÇÃO
+// ==========================================
+
+// POST /api/integracoes/importar - Importar arquivo
+router.post('/importar', uploadMiddleware, importarArquivo);
+
+// POST /api/integracoes/exportar - Exportar dados
+router.post('/exportar', exportarDados);
+
+// GET /api/integracoes/importacoes/historico - Histórico de importações
+router.get('/importacoes/historico', getHistoricoImportacoes);
+
+// GET /api/integracoes/importacoes/:id - Detalhes de importação
+router.get('/importacoes/:id', getDetalhesImportacao);
+
+// GET /api/integracoes/importacoes/:id/relatorio - Download relatório de erros
+router.get('/importacoes/:id/relatorio', downloadRelatorioImportacao);
+
+// GET /api/integracoes/exportar/templates - Templates de exportação
+router.get('/exportar/templates', getTemplatesExportacao);
 
 export default router;
 

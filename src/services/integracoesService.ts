@@ -154,6 +154,89 @@ class IntegracoesService {
       throw new Error('Erro ao salvar configuração de WhatsApp');
     }
   }
+
+  // ==========================================
+  // IMPORTAÇÃO/EXPORTAÇÃO
+  // ==========================================
+
+  async importarArquivo(file: File, modulo: string, opcoes?: any): Promise<any> {
+    try {
+      const formData = new FormData();
+      formData.append('arquivo', file);
+      formData.append('modulo', modulo);
+      if (opcoes) {
+        formData.append('opcoes', JSON.stringify(opcoes));
+      }
+
+      const response = await this.api.post('/importar', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      return response.data.data;
+    } catch (error) {
+      console.error('Erro ao importar arquivo:', error);
+      throw new Error('Erro ao importar arquivo');
+    }
+  }
+
+  async exportarDados(modulo: string, formato: string, filtros?: any): Promise<Blob> {
+    try {
+      const response = await this.api.post(
+        '/exportar',
+        { modulo, formato, filtros },
+        {
+          responseType: 'blob',
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error('Erro ao exportar dados:', error);
+      throw new Error('Erro ao exportar dados');
+    }
+  }
+
+  async getHistoricoImportacoes(): Promise<any[]> {
+    try {
+      const response = await this.api.get('/importacoes/historico');
+      return response.data.data || [];
+    } catch (error) {
+      console.error('Erro ao buscar histórico de importações:', error);
+      throw new Error('Erro ao buscar histórico de importações');
+    }
+  }
+
+  async getDetalhesImportacao(id: string): Promise<any> {
+    try {
+      const response = await this.api.get(`/importacoes/${id}`);
+      return response.data.data;
+    } catch (error) {
+      console.error('Erro ao buscar detalhes da importação:', error);
+      throw new Error('Erro ao buscar detalhes da importação');
+    }
+  }
+
+  async downloadRelatorioImportacao(id: string): Promise<Blob> {
+    try {
+      const response = await this.api.get(`/importacoes/${id}/relatorio`, {
+        responseType: 'blob',
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Erro ao baixar relatório:', error);
+      throw new Error('Erro ao baixar relatório');
+    }
+  }
+
+  async getTemplatesExportacao(): Promise<any[]> {
+    try {
+      const response = await this.api.get('/exportar/templates');
+      return response.data.data || [];
+    } catch (error) {
+      console.error('Erro ao buscar templates de exportação:', error);
+      throw new Error('Erro ao buscar templates de exportação');
+    }
+  }
 }
 
 export default new IntegracoesService();
