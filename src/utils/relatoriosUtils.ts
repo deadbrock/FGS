@@ -1,5 +1,6 @@
 import jsPDF from 'jspdf';
-import autoTable from 'jspdf-autotable';
+// @ts-ignore - jspdf-autotable não tem tipos TypeScript completos
+import 'jspdf-autotable';
 
 // Formata percentual
 export const formatarPercentual = (valor: number): string => {
@@ -107,8 +108,9 @@ export const exportarPDF = (
   doc.setFontSize(10);
   doc.text(`Gerado em: ${new Date().toLocaleDateString('pt-BR')}`, 14, 22);
   
-  // Tabela
-  autoTable(doc, {
+  // Tabela - jspdf-autotable estende o jsPDF
+  // @ts-ignore - autoTable é adicionado dinamicamente pelo plugin
+  (doc as any).autoTable({
     head: [dados.cabecalho],
     body: dados.linhas,
     startY: 30,
