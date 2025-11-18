@@ -46,16 +46,17 @@ export const Relatorios: React.FC = () => {
   };
 
   const handleExportarPDF = () => {
-    if (!dashboard) return;
+    if (!dashboard || !dashboard.indicadoresPrincipais) return;
     
+    const indicadores = dashboard.indicadoresPrincipais;
     const dados = {
       cabecalho: ['Indicador', 'Valor'],
       linhas: [
-        ['Funcionários Ativos', dashboard.indicadoresPrincipais.funcionariosAtivos],
-        ['Turnover Mensal', `${dashboard.indicadoresPrincipais.turnoverMensal}%`],
-        ['Dias Perdidos (Atestados)', dashboard.indicadoresPrincipais.diasPerdidosAtestados],
-        ['Treinamentos Vencidos', dashboard.indicadoresPrincipais.treinamentosVencidos],
-        ['Custo Total Benefícios', formatarMoeda(dashboard.indicadoresPrincipais.custoTotalBeneficios)],
+        ['Funcionários Ativos', indicadores.funcionariosAtivos || 0],
+        ['Turnover Mensal', `${indicadores.turnoverMensal || 0}%`],
+        ['Dias Perdidos (Atestados)', indicadores.diasPerdidosAtestados || 0],
+        ['Treinamentos Vencidos', indicadores.treinamentosVencidos || 0],
+        ['Custo Total Benefícios', formatarMoeda(indicadores.custoTotalBeneficios || 0)],
       ],
     };
     
@@ -63,16 +64,17 @@ export const Relatorios: React.FC = () => {
   };
 
   const handleExportarExcel = () => {
-    if (!dashboard) return;
+    if (!dashboard || !dashboard.indicadoresPrincipais) return;
     
+    const indicadores = dashboard.indicadoresPrincipais;
     const dados = [
       {
         Indicador: 'Funcionários Ativos',
-        Valor: dashboard.indicadoresPrincipais.funcionariosAtivos,
+        Valor: indicadores.funcionariosAtivos || 0,
       },
       {
         Indicador: 'Turnover Mensal',
-        Valor: `${dashboard.indicadoresPrincipais.turnoverMensal}%`,
+        Valor: `${indicadores.turnoverMensal || 0}%`,
       },
     ];
     
@@ -116,7 +118,7 @@ export const Relatorios: React.FC = () => {
         />
       </Box>
 
-      {dashboard && (
+      {dashboard && dashboard.indicadoresPrincipais && (
         <>
           {/* Indicadores Principais */}
           <Typography variant="h6" gutterBottom mb={2}>
@@ -126,8 +128,8 @@ export const Relatorios: React.FC = () => {
             <Grid item xs={12} sm={6} md={4}>
               <StatCard
                 title="Funcionários Ativos"
-                value={dashboard.indicadoresPrincipais.funcionariosAtivos}
-                subtitle={`${formatarPercentual(dashboard.indicadoresPrincipais.percentualAtivos)}`}
+                value={dashboard.indicadoresPrincipais.funcionariosAtivos || 0}
+                subtitle={`${formatarPercentual(dashboard.indicadoresPrincipais.percentualAtivos || 0)}`}
                 icon={<PeopleIcon />}
                 color="#388e3c"
               />
@@ -135,8 +137,8 @@ export const Relatorios: React.FC = () => {
             <Grid item xs={12} sm={6} md={4}>
               <StatCard
                 title="Turnover Mensal"
-                value={`${dashboard.indicadoresPrincipais.turnoverMensal}%`}
-                subtitle={`${dashboard.indicadoresPrincipais.demissoesMes} demissões`}
+                value={`${dashboard.indicadoresPrincipais.turnoverMensal || 0}%`}
+                subtitle={`${dashboard.indicadoresPrincipais.demissoesMes || 0} demissões`}
                 icon={<TrendingUpIcon />}
                 color="#f57c00"
               />
@@ -144,8 +146,8 @@ export const Relatorios: React.FC = () => {
             <Grid item xs={12} sm={6} md={4}>
               <StatCard
                 title="Dias Perdidos (Atestados)"
-                value={dashboard.indicadoresPrincipais.diasPerdidosAtestados}
-                subtitle={`${dashboard.indicadoresPrincipais.totalAtestadosMes} atestados`}
+                value={dashboard.indicadoresPrincipais.diasPerdidosAtestados || 0}
+                subtitle={`${dashboard.indicadoresPrincipais.totalAtestadosMes || 0} atestados`}
                 icon={<LocalHospitalIcon />}
                 color="#d32f2f"
               />
@@ -153,8 +155,8 @@ export const Relatorios: React.FC = () => {
             <Grid item xs={12} sm={6} md={4}>
               <StatCard
                 title="Treinamentos Vencidos"
-                value={dashboard.indicadoresPrincipais.treinamentosVencidos}
-                subtitle={`${dashboard.indicadoresPrincipais.treinamentosAVencer} a vencer`}
+                value={dashboard.indicadoresPrincipais.treinamentosVencidos || 0}
+                subtitle={`${dashboard.indicadoresPrincipais.treinamentosAVencer || 0} a vencer`}
                 icon={<SchoolIcon />}
                 color="#1976d2"
               />
@@ -162,8 +164,8 @@ export const Relatorios: React.FC = () => {
             <Grid item xs={12} sm={6} md={4}>
               <StatCard
                 title="Custo Total Benefícios"
-                value={formatarMoeda(dashboard.indicadoresPrincipais.custoTotalBeneficios)}
-                subtitle={`${formatarMoeda(dashboard.indicadoresPrincipais.custoMedioPorFuncionario)}/funcionário`}
+                value={formatarMoeda(dashboard.indicadoresPrincipais.custoTotalBeneficios || 0)}
+                subtitle={`${formatarMoeda(dashboard.indicadoresPrincipais.custoMedioPorFuncionario || 0)}/funcionário`}
                 icon={<CardGiftcardIcon />}
                 color="#7b1fa2"
               />
