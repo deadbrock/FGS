@@ -1,45 +1,59 @@
 import { pool } from '../server.js';
 
+// Função auxiliar para verificar se uma tabela existe
+const tabelaExiste = async (nomeTabela) => {
+  try {
+    const result = await pool.query(`
+      SELECT EXISTS (
+        SELECT FROM information_schema.tables 
+        WHERE table_schema = 'public' 
+        AND table_name = $1
+      )
+    `, [nomeTabela]);
+    return result.rows[0]?.exists || false;
+  } catch (err) {
+    return false;
+  }
+};
+
 // ==========================================
 // ESTATÍSTICAS DE INTEGRAÇÕES
 // ==========================================
 
 export const getEstatisticas = async (req, res) => {
   try {
+    // Verificar se as tabelas existem
+    const integracoesExiste = await tabelaExiste('integracoes');
+    const logsSincronizacaoExiste = await tabelaExiste('logs_sincronizacao');
+
     // Total de integrações
     let totalIntegracoes = 0;
     let integracoesAtivas = 0;
     let integracoesInativas = 0;
     let integracoesComErro = 0;
 
-    try {
-      const totalResult = await pool.query(`
-        SELECT COUNT(*) as total FROM integracoes
-      `);
-      totalIntegracoes = parseInt(totalResult.rows[0]?.total || '0');
+    if (integracoesExiste) {
+      try {
+        const totalResult = await pool.query(`
+          SELECT COUNT(*) as total FROM integracoes
+        `);
+        totalIntegracoes = parseInt(totalResult.rows[0]?.total || '0');
 
-      const ativasResult = await pool.query(`
-        SELECT COUNT(*) as total FROM integracoes WHERE ativa = true
-      `);
-      integracoesAtivas = parseInt(ativasResult.rows[0]?.total || '0');
+        const ativasResult = await pool.query(`
+          SELECT COUNT(*) as total FROM integracoes WHERE ativa = true
+        `);
+        integracoesAtivas = parseInt(ativasResult.rows[0]?.total || '0');
 
-      const inativasResult = await pool.query(`
-        SELECT COUNT(*) as total FROM integracoes WHERE ativa = false
-      `);
-      integracoesInativas = parseInt(inativasResult.rows[0]?.total || '0');
+        const inativasResult = await pool.query(`
+          SELECT COUNT(*) as total FROM integracoes WHERE ativa = false
+        `);
+        integracoesInativas = parseInt(inativasResult.rows[0]?.total || '0');
 
-      const erroResult = await pool.query(`
-        SELECT COUNT(*) as total FROM integracoes WHERE status = 'ERRO'
-      `);
-      integracoesComErro = parseInt(erroResult.rows[0]?.total || '0');
-    } catch (err) {
-      // Se a tabela não existir, manter valores padrão (0)
-      if (err.code === '42P01' || err.message.includes('does not exist')) {
-        totalIntegracoes = 0;
-        integracoesAtivas = 0;
-        integracoesInativas = 0;
-        integracoesComErro = 0;
-      } else {
+        const erroResult = await pool.query(`
+          SELECT COUNT(*) as total FROM integracoes WHERE status = 'ERRO'
+        `);
+        integracoesComErro = parseInt(erroResult.rows[0]?.total || '0');
+      } catch (err) {
         console.error('Erro ao buscar total de integrações:', err.message);
       }
     }
@@ -50,27 +64,23 @@ export const getEstatisticas = async (req, res) => {
     let registrosProcessadosHoje = 0;
     let errosHoje = 0;
 
-    try {
-      const sincHoje = await pool.query(`
-        SELECT 
-          COUNT(*) as total,
-          COALESCE(SUM(total_registros), 0) as registros,
-          COALESCE(SUM(registros_erro), 0) as erros
-        FROM logs_sincronizacao
-        WHERE DATE(data_hora_inicio) = $1
-      `, [hoje]);
-      
-      if (sincHoje.rows[0]) {
-        sincronizacoesHoje = parseInt(sincHoje.rows[0].total || '0');
-        registrosProcessadosHoje = parseInt(sincHoje.rows[0].registros || '0');
-        errosHoje = parseInt(sincHoje.rows[0].erros || '0');
-      }
-    } catch (err) {
-      if (err.code === '42P01' || err.message.includes('does not exist')) {
-        sincronizacoesHoje = 0;
-        registrosProcessadosHoje = 0;
-        errosHoje = 0;
-      } else {
+    if (logsSincronizacaoExiste) {
+      try {
+        const sincHoje = await pool.query(`
+          SELECT 
+            COUNT(*) as total,
+            COALESCE(SUM(total_registros), 0) as registros,
+            COALESCE(SUM(registros_erro), 0) as erros
+          FROM logs_sincronizacao
+          WHERE DATE(data_hora_inicio) = $1
+        `, [hoje]);
+        
+        if (sincHoje.rows[0]) {
+          sincronizacoesHoje = parseInt(sincHoje.rows[0].total || '0');
+          registrosProcessadosHoje = parseInt(sincHoje.rows[0].registros || '0');
+          errosHoje = parseInt(sincHoje.rows[0].erros || '0');
+        }
+      } catch (err) {
         console.error('Erro ao buscar sincronizações hoje:', err.message);
       }
     }
@@ -80,27 +90,23 @@ export const getEstatisticas = async (req, res) => {
     let registrosProcessadosSemana = 0;
     let errosSemana = 0;
 
-    try {
-      const sincSemana = await pool.query(`
-        SELECT 
-          COUNT(*) as total,
-          COALESCE(SUM(total_registros), 0) as registros,
-          COALESCE(SUM(registros_erro), 0) as erros
-        FROM logs_sincronizacao
-        WHERE data_hora_inicio >= CURRENT_DATE - INTERVAL '7 days'
-      `);
-      
-      if (sincSemana.rows[0]) {
-        sincronizacoesSemana = parseInt(sincSemana.rows[0].total || '0');
-        registrosProcessadosSemana = parseInt(sincSemana.rows[0].registros || '0');
-        errosSemana = parseInt(sincSemana.rows[0].erros || '0');
-      }
-    } catch (err) {
-      if (err.code === '42P01' || err.message.includes('does not exist')) {
-        sincronizacoesSemana = 0;
-        registrosProcessadosSemana = 0;
-        errosSemana = 0;
-      } else {
+    if (logsSincronizacaoExiste) {
+      try {
+        const sincSemana = await pool.query(`
+          SELECT 
+            COUNT(*) as total,
+            COALESCE(SUM(total_registros), 0) as registros,
+            COALESCE(SUM(registros_erro), 0) as erros
+          FROM logs_sincronizacao
+          WHERE data_hora_inicio >= CURRENT_DATE - INTERVAL '7 days'
+        `);
+        
+        if (sincSemana.rows[0]) {
+          sincronizacoesSemana = parseInt(sincSemana.rows[0].total || '0');
+          registrosProcessadosSemana = parseInt(sincSemana.rows[0].registros || '0');
+          errosSemana = parseInt(sincSemana.rows[0].erros || '0');
+        }
+      } catch (err) {
         console.error('Erro ao buscar sincronizações semana:', err.message);
       }
     }
@@ -108,35 +114,31 @@ export const getEstatisticas = async (req, res) => {
     // Sincronizações mês
     let sincronizacoesMes = 0;
 
-    try {
-      const sincMes = await pool.query(`
-        SELECT COUNT(*) as total
-        FROM logs_sincronizacao
-        WHERE data_hora_inicio >= DATE_TRUNC('month', CURRENT_DATE)
-      `);
-      sincronizacoesMes = parseInt(sincMes.rows[0]?.total || '0');
-    } catch (err) {
-      if (err.code === '42P01' || err.message.includes('does not exist')) {
-        sincronizacoesMes = 0;
-      } else {
+    if (logsSincronizacaoExiste) {
+      try {
+        const sincMes = await pool.query(`
+          SELECT COUNT(*) as total
+          FROM logs_sincronizacao
+          WHERE data_hora_inicio >= DATE_TRUNC('month', CURRENT_DATE)
+        `);
+        sincronizacoesMes = parseInt(sincMes.rows[0]?.total || '0');
+      } catch (err) {
         console.error('Erro ao buscar sincronizações mês:', err.message);
       }
     }
 
     // Tempo médio de resposta
     let tempoMedioResposta = 0;
-    try {
-      const tempoMedio = await pool.query(`
-        SELECT COALESCE(AVG(duracao), 0) as media
-        FROM logs_sincronizacao
-        WHERE duracao IS NOT NULL
-        AND data_hora_inicio >= CURRENT_DATE - INTERVAL '7 days'
-      `);
-      tempoMedioResposta = parseFloat(tempoMedio.rows[0]?.media || '0');
-    } catch (err) {
-      if (err.code === '42P01' || err.message.includes('does not exist')) {
-        tempoMedioResposta = 0;
-      } else {
+    if (logsSincronizacaoExiste) {
+      try {
+        const tempoMedio = await pool.query(`
+          SELECT COALESCE(AVG(duracao), 0) as media
+          FROM logs_sincronizacao
+          WHERE duracao IS NOT NULL
+          AND data_hora_inicio >= CURRENT_DATE - INTERVAL '7 days'
+        `);
+        tempoMedioResposta = parseFloat(tempoMedio.rows[0]?.media || '0');
+      } catch (err) {
         console.error('Erro ao buscar tempo médio:', err.message);
       }
     }
@@ -150,53 +152,49 @@ export const getEstatisticas = async (req, res) => {
 
     // Integrações por tipo
     let integracoesPorTipo = [];
-    try {
-      const porTipo = await pool.query(`
-        SELECT 
-          tipo,
-          COUNT(*) as quantidade,
-          COUNT(*) FILTER (WHERE ativa = true) as ativas
-        FROM integracoes
-        GROUP BY tipo
-      `);
-      integracoesPorTipo = porTipo.rows.map(row => ({
-        tipo: row.tipo,
-        quantidade: parseInt(row.quantidade || '0'),
-        ativas: parseInt(row.ativas || '0'),
-      }));
-    } catch (err) {
-      if (err.code === '42P01' || err.message.includes('does not exist')) {
-        integracoesPorTipo = [];
-      } else {
+    if (integracoesExiste) {
+      try {
+        const porTipo = await pool.query(`
+          SELECT 
+            tipo,
+            COUNT(*) as quantidade,
+            COUNT(*) FILTER (WHERE ativa = true) as ativas
+          FROM integracoes
+          GROUP BY tipo
+        `);
+        integracoesPorTipo = porTipo.rows.map(row => ({
+          tipo: row.tipo,
+          quantidade: parseInt(row.quantidade || '0'),
+          ativas: parseInt(row.ativas || '0'),
+        }));
+      } catch (err) {
         console.error('Erro ao buscar integrações por tipo:', err.message);
       }
     }
 
     // Sincronizações por dia (últimos 7 dias)
     let sincronizacoesPorDia = [];
-    try {
-      const porDia = await pool.query(`
-        SELECT 
-          DATE(data_hora_inicio) as data,
-          COUNT(*) as total,
-          COUNT(*) FILTER (WHERE status = 'SUCESSO') as sucesso,
-          COUNT(*) FILTER (WHERE status = 'FALHA') as falha
-        FROM logs_sincronizacao
-        WHERE data_hora_inicio >= CURRENT_DATE - INTERVAL '7 days'
-        GROUP BY DATE(data_hora_inicio)
-        ORDER BY data DESC
-        LIMIT 7
-      `);
-      sincronizacoesPorDia = porDia.rows.map(row => ({
-        data: row.data,
-        total: parseInt(row.total || '0'),
-        sucesso: parseInt(row.sucesso || '0'),
-        falha: parseInt(row.falha || '0'),
-      }));
-    } catch (err) {
-      if (err.code === '42P01' || err.message.includes('does not exist')) {
-        sincronizacoesPorDia = [];
-      } else {
+    if (logsSincronizacaoExiste) {
+      try {
+        const porDia = await pool.query(`
+          SELECT 
+            DATE(data_hora_inicio) as data,
+            COUNT(*) as total,
+            COUNT(*) FILTER (WHERE status = 'SUCESSO') as sucesso,
+            COUNT(*) FILTER (WHERE status = 'FALHA') as falha
+          FROM logs_sincronizacao
+          WHERE data_hora_inicio >= CURRENT_DATE - INTERVAL '7 days'
+          GROUP BY DATE(data_hora_inicio)
+          ORDER BY data DESC
+          LIMIT 7
+        `);
+        sincronizacoesPorDia = porDia.rows.map(row => ({
+          data: row.data,
+          total: parseInt(row.total || '0'),
+          sucesso: parseInt(row.sucesso || '0'),
+          falha: parseInt(row.falha || '0'),
+        }));
+      } catch (err) {
         console.error('Erro ao buscar sincronizações por dia:', err.message);
       }
     }
@@ -237,6 +235,15 @@ export const getEstatisticas = async (req, res) => {
 
 export const getAllIntegracoes = async (req, res) => {
   try {
+    // Verificar se a tabela existe
+    const existe = await tabelaExiste('integracoes');
+    if (!existe) {
+      return res.json({
+        success: true,
+        data: [],
+      });
+    }
+
     const result = await pool.query(`
       SELECT 
         id,
@@ -292,15 +299,6 @@ export const getAllIntegracoes = async (req, res) => {
     });
   } catch (error) {
     console.error('Erro ao buscar integrações:', error);
-    
-    // Se a tabela não existir, retornar array vazio
-    if (error.code === '42P01' || error.message.includes('does not exist')) {
-      return res.json({
-        success: true,
-        data: [],
-      });
-    }
-
     res.status(500).json({
       success: false,
       error: 'Erro ao buscar integrações',

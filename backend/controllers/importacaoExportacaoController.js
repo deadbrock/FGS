@@ -302,14 +302,15 @@ async function processarLinha(dados, modulo, numeroLinha) {
 // Processar colaborador
 async function processarColaborador(dados) {
   // Validar campos obrigatórios
-  if (!dados.nome && !dados.name) {
+  if (!dados.nome && !dados.name && !dados.nome_completo) {
     throw new Error('Nome é obrigatório');
   }
 
-  const nome = dados.nome || dados.name;
+  const nomeCompleto = dados.nome_completo || dados.nome || dados.name;
   const cpf = dados.cpf || dados.CPF;
   const email = dados.email || dados.Email;
   const cargo = dados.cargo || dados.Cargo || dados.funcao || dados.Funcao;
+  const dataAdmissao = dados.data_admissao || dados.dataAdmissao || new Date().toISOString().split('T')[0];
 
   // Verificar se já existe
   if (cpf) {
@@ -318,15 +319,15 @@ async function processarColaborador(dados) {
       // Atualizar existente
       await pool.query(`
         UPDATE colaboradores
-        SET nome = $1, email = $2, cargo = $3, updated_at = NOW()
+        SET nome_completo = $1, email = $2, cargo = $3, updated_at = NOW()
         WHERE cpf = $4
-      `, [nome, email, cargo, cpf]);
+      `, [nomeCompleto, email, cargo, cpf]);
     } else {
       // Criar novo
       await pool.query(`
-        INSERT INTO colaboradores (nome, cpf, email, cargo, created_at)
-        VALUES ($1, $2, $3, $4, NOW())
-      `, [nome, cpf, email, cargo]);
+        INSERT INTO colaboradores (nome_completo, cpf, email, cargo, data_admissao, created_at)
+        VALUES ($1, $2, $3, $4, $5, NOW())
+      `, [nomeCompleto, cpf, email, cargo, dataAdmissao]);
     }
   } else {
     throw new Error('CPF é obrigatório para colaboradores');
@@ -442,13 +443,20 @@ export const exportarDados = async (req, res) => {
 
 // Exportar colaboradores
 async function exportarColaboradores(filtros) {
-  let query = 'SELECT * FROM colaboradores WHERE 1=1';
+  let query = `
+    SELECT 
+      id, nome_completo, cpf, email, celular, cargo, departamento,
+      data_admissao, status, local_trabalho, salario,
+      created_at, updated_at
+    FROM colaboradores 
+    WHERE 1=1
+  `;
   const params = [];
   let paramIndex = 1;
 
-  if (filtros?.ativo !== undefined) {
-    query += ` AND ativo = $${paramIndex}`;
-    params.push(filtros.ativo);
+  if (filtros?.status) {
+    query += ` AND status = $${paramIndex}`;
+    params.push(filtros.status);
     paramIndex++;
   }
 
@@ -458,7 +466,7 @@ async function exportarColaboradores(filtros) {
     paramIndex++;
   }
 
-  query += ' ORDER BY nome';
+  query += ' ORDER BY nome_completo';
 
   const result = await pool.query(query, params);
   return result.rows;
@@ -547,6 +555,30 @@ async function gerarExcel(dados) {
 
 export const getHistoricoImportacoes = async (req, res) => {
   try {
+    // Verificar se a tabela existe
+    const tabelaExiste = async (nomeTabela) => {
+      try {
+        const result = await pool.query(`
+          SELECT EXISTS (
+            SELECT FROM information_schema.tables 
+            WHERE table_schema = 'public' 
+            AND table_name = $1
+          )
+        `, [nomeTabela]);
+        return result.rows[0]?.exists || false;
+      } catch (err) {
+        return false;
+      }
+    };
+
+    const existe = await tabelaExiste('historico_importacoes');
+    if (!existe) {
+      return res.json({
+        success: true,
+        data: [],
+      });
+    }
+
     const result = await pool.query(`
       SELECT 
         id,
@@ -587,15 +619,6 @@ export const getHistoricoImportacoes = async (req, res) => {
     });
   } catch (error) {
     console.error('Erro ao buscar histórico:', error);
-    
-    // Se a tabela não existir, retornar array vazio
-    if (error.code === '42P01' || error.message.includes('does not exist')) {
-      return res.json({
-        success: true,
-        data: [],
-      });
-    }
-
     res.status(500).json({
       success: false,
       error: 'Erro ao buscar histórico',
