@@ -9,4 +9,5 @@ export { AnexosDocumentos } from './AnexosDocumentos';
 export { HistoricoColaborador } from './HistoricoColaborador';
 export { AdicionarEventoModal } from './AdicionarEventoModal';
 export { BeneficiosColaboradorTab } from './BeneficiosColaboradorTab';
+export { HistoricoReajustes } from './HistoricoReajustes';
 

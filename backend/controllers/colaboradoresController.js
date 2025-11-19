@@ -187,6 +187,7 @@ export const createColaborador = async (req, res) => {
       email,
       telefone,
       celular,
+      whatsapp,
       
       // Endereço
       cep,
@@ -226,6 +227,9 @@ export const createColaborador = async (req, res) => {
       nome_mae,
       nome_pai,
       quantidade_dependentes,
+      
+      // Dados Educacionais
+      escolaridade,
       
       // Outros
       observacoes,
@@ -271,7 +275,7 @@ export const createColaborador = async (req, res) => {
     const result = await pool.query(`
       INSERT INTO colaboradores (
         nome_completo, cpf, rg, data_nascimento, sexo, estado_civil,
-        nacionalidade, naturalidade, email, telefone, celular,
+        nacionalidade, naturalidade, email, telefone, celular, whatsapp,
         cep, logradouro, numero, complemento, bairro, cidade, estado,
         matricula, data_admissao, cargo, departamento, centro_custo,
         local_trabalho, tipo_contrato, jornada_trabalho, salario,
@@ -279,18 +283,19 @@ export const createColaborador = async (req, res) => {
         pis_pasep, ctps_numero, ctps_serie, ctps_uf,
         titulo_eleitor, cnh, cnh_categoria, cnh_validade,
         nome_mae, nome_pai, quantidade_dependentes,
+        escolaridade,
         observacoes, user_id, created_by
       ) VALUES (
         $1, $2, $3, $4, $5, $6, $7, $8, $9, $10,
         $11, $12, $13, $14, $15, $16, $17, $18, $19, $20,
         $21, $22, $23, $24, $25, $26, $27, $28, $29, $30,
         $31, $32, $33, $34, $35, $36, $37, $38, $39, $40,
-        $41, $42, $43, $44, $45
+        $41, $42, $43, $44, $45, $46, $47
       )
       RETURNING *
     `, [
       nome_completo, cpf, rg, data_nascimento, sexo, estado_civil,
-      nacionalidade, naturalidade, email, telefone, celular,
+      nacionalidade, naturalidade, email, telefone, celular, whatsapp,
       cep, logradouro, numero, complemento, bairro, cidade, estado,
       matricula, data_admissao, cargo, departamento, centro_custo,
       local_trabalho, tipo_contrato, jornada_trabalho, salario,
@@ -298,6 +303,7 @@ export const createColaborador = async (req, res) => {
       pis_pasep, ctps_numero, ctps_serie, ctps_uf,
       titulo_eleitor, cnh, cnh_categoria, cnh_validade,
       nome_mae, nome_pai, quantidade_dependentes || 0,
+      escolaridade,
       observacoes, user_id, req.user?.id || null
     ]);
 
@@ -363,7 +369,7 @@ export const updateColaborador = async (req, res) => {
     // Lista de campos permitidos
     const allowedFields = [
       'nome_completo', 'cpf', 'rg', 'data_nascimento', 'sexo', 'estado_civil',
-      'nacionalidade', 'naturalidade', 'email', 'telefone', 'celular',
+      'nacionalidade', 'naturalidade', 'email', 'telefone', 'celular', 'whatsapp',
       'cep', 'logradouro', 'numero', 'complemento', 'bairro', 'cidade', 'estado',
       'matricula', 'data_admissao', 'data_demissao', 'cargo', 'departamento',
       'centro_custo', 'local_trabalho', 'tipo_contrato', 'jornada_trabalho',
@@ -371,6 +377,7 @@ export const updateColaborador = async (req, res) => {
       'pis_pasep', 'ctps_numero', 'ctps_serie', 'ctps_uf',
       'titulo_eleitor', 'cnh', 'cnh_categoria', 'cnh_validade',
       'nome_mae', 'nome_pai', 'quantidade_dependentes',
+      'escolaridade',
       'status', 'motivo_desligamento', 'avatar', 'observacoes'
     ];
 

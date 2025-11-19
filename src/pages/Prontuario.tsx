@@ -61,6 +61,7 @@ import {
   AnexosDocumentos,
   HistoricoColaborador,
   BeneficiosColaboradorTab,
+  HistoricoReajustes,
 } from '../components/prontuario';
 import { formatarData } from '../utils/statusUtils';
 import prontuarioService from '../services/prontuarioService';
@@ -1169,6 +1170,15 @@ export const Prontuario: React.FC = () => {
                   Salvar Alterações
                 </GradientButton>
               </Box>
+
+              {colaboradorSelecionado && (
+                <Box mt={4}>
+                  <HistoricoReajustes
+                    colaboradorId={colaboradorSelecionado.id}
+                    salarioAtual={prontuario?.dadosContratuais?.salario}
+                  />
+                </Box>
+              )}
             </TabPanel>
 
             {/* Tab Panel 2: Exames Médicos */}

@@ -24,7 +24,9 @@ export interface DadosPessoais {
   nomePai?: string;
   telefone: string;
   celular: string;
+  whatsapp?: string;
   email: string;
+  escolaridade?: string;
   endereco: Endereco;
 }
 

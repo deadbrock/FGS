@@ -7,6 +7,12 @@ import {
   deleteColaborador,
   getEstatisticas
 } from '../controllers/colaboradoresController.js';
+import {
+  getHistoricoReajustes,
+  createReajuste,
+  updateReajuste,
+  deleteReajuste
+} from '../controllers/reajustesController.js';
 
 const router = express.Router();
 
@@ -20,6 +26,22 @@ router.get('/', getColaboradores);
 
 // GET /api/colaboradores/estatisticas - Estatísticas gerais
 router.get('/estatisticas', getEstatisticas);
+
+// =============================================
+// ROTAS DE REAJUSTES DE SALÁRIO
+// =============================================
+
+// GET /api/colaboradores/:id/reajustes - Listar histórico de reajustes
+router.get('/:id/reajustes', getHistoricoReajustes);
+
+// POST /api/colaboradores/:id/reajustes - Criar novo reajuste
+router.post('/:id/reajustes', createReajuste);
+
+// PUT /api/colaboradores/:id/reajustes/:reajusteId - Atualizar reajuste
+router.put('/:id/reajustes/:reajusteId', updateReajuste);
+
+// DELETE /api/colaboradores/:id/reajustes/:reajusteId - Deletar reajuste
+router.delete('/:id/reajustes/:reajusteId', deleteReajuste);
 
 // GET /api/colaboradores/:id - Buscar por ID
 router.get('/:id', getColaboradorById);

@@ -171,6 +171,39 @@ export const DadosPessoaisForm: React.FC<DadosPessoaisFormProps> = ({
         />
       </Grid>
 
+      <Grid item xs={12} md={4}>
+        <TextField
+          fullWidth
+          label="WhatsApp"
+          value={dados.whatsapp || ''}
+          onChange={(e) => onChange('whatsapp', e.target.value)}
+          placeholder="(00) 00000-0000"
+          disabled={readonly}
+        />
+      </Grid>
+
+      <Grid item xs={12} md={4}>
+        <TextField
+          fullWidth
+          select
+          label="Escolaridade"
+          value={dados.escolaridade || ''}
+          onChange={(e) => onChange('escolaridade', e.target.value)}
+          disabled={readonly}
+        >
+          <MenuItem value="">Selecione...</MenuItem>
+          <MenuItem value="Fundamental Incompleto">Fundamental Incompleto</MenuItem>
+          <MenuItem value="Fundamental Completo">Fundamental Completo</MenuItem>
+          <MenuItem value="Médio Incompleto">Médio Incompleto</MenuItem>
+          <MenuItem value="Médio Completo">Médio Completo</MenuItem>
+          <MenuItem value="Superior Incompleto">Superior Incompleto</MenuItem>
+          <MenuItem value="Superior Completo">Superior Completo</MenuItem>
+          <MenuItem value="Pós-graduação">Pós-graduação</MenuItem>
+          <MenuItem value="Mestrado">Mestrado</MenuItem>
+          <MenuItem value="Doutorado">Doutorado</MenuItem>
+        </TextField>
+      </Grid>
+
       {/* Endereço */}
       <Grid item xs={12}>
         <strong>Endereço</strong>
