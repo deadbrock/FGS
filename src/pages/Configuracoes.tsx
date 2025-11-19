@@ -62,6 +62,20 @@ export const Configuracoes: React.FC = () => {
     console.log('🔑 User ID:', user?.id);
     console.log('📧 User Email:', user?.email);
   }, [user]);
+
+  // Atualizar perfil quando user mudar
+  useEffect(() => {
+    if (user) {
+      setPerfil({
+        nome: user.nome || '',
+        email: user.email || '',
+        cargo: user.cargo || 'Administrador do Sistema',
+      });
+      if (user.avatar) {
+        setAvatarPreview(user.avatar);
+      }
+    }
+  }, [user]);
   
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string>('');
@@ -72,8 +86,7 @@ export const Configuracoes: React.FC = () => {
   const [perfil, setPerfil] = useState({
     nome: user?.nome || '',
     email: user?.email || '',
-    telefone: '(11) 98765-4321',
-    cargo: 'Administrador do Sistema',
+    cargo: user?.cargo || 'Administrador do Sistema',
   });
 
   const [senha, setSenha] = useState({
@@ -104,24 +117,45 @@ export const Configuracoes: React.FC = () => {
         console.log('🔍 Atualizando usuário:', { 
           userId: user.id, 
           nome: perfil.nome, 
-          email: perfil.email 
+          email: perfil.email,
+          hasAvatar: !!avatarPreview
         });
         
         const usuariosService = (await import('../services/usuariosService')).default;
         
-        await usuariosService.update(user.id, {
+        // Preparar dados para atualização
+        const updateData: any = {
           nome: perfil.nome,
           email: perfil.email,
-        });
+        };
 
-        console.log('✅ Usuário atualizado com sucesso');
+        // Incluir cargo se houver
+        if (perfil.cargo) {
+          updateData.cargo = perfil.cargo;
+        }
 
-        // Atualizar também no localStorage
+        // Incluir avatar se houver preview
+        if (avatarPreview) {
+          updateData.avatar = avatarPreview;
+        }
+
+        const updatedUser = await usuariosService.update(user.id, updateData);
+
+        console.log('✅ Usuário atualizado com sucesso:', updatedUser);
+
+        // Atualizar também no localStorage com os dados retornados do backend
         const storedUser = localStorage.getItem('@FGS:user');
         if (storedUser) {
           const userObj = JSON.parse(storedUser);
-          userObj.nome = perfil.nome;
-          userObj.email = perfil.email;
+          userObj.nome = updatedUser.nome || perfil.nome;
+          userObj.email = updatedUser.email || perfil.email;
+          if (updatedUser.cargo) {
+            userObj.cargo = updatedUser.cargo;
+          }
+          if (updatedUser.avatar) {
+            userObj.avatar = updatedUser.avatar;
+            localStorage.setItem('@FGS:userAvatar', updatedUser.avatar);
+          }
           localStorage.setItem('@FGS:user', JSON.stringify(userObj));
         }
         
@@ -129,7 +163,7 @@ export const Configuracoes: React.FC = () => {
         setSuccess(true);
         setTimeout(() => {
           setSuccess(false);
-          // Recarregar para atualizar o nome no sidebar
+          // Recarregar para atualizar o nome e avatar no sidebar
           window.location.reload();
         }, 1500);
       } else {
@@ -251,45 +285,76 @@ export const Configuracoes: React.FC = () => {
     fileInputRef.current?.click();
   };
 
-  const handleAvatarChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleAvatarChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
       // Validar tipo de arquivo
       if (!file.type.startsWith('image/')) {
-        alert('Por favor, selecione apenas arquivos de imagem (JPG, PNG, etc.)');
+        setError('Por favor, selecione apenas arquivos de imagem (JPG, PNG, etc.)');
         return;
       }
 
       // Validar tamanho (máximo 5MB)
       if (file.size > 5 * 1024 * 1024) {
-        alert('A imagem deve ter no máximo 5MB');
+        setError('A imagem deve ter no máximo 5MB');
         return;
       }
 
       // Criar preview da imagem
       const reader = new FileReader();
-      reader.onloadend = () => {
-        setAvatarPreview(reader.result as string);
+      reader.onloadend = async () => {
+        const avatarBase64 = reader.result as string;
+        setAvatarPreview(avatarBase64);
+        setError('');
         logAction('Foto de perfil alterada');
         
-        // Aqui você salvaria a imagem no backend/localStorage
-        // Por enquanto, vamos apenas salvar no localStorage
-        localStorage.setItem('@FGS:userAvatar', reader.result as string);
-        
-        // Atualizar também no objeto user do localStorage
-        const storedUser = localStorage.getItem('@FGS:user');
-        if (storedUser) {
-          const userObj = JSON.parse(storedUser);
-          userObj.avatar = reader.result as string;
-          localStorage.setItem('@FGS:user', JSON.stringify(userObj));
+        // Salvar no backend
+        if (user?.id) {
+          try {
+            const usuariosService = (await import('../services/usuariosService')).default;
+            const updatedUser = await usuariosService.update(user.id, {
+              avatar: avatarBase64,
+            });
+
+            console.log('✅ Avatar atualizado no backend:', updatedUser);
+
+            // Atualizar no localStorage
+            localStorage.setItem('@FGS:userAvatar', avatarBase64);
+            
+            const storedUser = localStorage.getItem('@FGS:user');
+            if (storedUser) {
+              const userObj = JSON.parse(storedUser);
+              userObj.avatar = avatarBase64;
+              localStorage.setItem('@FGS:user', JSON.stringify(userObj));
+            }
+            
+            setSuccess(true);
+            setTimeout(() => {
+              setSuccess(false);
+              // Recarregar a página para atualizar o avatar no sidebar
+              window.location.reload();
+            }, 1500);
+          } catch (error: any) {
+            console.error('❌ Erro ao salvar avatar no backend:', error);
+            setError('Erro ao salvar foto de perfil. Tente novamente.');
+            // Reverter preview em caso de erro
+            setAvatarPreview(user?.avatar || null);
+          }
+        } else {
+          // Fallback: salvar apenas no localStorage se não houver user.id
+          localStorage.setItem('@FGS:userAvatar', avatarBase64);
+          const storedUser = localStorage.getItem('@FGS:user');
+          if (storedUser) {
+            const userObj = JSON.parse(storedUser);
+            userObj.avatar = avatarBase64;
+            localStorage.setItem('@FGS:user', JSON.stringify(userObj));
+          }
+          setSuccess(true);
+          setTimeout(() => {
+            setSuccess(false);
+            window.location.reload();
+          }, 1500);
         }
-        
-        setSuccess(true);
-        setTimeout(() => {
-          setSuccess(false);
-          // Recarregar a página para atualizar o avatar no sidebar
-          window.location.reload();
-        }, 1500);
       };
       reader.readAsDataURL(file);
     }
@@ -435,14 +500,6 @@ export const Configuracoes: React.FC = () => {
                       type="email"
                       value={perfil.email}
                       onChange={(e) => setPerfil({ ...perfil, email: e.target.value })}
-                    />
-                  </Grid>
-                  <Grid item xs={12} md={6}>
-                    <TextField
-                      fullWidth
-                      label="Telefone"
-                      value={perfil.telefone}
-                      onChange={(e) => setPerfil({ ...perfil, telefone: e.target.value })}
                     />
                   </Grid>
                   <Grid item xs={12} md={6}>
