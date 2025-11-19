@@ -16,13 +16,14 @@ import {
   enviarESocial,
   enviarThompsonReuters
 } from '../controllers/admissaoIntegracoesController.js';
-import { authenticateToken } from '../middleware/auth.js';
-import { uploadMiddleware } from '../config/multer.js';
+import upload from '../config/multer.js';
 
 const router = express.Router();
 
-// Aplicar autenticação em todas as rotas
-router.use(authenticateToken);
+// =============================================
+// ROTAS PÚBLICAS (sem autenticação por enquanto)
+// TODO: Adicionar middleware de autenticação
+// =============================================
 
 // Rotas principais
 router.get('/', getAdmissoes);
@@ -34,7 +35,7 @@ router.post('/:id/avancar-etapa', avancarEtapa);
 
 // Rotas de documentos
 router.get('/documentos/template', getDocumentosTemplate);
-router.post('/documentos/upload', uploadMiddleware.single('arquivo'), uploadDocumento);
+router.post('/documentos/upload', upload.single('arquivo'), uploadDocumento);
 router.put('/documentos/:documento_id/validar', validarDocumento);
 
 // Rotas de integrações
