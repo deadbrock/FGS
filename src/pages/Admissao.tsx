@@ -485,7 +485,7 @@ export const Admissao: React.FC = () => {
                   title="Total de Admissões"
                   value={estatisticas.total.toString()}
                   icon={<DescriptionIcon />}
-                  color="primary"
+                  color="#354a80"
                 />
               </Grid>
               <Grid item xs={12} md={3}>
@@ -493,7 +493,7 @@ export const Admissao: React.FC = () => {
                   title="Tempo Médio"
                   value={`${estatisticas.tempoMedioDias} dias`}
                   icon={<TimelineIcon />}
-                  color="info"
+                  color="#0288d1"
                 />
               </Grid>
               <Grid item xs={12} md={3}>
@@ -501,7 +501,7 @@ export const Admissao: React.FC = () => {
                   title="Documentos Pendentes"
                   value={estatisticas.documentosPendentes.toString()}
                   icon={<PendingIcon />}
-                  color="warning"
+                  color="#ed6c02"
                 />
               </Grid>
               <Grid item xs={12} md={3}>
@@ -511,7 +511,7 @@ export const Admissao: React.FC = () => {
                     estatisticas.porStatus.find((s) => s.status === 'EM_ANDAMENTO')?.total || '0'
                   }
                   icon={<CheckCircleIcon />}
-                  color="success"
+                  color="#2e7d32"
                 />
               </Grid>
             </Grid>
