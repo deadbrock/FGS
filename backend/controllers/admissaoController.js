@@ -182,7 +182,7 @@ export const getAdmissaoById = async (req, res) => {
       LEFT JOIN users u_resp ON ad.responsavel_id = u_resp.id
       LEFT JOIN users u_validado ON ad.validado_por = u_validado.id
       WHERE ad.admissao_id = $1
-      ORDER BY ad.ordem, ad.created_at`,
+      ORDER BY ad.created_at`,
       [id]
     );
 
