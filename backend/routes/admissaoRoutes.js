@@ -24,6 +24,11 @@ import {
   getClinicas,
   getCalendarioAgendamentos
 } from '../controllers/examesAdmissionaisController.js';
+import {
+  receberCandidato,
+  verificarStatusPorCPF
+} from '../controllers/admissaoCandidatosController.js';
+import { apiKeyAuth } from '../middleware/apiKeyAuth.js';
 import upload from '../config/multer.js';
 
 const router = express.Router();
@@ -57,6 +62,11 @@ router.post('/:admissao_id/exames', criarAgendamento);
 router.put('/exames/:exame_id', updateExame);
 router.get('/clinicas/listar', getClinicas);
 router.get('/exames/calendario', getCalendarioAgendamentos);
+
+// Rotas de integração externa (Trabalhe Conosco)
+// Estas rotas usam autenticação via API Key
+router.post('/candidatos', apiKeyAuth, receberCandidato);
+router.get('/candidatos/cpf/:cpf', apiKeyAuth, verificarStatusPorCPF);
 
 export default router;
 
