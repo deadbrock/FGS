@@ -38,6 +38,7 @@ import AssessmentIcon from '@mui/icons-material/Assessment';
 import SecurityIcon from '@mui/icons-material/Security';
 import IntegrationInstructionsIcon from '@mui/icons-material/IntegrationInstructions';
 import PublicIcon from '@mui/icons-material/Public';
+import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import SearchIcon from '@mui/icons-material/Search';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import Brightness4Icon from '@mui/icons-material/Brightness4';
@@ -77,6 +78,12 @@ const menuItems: MenuItem[] = [
     title: 'Prontuário',
     path: '/prontuario',
     icon: <FolderSharedIcon />,
+    allowedRoles: [UserRole.ADMINISTRADOR, UserRole.RH, UserRole.GESTOR],
+  },
+  {
+    title: 'Admissão',
+    path: '/admissao',
+    icon: <PersonAddIcon />,
     allowedRoles: [UserRole.ADMINISTRADOR, UserRole.RH, UserRole.GESTOR],
   },
   {
