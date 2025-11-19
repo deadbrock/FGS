@@ -15,6 +15,7 @@ import { Relatorios } from '../pages/Relatorios';
 import { Seguranca } from '../pages/Seguranca';
 import { Integracoes } from '../pages/Integracoes';
 import { Regionais } from '../pages/Regionais';
+import { Admissao } from '../pages/Admissao';
 import { UserRole } from '../types';
 
 // Componente de rotas da aplicação
@@ -68,6 +69,16 @@ export const AppRoutes: React.FC = () => {
             element={
               <PrivateRoute allowedRoles={[UserRole.ADMINISTRADOR, UserRole.RH, UserRole.GESTOR]}>
                 <Prontuario />
+              </PrivateRoute>
+            }
+          />
+
+          {/* Admissão - Admin, RH e Gestor */}
+          <Route
+            path="/admissao"
+            element={
+              <PrivateRoute allowedRoles={[UserRole.ADMINISTRADOR, UserRole.RH, UserRole.GESTOR]}>
+                <Admissao />
               </PrivateRoute>
             }
           />
