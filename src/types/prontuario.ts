@@ -55,6 +55,7 @@ export interface DadosContratuais {
   horarioEntrada: string;
   horarioSaida: string;
   ctps?: string; // CTPS – Carteira profissional Digital
+  pisPasep?: string; // PIS/PASEP
   status: StatusProntuario;
   contratoAnexo?: Anexo;
 }

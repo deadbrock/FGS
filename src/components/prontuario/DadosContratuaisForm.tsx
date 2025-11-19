@@ -163,6 +163,18 @@ export const DadosContratuaisForm: React.FC<DadosContratuaisFormProps> = ({
         />
       </Grid>
 
+      <Grid item xs={12} md={4}>
+        <TextField
+          fullWidth
+          label="PIS/PASEP"
+          value={dados.pisPasep || ''}
+          onChange={(e) => onChange('pisPasep', e.target.value)}
+          placeholder="000.00000.00-0"
+          disabled={readonly}
+          helperText="Programa de Integração Social / Programa de Formação do Patrimônio do Servidor Público"
+        />
+      </Grid>
+
       <Grid item xs={12} md={2}>
         <TextField
           fullWidth

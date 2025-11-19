@@ -321,6 +321,27 @@ export const Prontuario: React.FC = () => {
     }
   };
 
+  // Salvar dados contratuais
+  const handleSalvarDadosContratuais = async () => {
+    if (!prontuario || !colaboradorSelecionado) return;
+
+    try {
+      setLoading(true);
+      await prontuarioService.atualizarDadosContratuais(
+        colaboradorSelecionado.id,
+        prontuario.dadosContratuais
+      );
+      alert('Dados contratuais salvos com sucesso!');
+      // Recarregar prontuário para garantir dados atualizados
+      await carregarProntuario(colaboradorSelecionado.id);
+    } catch (error: any) {
+      console.error('Erro ao salvar dados contratuais:', error);
+      alert(`Erro ao salvar: ${error.message || 'Erro desconhecido'}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     if (prontuario && tabAtual === 2) carregarExames();
     if (prontuario && tabAtual === 5) carregarTreinamentos();
@@ -1158,15 +1179,29 @@ export const Prontuario: React.FC = () => {
             <TabPanel value={tabAtual} index={1}>
               <DadosContratuaisForm
                 dados={prontuario?.dadosContratuais}
-                onChange={(dados) => {
-                  if (prontuario) {
-                    setProntuario({ ...prontuario, dadosContratuais: dados });
+                onChange={(campo, valor) => {
+                  if (prontuario && prontuario.dadosContratuais) {
+                    setProntuario({
+                      ...prontuario,
+                      dadosContratuais: {
+                        ...prontuario.dadosContratuais,
+                        [campo]: valor,
+                      },
+                    });
                   }
                 }}
               />
               <Box display="flex" justifyContent="flex-end" mt={3} gap={2}>
-                <Button variant="outlined">Cancelar</Button>
-                <GradientButton startIcon={<AddIcon />}>
+                <Button 
+                  variant="outlined" 
+                  onClick={() => colaboradorSelecionado && carregarProntuario(colaboradorSelecionado.id)}
+                >
+                  Cancelar
+                </Button>
+                <GradientButton 
+                  startIcon={<AddIcon />} 
+                  onClick={handleSalvarDadosContratuais}
+                >
                   Salvar Alterações
                 </GradientButton>
               </Box>

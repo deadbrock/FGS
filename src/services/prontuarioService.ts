@@ -25,7 +25,66 @@ class ProntuarioService {
   async buscarProntuario(colaboradorId: string): Promise<ProntuarioColaborador> {
     try {
       const response = await this.api.get(`/${colaboradorId}`);
-      return response.data.data;
+      const data = response.data.data;
+      
+      // Mapear dados do backend (snake_case) para frontend (camelCase)
+      // O backend retorna um objeto colaborador diretamente
+      return {
+        id: data.id,
+        colaboradorId: data.id,
+        dadosPessoais: {
+          id: data.id,
+          nome: data.nome_completo || '',
+          cpf: data.cpf || '',
+          rg: data.rg || '',
+          dataNascimento: data.data_nascimento || '',
+          sexo: data.sexo === 'M' ? 'M' : data.sexo === 'F' ? 'F' : 'Outro',
+          estadoCivil: data.estado_civil || '',
+          nacionalidade: data.nacionalidade || '',
+          naturalidade: data.naturalidade || '',
+          nomeMae: data.nome_mae || '',
+          nomePai: data.nome_pai || '',
+          telefone: data.telefone || '',
+          celular: data.celular || '',
+          whatsapp: data.whatsapp || '',
+          email: data.email || '',
+          escolaridade: data.escolaridade || '',
+          endereco: {
+            cep: data.cep || '',
+            logradouro: data.logradouro || '',
+            numero: data.numero || '',
+            complemento: data.complemento || '',
+            bairro: data.bairro || '',
+            cidade: data.cidade || '',
+            estado: data.estado || '',
+          },
+        },
+        dadosContratuais: {
+          id: data.id,
+          colaboradorId: data.id,
+          dataAdmissao: data.data_admissao || '',
+          dataDesligamento: data.data_demissao || '',
+          cargo: data.cargo || '',
+          departamento: data.departamento || '',
+          localTrabalho: data.local_trabalho || '',
+          salario: parseFloat(data.salario) || 0,
+          tipoContrato: (data.tipo_contrato || 'CLT') as 'CLT' | 'PJ' | 'Estágio' | 'Temporário',
+          jornadaTrabalho: data.jornada_trabalho || '',
+          horarioEntrada: '08:00',
+          horarioSaida: '17:00',
+          ctps: data.ctps_numero ? `${data.ctps_numero}/${data.ctps_serie}` : '',
+          pisPasep: data.pis_pasep || '',
+          status: 'APROVADO' as any,
+        },
+        examesMedicos: [],
+        atestados: [],
+        ferias: [],
+        frequencia: [],
+        advertencias: [],
+        treinamentos: [],
+        documentos: [],
+        ultimaAtualizacao: data.updated_at || new Date().toISOString(),
+      };
     } catch (error: any) {
       console.error('Erro ao buscar prontuário:', error);
       throw new Error(error.response?.data?.error || 'Erro ao buscar prontuário');
@@ -45,7 +104,26 @@ class ProntuarioService {
   // Atualizar dados contratuais
   async atualizarDadosContratuais(colaboradorId: string, dados: any): Promise<void> {
     try {
-      await this.api.put(`/${colaboradorId}`, dados);
+      // Mapear dados do frontend (camelCase) para backend (snake_case)
+      const dadosBackend: any = {
+        ...dados,
+        pis_pasep: dados.pisPasep,
+        local_trabalho: dados.localTrabalho,
+        data_admissao: dados.dataAdmissao,
+        data_demissao: dados.dataDesligamento,
+        tipo_contrato: dados.tipoContrato,
+        jornada_trabalho: dados.jornadaTrabalho,
+      };
+      
+      // Remover campos camelCase se existirem
+      delete dadosBackend.pisPasep;
+      delete dadosBackend.localTrabalho;
+      delete dadosBackend.dataAdmissao;
+      delete dadosBackend.dataDesligamento;
+      delete dadosBackend.tipoContrato;
+      delete dadosBackend.jornadaTrabalho;
+      
+      await this.api.put(`/${colaboradorId}`, dadosBackend);
     } catch (error: any) {
       console.error('Erro ao atualizar dados contratuais:', error);
       throw new Error(error.response?.data?.error || 'Erro ao atualizar dados contratuais');
