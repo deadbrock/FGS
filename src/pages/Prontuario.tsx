@@ -65,6 +65,7 @@ import {
 } from '../components/prontuario';
 import { formatarData } from '../utils/statusUtils';
 import prontuarioService from '../services/prontuarioService';
+import colaboradoresService, { Colaborador as ColaboradorBackend } from '../services/colaboradoresService';
 import {
   PageHeader,
   GradientButton,
@@ -186,85 +187,32 @@ export const Prontuario: React.FC = () => {
     setLoading(true);
     
     try {
-      // Nomes realistas
-      const nomesMasculinos = [
-        'João Silva Santos', 'Carlos Eduardo Oliveira', 'Pedro Henrique Costa',
-        'Rafael Almeida Souza', 'Lucas Martins Ferreira', 'Bruno Pereira Lima',
-        'Guilherme Santos Rocha', 'Fernando Costa Silva', 'Rodrigo Alves Santos',
-        'Thiago Souza Oliveira', 'Gabriel Lima Costa', 'André Pereira Santos',
-        'Marcelo Silva Ferreira', 'Ricardo Costa Almeida', 'Felipe Santos Lima',
-      ];
-
-      const nomesFemininos = [
-        'Maria Silva Santos', 'Ana Paula Oliveira', 'Juliana Costa Ferreira',
-        'Fernanda Almeida Santos', 'Carla Souza Lima', 'Patricia Santos Costa',
-        'Camila Oliveira Silva', 'Renata Ferreira Alves', 'Beatriz Costa Santos',
-        'Amanda Lima Oliveira', 'Daniela Santos Ferreira', 'Larissa Costa Silva',
-        'Mariana Almeida Santos', 'Priscila Oliveira Costa', 'Vanessa Santos Lima',
-      ];
-
-      const cargos = [
-        'Analista de RH', 'Assistente Administrativo', 'Coordenador de Produção',
-        'Gerente de Operações', 'Diretor Comercial', 'Analista Financeiro',
-        'Assistente de TI', 'Coordenador de Vendas', 'Gerente de Projetos',
-        'Analista de Marketing', 'Supervisor de Logística', 'Técnico de Manutenção',
-      ];
-
-      const setores = [
-        'Recursos Humanos', 'Administrativo', 'Operacional', 'Comercial',
-        'Financeiro', 'TI', 'Marketing', 'Logística', 'Produção',
-      ];
-
-      // Mock de dados - em produção viria do backend
-      const mockColaboradores: Colaborador[] = Array.from({ length: 50 }, (_, i) => {
-        const id = i + 1;
-        const sexo = id % 2 === 0 ? 'M' : 'F';
-        const nomes = sexo === 'M' ? nomesMasculinos : nomesFemininos;
-        const nome = nomes[id % nomes.length];
-        
-        return {
-          id: `${id}`,
-          nome,
-          cpf: `${String(id).padStart(3, '0')}.${String(id + 100).padStart(3, '0')}.${String(id + 200).padStart(3, '0')}-${String(id % 100).padStart(2, '0')}`,
-          email: `${nome.toLowerCase().replace(/\s+/g, '.')}.${id}@fgs.com`,
-          cargo: cargos[id % cargos.length],
-          setor: setores[id % setores.length],
-          dataAdmissao: new Date(2020 + (id % 5), id % 12, (id % 28) + 1).toISOString(),
-          dataNascimento: new Date(1980 + (id % 30), id % 12, (id % 28) + 1).toISOString(),
-          status: ['ATIVO', 'ATIVO', 'ATIVO', 'FERIAS', 'AFASTADO'][id % 5] as any,
-        };
+      // Buscar colaboradores do backend
+      const response = await colaboradoresService.getAll({
+        search: filtros.busca || undefined,
+        cargo: filtros.cargo || undefined,
+        departamento: filtros.setor || undefined,
+        status: filtros.status || undefined,
+        limit: itensPorPagina,
+        offset: pagina * itensPorPagina,
       });
 
-      // Aplicar filtros
-      let colaboradoresFiltrados = mockColaboradores;
+      // Mapear dados do backend (snake_case) para frontend (camelCase)
+      const colaboradoresMapeados: Colaborador[] = response.data.map((c: ColaboradorBackend) => ({
+        id: c.id,
+        nome: c.nome_completo || '',
+        cpf: c.cpf || '',
+        email: c.email_pessoal || c.email_corporativo || '',
+        cargo: c.cargo || '',
+        setor: c.departamento || '',
+        dataAdmissao: c.data_admissao || '',
+        dataNascimento: c.data_nascimento || '',
+        status: c.status || 'ATIVO',
+        foto: c.avatar_url || undefined,
+      }));
 
-      if (filtros.busca) {
-        colaboradoresFiltrados = colaboradoresFiltrados.filter(c =>
-          c.nome?.toLowerCase().includes(filtros.busca.toLowerCase()) ||
-          c.cpf?.includes(filtros.busca) ||
-          c.email?.toLowerCase().includes(filtros.busca.toLowerCase())
-        );
-      }
-
-      if (filtros.cargo) {
-        colaboradoresFiltrados = colaboradoresFiltrados.filter(c => c.cargo === filtros.cargo);
-      }
-
-      if (filtros.setor) {
-        colaboradoresFiltrados = colaboradoresFiltrados.filter(c => c.setor === filtros.setor);
-      }
-
-      if (filtros.status) {
-        colaboradoresFiltrados = colaboradoresFiltrados.filter(c => c.status === filtros.status);
-      }
-
-      // Paginação
-      const inicio = pagina * itensPorPagina;
-      const fim = inicio + itensPorPagina;
-      const colaboradoresPaginados = colaboradoresFiltrados.slice(inicio, fim);
-
-      setColaboradores(colaboradoresPaginados);
-      setTotalColaboradores(colaboradoresFiltrados.length);
+      setColaboradores(colaboradoresMapeados);
+      setTotalColaboradores(response.pagination?.total || colaboradoresMapeados.length);
     } catch (error) {
       console.error('Erro ao carregar colaboradores:', error);
       setColaboradores([]);
