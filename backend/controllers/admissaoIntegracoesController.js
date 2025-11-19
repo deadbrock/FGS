@@ -3,9 +3,9 @@ import axios from 'axios';
 import { v4 as uuidv4 } from 'uuid';
 
 // =============================================
-// INTEGRAÇÃO COM ESOCIAL (S-2200)
+// ENVIAR PARA DOMÍNIO WEB (THOMSON REUTERS) - GERAÇÃO DE CONTRATO
 // =============================================
-export const enviarESocial = async (req, res) => {
+export const enviarParaDominio = async (req, res) => {
   try {
     const { admissao_id } = req.params;
 
@@ -27,11 +27,11 @@ export const enviarESocial = async (req, res) => {
 
     const admissao = admissaoResult.rows[0];
 
-    // Verificar se já foi enviado
-    if (admissao.esocial_enviado) {
+    // Verificar se já foi enviado para domínio
+    if (admissao.contrato_enviado_dominio) {
       return res.status(400).json({
         success: false,
-        error: 'Evento eSocial já foi enviado para esta admissão'
+        error: 'Admissão já foi enviada para Domínio Web'
       });
     }
 
@@ -43,140 +43,167 @@ export const enviarESocial = async (req, res) => {
       });
     }
 
-    // Preparar dados do evento S-2200
-    const eventoESocial = {
-      evento: {
-        ideEvento: {
-          tpAmb: process.env.ESOCIAL_AMBIENTE || '2', // 1=Produção, 2=Teste
-          procEmi: '1', // Aplicativo do empregador
-          verProc: '1.0'
-        },
-        ideEmpregador: {
-          tpInsc: '1', // CNPJ
-          nrInsc: process.env.ESOCIAL_CNPJ || '' // CNPJ da empresa
-        },
-        trabalhador: {
-          cpfTrab: admissao.cpf_candidato.replace(/\D/g, ''),
-          nmTrab: admissao.nome_candidato,
-          sexo: admissao.sexo || 'M',
-          racaCor: '1', // Branca (ajustar conforme necessário)
-          estCiv: '1', // Solteiro (ajustar conforme necessário)
-          grauInstr: '01', // Analfabeto (ajustar conforme necessário)
-          dtNascto: admissao.data_nascimento?.split('T')[0] || '',
-          paisNascto: '105', // Brasil
-          paisNac: '105', // Brasil
-          endereco: {
-            brasil: {
-              tpLograd: 'R', // Rua
-              dscLograd: admissao.endereco_rua || '',
-              nrLograd: admissao.endereco_numero || '',
-              complemento: admissao.endereco_complemento || '',
-              bairro: admissao.endereco_bairro || '',
-              cep: admissao.endereco_cep?.replace(/\D/g, '') || '',
-              codMunic: '', // Código do município (ajustar conforme necessário)
-              uf: admissao.endereco_estado || ''
-            }
-          },
-          trabEstrangeiro: {
-            dtChegada: '',
-            classTrabEstrang: ''
-          },
-          infoDeficiencia: {
-            defFisica: 'N',
-            defVisual: 'N',
-            defAuditiva: 'N',
-            defMental: 'N',
-            defIntelectual: 'N',
-            reabReadap: 'N',
-            observacao: ''
-          }
-        },
-        vinculo: {
-          matricula: admissao.matricula || '',
-          tpRegTrab: '1', // CLT
-          tpRegPrev: '1', // Regime Geral da Previdência Social
-          dtAdm: admissao.data_admissao?.split('T')[0] || new Date().toISOString().split('T')[0],
-          codCateg: '101', // Empregado - Geral
-          codCargo: '', // Código do cargo (ajustar conforme necessário)
-          codFuncao: '', // Código da função (ajustar conforme necessário)
-          codCategIncidencia: '101',
-          natAtividade: '1', // Não se aplica
-          dtInicio: admissao.data_inicio_prevista?.split('T')[0] || new Date().toISOString().split('T')[0],
-          infoRegimeTrab: {
-            infoCeletista: {
-              dtAdm: admissao.data_admissao?.split('T')[0] || new Date().toISOString().split('T')[0],
-              tpAdmissao: '1', // Admissão
-              indAdmissao: '1', // Normal
-              dtBase: '', // Data base (ajustar conforme necessário)
-              cnpjSindCategProf: '', // CNPJ do sindicato (ajustar conforme necessário)
-              remuneracao: {
-                vrSalFx: parseFloat(admissao.salario_proposto || 0).toFixed(2),
-                undSalFixo: '1', // Mensal
-                dscSalVar: ''
-              }
-            }
-          },
-          infoContrato: {
-            codCargo: '',
-            codFuncao: '',
-            codCateg: '101',
-            codCarreira: '',
-            dtIngrCarr: ''
-          }
+    // Preparar dados para envio ao Domínio Web (Thompson Reuters)
+    const dadosDominio = {
+      employee: {
+        firstName: admissao.nome_candidato.split(' ')[0] || admissao.nome_candidato,
+        lastName: admissao.nome_candidato.split(' ').slice(1).join(' ') || '',
+        email: admissao.email_candidato,
+        phone: admissao.telefone_candidato || '',
+        cpf: admissao.cpf_candidato.replace(/\D/g, ''),
+        dateOfBirth: admissao.data_nascimento?.split('T')[0] || '',
+        gender: admissao.sexo === 'M' ? 'Male' : 'Female',
+        position: admissao.cargo,
+        department: admissao.departamento,
+        hireDate: admissao.data_admissao?.split('T')[0] || new Date().toISOString().split('T')[0],
+        salary: parseFloat(admissao.salario_proposto || 0),
+        contractType: admissao.tipo_contrato || 'CLT',
+        address: {
+          street: admissao.endereco_rua || '',
+          number: admissao.endereco_numero || '',
+          complement: admissao.endereco_complemento || '',
+          neighborhood: admissao.endereco_bairro || '',
+          city: admissao.endereco_cidade || '',
+          state: admissao.endereco_estado || '',
+          zipCode: admissao.endereco_cep?.replace(/\D/g, '') || ''
         }
       }
     };
 
-    // Enviar para API do eSocial
-    const esocialApiUrl = process.env.ESOCIAL_API_URL || 'https://webservices.producaorestrita.esocial.gov.br/servicos/empregador/enviarloteeventos/WsEnviarLoteEventos.svc';
-    const esocialToken = process.env.ESOCIAL_TOKEN || '';
+    // Enviar para API Domínio Web (Thompson Reuters)
+    const dominioApiUrl = process.env.DOMINIO_WEB_API_URL || 'https://api.dominioweb.com/v1/contracts';
+    const dominioApiKey = process.env.DOMINIO_WEB_API_KEY || '';
 
     try {
-      const response = await axios.post(esocialApiUrl, eventoESocial, {
+      const response = await axios.post(dominioApiUrl, dadosDominio, {
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${esocialToken}`
+          'X-API-Key': dominioApiKey
         },
         timeout: 30000
       });
 
-      const eventoId = response.data?.idEvento || response.data?.protocolo || uuidv4();
+      const contratoId = response.data?.id || response.data?.contractId || uuidv4();
 
-      // Atualizar admissão
+      // Atualizar admissão - marcar como enviado para domínio
       await pool.query(
         `UPDATE admissoes
-        SET esocial_enviado = true,
-            esocial_evento_id = $1,
-            esocial_data_envio = CURRENT_TIMESTAMP,
+        SET contrato_enviado_dominio = true,
+            thomson_reuters_id = $1,
+            thomson_reuters_data_envio = CURRENT_TIMESTAMP,
+            etapa_atual = 'GERACAO_CONTRATO',
             updated_at = CURRENT_TIMESTAMP
         WHERE id = $2`,
-        [eventoId, admissao_id]
+        [contratoId, admissao_id]
       );
 
       res.json({
         success: true,
-        message: 'Evento eSocial enviado com sucesso',
+        message: 'Admissão enviada para Domínio Web com sucesso. O contrato será gerado automaticamente.',
         data: {
-          evento_id: eventoId,
-          protocolo: response.data?.protocolo,
+          contrato_id: contratoId,
           data_envio: new Date().toISOString()
         }
       });
     } catch (apiError) {
-      console.error('Erro ao enviar para API eSocial:', apiError.response?.data || apiError.message);
+      console.error('Erro ao enviar para API Domínio Web:', apiError.response?.data || apiError.message);
       
       res.status(500).json({
         success: false,
-        error: 'Erro ao enviar evento para eSocial',
+        error: 'Erro ao enviar admissão para Domínio Web',
         message: apiError.response?.data?.message || apiError.message,
         details: apiError.response?.data
       });
     }
   } catch (error) {
-    console.error('Erro ao processar envio eSocial:', error);
+    console.error('Erro ao processar envio para Domínio Web:', error);
     res.status(500).json({
       success: false,
-      error: 'Erro ao processar envio eSocial',
+      error: 'Erro ao processar envio para Domínio Web',
+      message: error.message
+    });
+  }
+};
+
+// =============================================
+// MARCAR CONTRATO ASSINADO FISICAMENTE
+// =============================================
+export const marcarContratoAssinado = async (req, res) => {
+  try {
+    const { admissao_id } = req.params;
+    const { data_assinatura } = req.body;
+
+    const result = await pool.query(
+      `UPDATE admissoes
+      SET contrato_assinado_fisicamente = true,
+          data_assinatura_fisica = $1,
+          etapa_atual = 'ASSINATURA_DIGITAL',
+          updated_at = CURRENT_TIMESTAMP
+      WHERE id = $2
+      RETURNING *`,
+      [data_assinatura || new Date().toISOString().split('T')[0], admissao_id]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        error: 'Admissão não encontrada'
+      });
+    }
+
+    res.json({
+      success: true,
+      message: 'Contrato marcado como assinado fisicamente',
+      data: result.rows[0]
+    });
+  } catch (error) {
+    console.error('Erro ao marcar contrato assinado:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Erro ao marcar contrato assinado',
+      message: error.message
+    });
+  }
+};
+
+// =============================================
+// MARCAR ESOCIAL ENVIADO PELO DOMÍNIO
+// =============================================
+export const marcarESocialEnviadoDominio = async (req, res) => {
+  try {
+    const { admissao_id } = req.params;
+
+    const result = await pool.query(
+      `UPDATE admissoes
+      SET esocial_enviado_por_dominio = true,
+          esocial_enviado = true,
+          esocial_data_envio = CURRENT_TIMESTAMP,
+          etapa_atual = 'ENVIO_ESOCIAL',
+          status = 'CONCLUIDA',
+          data_conclusao = CURRENT_TIMESTAMP,
+          updated_at = CURRENT_TIMESTAMP
+      WHERE id = $1
+      RETURNING *`,
+      [admissao_id]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        error: 'Admissão não encontrada'
+      });
+    }
+
+    res.json({
+      success: true,
+      message: 'eSocial marcado como enviado pelo Domínio Web',
+      data: result.rows[0]
+    });
+  } catch (error) {
+    console.error('Erro ao marcar eSocial enviado:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Erro ao marcar eSocial enviado',
       message: error.message
     });
   }

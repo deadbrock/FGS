@@ -11,8 +11,7 @@ export type EtapaWorkflow =
   | 'EXAME_ADMISSIONAL'
   | 'GERACAO_CONTRATO'
   | 'ASSINATURA_DIGITAL'
-  | 'ENVIO_ESOCIAL'
-  | 'INTEGRACAO_THOMSON';
+  | 'ENVIO_ESOCIAL';
 
 export type StatusDocumento = 'PENDENTE' | 'RECEBIDO' | 'APROVADO' | 'REPROVADO';
 export type StatusEtapa = 'PENDENTE' | 'EM_ANDAMENTO' | 'CONCLUIDA' | 'CANCELADA';
@@ -45,11 +44,15 @@ export interface Admissao {
   data_conclusao?: string;
   prazo_final?: string;
   esocial_enviado: boolean;
+  esocial_enviado_por_dominio?: boolean;
   esocial_evento_id?: string;
   esocial_data_envio?: string;
   thomson_reuters_enviado: boolean;
   thomson_reuters_id?: string;
   thomson_reuters_data_envio?: string;
+  contrato_enviado_dominio?: boolean;
+  contrato_assinado_fisicamente?: boolean;
+  data_assinatura_fisica?: string;
   observacoes?: string;
   created_at: string;
   updated_at: string;

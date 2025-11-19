@@ -377,8 +377,9 @@ export const updateAdmissao = async (req, res) => {
       'cargo', 'departamento', 'tipo_contrato', 'salario_proposto',
       'data_inicio_prevista', 'etapa_atual', 'status', 'responsavel_atual',
       'aprovado_por', 'data_aprovacao', 'data_conclusao', 'prazo_final',
-      'esocial_enviado', 'esocial_evento_id', 'esocial_data_envio',
+      'esocial_enviado', 'esocial_enviado_por_dominio', 'esocial_evento_id', 'esocial_data_envio',
       'thomson_reuters_enviado', 'thomson_reuters_id', 'thomson_reuters_data_envio',
+      'contrato_enviado_dominio', 'contrato_assinado_fisicamente', 'data_assinatura_fisica',
       'observacoes'
     ];
 
@@ -517,8 +518,7 @@ function getProximaEtapa(etapaAtual) {
     'EXAME_ADMISSIONAL',
     'GERACAO_CONTRATO',
     'ASSINATURA_DIGITAL',
-    'ENVIO_ESOCIAL',
-    'INTEGRACAO_THOMSON'
+    'ENVIO_ESOCIAL'
   ];
 
   const indexAtual = etapas.indexOf(etapaAtual);

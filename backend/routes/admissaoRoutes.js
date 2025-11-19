@@ -13,9 +13,17 @@ import {
   getDocumentosTemplate
 } from '../controllers/admissaoDocumentosController.js';
 import {
-  enviarESocial,
-  enviarThompsonReuters
+  enviarParaDominio,
+  marcarContratoAssinado,
+  marcarESocialEnviadoDominio
 } from '../controllers/admissaoIntegracoesController.js';
+import {
+  getExamesByAdmissao,
+  criarAgendamento,
+  updateExame,
+  getClinicas,
+  getCalendarioAgendamentos
+} from '../controllers/examesAdmissionaisController.js';
 import upload from '../config/multer.js';
 
 const router = express.Router();
@@ -39,8 +47,16 @@ router.post('/documentos/upload', upload.single('arquivo'), uploadDocumento);
 router.put('/documentos/:documento_id/validar', validarDocumento);
 
 // Rotas de integrações
-router.post('/:admissao_id/esocial', enviarESocial);
-router.post('/:admissao_id/thomson-reuters', enviarThompsonReuters);
+router.post('/:admissao_id/enviar-dominio', enviarParaDominio);
+router.put('/:admissao_id/contrato-assinado', marcarContratoAssinado);
+router.put('/:admissao_id/esocial-enviado-dominio', marcarESocialEnviadoDominio);
+
+// Rotas de exames admissionais
+router.get('/:admissao_id/exames', getExamesByAdmissao);
+router.post('/:admissao_id/exames', criarAgendamento);
+router.put('/exames/:exame_id', updateExame);
+router.get('/clinicas/listar', getClinicas);
+router.get('/exames/calendario', getCalendarioAgendamentos);
 
 export default router;
 

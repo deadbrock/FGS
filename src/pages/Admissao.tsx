@@ -228,12 +228,11 @@ export const Admissao: React.FC = () => {
       SOLICITACAO_VAGA: 'Solicitação de Vaga',
       APROVACAO: 'Aprovação',
       COLETA_DOCUMENTOS: 'Coleta de Documentos',
-      VALIDACAO_DOCUMENTOS: 'Validação de Documentos',
-      EXAME_ADMISSIONAL: 'Exame Admissional',
-      GERACAO_CONTRATO: 'Geração de Contrato',
-      ASSINATURA_DIGITAL: 'Assinatura Digital',
-      ENVIO_ESOCIAL: 'Envio eSocial',
-      INTEGRACAO_THOMSON: 'Integração Thompson Reuters',
+      VALIDACAO_DOCUMENTOS: 'Validação de Documentos (DP)',
+      EXAME_ADMISSIONAL: 'Exame Admissional (SST)',
+      GERACAO_CONTRATO: 'Enviado para Domínio Web',
+      ASSINATURA_DIGITAL: 'Contrato Assinado Fisicamente',
+      ENVIO_ESOCIAL: 'Enviado pela Domínio Web',
     };
     return labels[etapa] || etapa;
   };
@@ -333,7 +332,6 @@ export const Admissao: React.FC = () => {
       'GERACAO_CONTRATO',
       'ASSINATURA_DIGITAL',
       'ENVIO_ESOCIAL',
-      'INTEGRACAO_THOMSON',
     ];
     return etapas.indexOf(etapa);
   };
@@ -617,7 +615,6 @@ export const Admissao: React.FC = () => {
                   'GERACAO_CONTRATO',
                   'ASSINATURA_DIGITAL',
                   'ENVIO_ESOCIAL',
-                  'INTEGRACAO_THOMSON',
                 ].map((etapa, index) => {
                   const etapaKey = etapa as EtapaWorkflow;
                   const workflowEtapa = admissaoCompleta.workflow?.find((w) => w.etapa === etapaKey);
