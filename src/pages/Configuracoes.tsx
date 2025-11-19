@@ -54,7 +54,7 @@ function TabPanel(props: TabPanelProps) {
 
 export const Configuracoes: React.FC = () => {
   const { logAction } = useNavigationLog();
-  const { user } = useAuth();
+  const { user, login } = useAuth();
   
   // Debug: verificar user ao carregar
   useEffect(() => {
@@ -64,6 +64,7 @@ export const Configuracoes: React.FC = () => {
   }, [user]);
   
   const [success, setSuccess] = useState(false);
+  const [error, setError] = useState<string>('');
   const [tabValue, setTabValue] = useState(0);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(user?.avatar || null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -73,6 +74,12 @@ export const Configuracoes: React.FC = () => {
     email: user?.email || '',
     telefone: '(11) 98765-4321',
     cargo: 'Administrador do Sistema',
+  });
+
+  const [senha, setSenha] = useState({
+    senhaAtual: '',
+    novaSenha: '',
+    confirmarSenha: '',
   });
 
   const [config, setConfig] = useState({
@@ -91,6 +98,7 @@ export const Configuracoes: React.FC = () => {
 
   const handleSave = async () => {
     try {
+      setError('');
       // Atualizar dados do usuário no backend
       if (user?.id) {
         console.log('🔍 Atualizando usuário:', { 
@@ -126,12 +134,108 @@ export const Configuracoes: React.FC = () => {
         }, 1500);
       } else {
         console.error('❌ user.id não encontrado:', user);
-        alert('Erro: ID do usuário não encontrado. Faça login novamente.');
+        setError('Erro: ID do usuário não encontrado. Faça login novamente.');
       }
     } catch (error: any) {
       console.error('❌ Erro ao salvar configurações:', error);
       console.error('Detalhes do erro:', error.response?.data);
-      alert(`Erro ao salvar configurações: ${error.message || 'Erro desconhecido'}`);
+      setError(`Erro ao salvar configurações: ${error.message || 'Erro desconhecido'}`);
+    }
+  };
+
+  const handleAlterarSenha = async () => {
+    try {
+      setError('');
+      setSuccess(false);
+
+      // Validações
+      if (!senha.senhaAtual || !senha.novaSenha || !senha.confirmarSenha) {
+        setError('Por favor, preencha todos os campos de senha.');
+        return;
+      }
+
+      if (senha.novaSenha.length < 6) {
+        setError('A nova senha deve ter pelo menos 6 caracteres.');
+        return;
+      }
+
+      if (senha.novaSenha !== senha.confirmarSenha) {
+        setError('A nova senha e a confirmação não coincidem.');
+        return;
+      }
+
+      if (!user?.email) {
+        setError('Erro: Email do usuário não encontrado.');
+        return;
+      }
+
+      // Verificar se a senha atual está correta (fazendo um login de teste)
+      const authService = (await import('../services/authService')).default;
+      
+      // Salvar token atual antes da verificação
+      const tokenAtual = authService.getStoredToken();
+      let verificacaoBemSucedida = false;
+      try {
+        await authService.login({
+          email: user.email,
+          senha: senha.senhaAtual,
+        });
+        verificacaoBemSucedida = true;
+      } catch (loginError: any) {
+        setError('Senha atual incorreta. Por favor, verifique e tente novamente.');
+        return;
+      }
+
+      // Se a verificação foi bem-sucedida, restaurar o token anterior temporariamente
+      if (verificacaoBemSucedida && tokenAtual) {
+        localStorage.setItem('@FGS:token', tokenAtual);
+      }
+
+      // Atualizar a senha no backend
+      if (!user?.id) {
+        setError('Erro: ID do usuário não encontrado.');
+        return;
+      }
+
+      const usuariosService = (await import('../services/usuariosService')).default;
+      await usuariosService.update(user.id, {
+        senha: senha.novaSenha,
+      });
+
+      console.log('✅ Senha atualizada com sucesso');
+
+      // Fazer login novamente com a nova senha para atualizar o token
+      try {
+        await login({
+          email: user.email,
+          senha: senha.novaSenha,
+        });
+
+        // Limpar campos de senha
+        setSenha({
+          senhaAtual: '',
+          novaSenha: '',
+          confirmarSenha: '',
+        });
+
+        logAction('Senha alterada com sucesso');
+        setSuccess(true);
+        setError('');
+        
+        setTimeout(() => {
+          setSuccess(false);
+        }, 3000);
+      } catch (loginError: any) {
+        // Se o login falhar, ainda assim a senha foi alterada
+        // O usuário precisará fazer login novamente
+        setError('Senha alterada com sucesso, mas houve um erro ao atualizar a sessão. Por favor, faça login novamente.');
+        setTimeout(() => {
+          window.location.href = '/login';
+        }, 2000);
+      }
+    } catch (error: any) {
+      console.error('❌ Erro ao alterar senha:', error);
+      setError(`Erro ao alterar senha: ${error.message || 'Erro desconhecido'}`);
     }
   };
 
@@ -206,7 +310,13 @@ export const Configuracoes: React.FC = () => {
 
       {success && (
         <Alert severity="success" sx={{ mb: 3 }}>
-          Configurações salvas com sucesso!
+          {tabValue === 0 && senha.novaSenha ? 'Senha alterada com sucesso!' : 'Configurações salvas com sucesso!'}
+        </Alert>
+      )}
+
+      {error && (
+        <Alert severity="error" sx={{ mb: 3 }} onClose={() => setError('')}>
+          {error}
         </Alert>
       )}
 
@@ -356,6 +466,8 @@ export const Configuracoes: React.FC = () => {
                       fullWidth
                       label="Senha Atual"
                       type="password"
+                      value={senha.senhaAtual}
+                      onChange={(e) => setSenha({ ...senha, senhaAtual: e.target.value })}
                     />
                   </Grid>
                   <Grid item xs={12} md={6}>
@@ -363,6 +475,9 @@ export const Configuracoes: React.FC = () => {
                       fullWidth
                       label="Nova Senha"
                       type="password"
+                      value={senha.novaSenha}
+                      onChange={(e) => setSenha({ ...senha, novaSenha: e.target.value })}
+                      helperText="Mínimo de 6 caracteres"
                     />
                   </Grid>
                   <Grid item xs={12} md={6}>
@@ -370,14 +485,42 @@ export const Configuracoes: React.FC = () => {
                       fullWidth
                       label="Confirmar Nova Senha"
                       type="password"
+                      value={senha.confirmarSenha}
+                      onChange={(e) => setSenha({ ...senha, confirmarSenha: e.target.value })}
                     />
                   </Grid>
                 </Grid>
 
                 <Box display="flex" justifyContent="flex-end" gap={2} mt={3}>
-                  <Button variant="outlined">
+                  <Button
+                    variant="outlined"
+                    onClick={() => {
+                      setSenha({
+                        senhaAtual: '',
+                        novaSenha: '',
+                        confirmarSenha: '',
+                      });
+                      setError('');
+                    }}
+                  >
                     Cancelar
                   </Button>
+                  <Button
+                    variant="contained"
+                    startIcon={<SaveIcon />}
+                    onClick={handleAlterarSenha}
+                    disabled={!senha.senhaAtual || !senha.novaSenha || !senha.confirmarSenha}
+                    sx={{
+                      background: 'linear-gradient(135deg, #a2122a 0%, #354a80 100%)',
+                    }}
+                  >
+                    Alterar Senha
+                  </Button>
+                </Box>
+
+                <Divider sx={{ my: 3 }} />
+
+                <Box display="flex" justifyContent="flex-end" gap={2}>
                   <Button
                     variant="contained"
                     startIcon={<SaveIcon />}
@@ -386,7 +529,7 @@ export const Configuracoes: React.FC = () => {
                       background: 'linear-gradient(135deg, #a2122a 0%, #354a80 100%)',
                     }}
                   >
-                    Salvar Alterações
+                    Salvar Informações Pessoais
                   </Button>
                 </Box>
               </CardContent>
