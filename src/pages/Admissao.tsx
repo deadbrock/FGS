@@ -107,6 +107,13 @@ export const Admissao: React.FC = () => {
   // Estados de estatísticas
   const [estatisticas, setEstatisticas] = useState<EstatisticasAdmissao | null>(null);
 
+  // Estados do workflow e checklist
+  const [admissaoCompleta, setAdmissaoCompleta] = useState<Admissao | null>(null);
+  const [loadingDetalhes, setLoadingDetalhes] = useState(false);
+  const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
+  const [documentoSelecionado, setDocumentoSelecionado] = useState<string | null>(null);
+  const [arquivoSelecionado, setArquivoSelecionado] = useState<File | null>(null);
+
   // Carregar admissões
   const carregarAdmissoes = useCallback(async () => {
     setLoading(true);
@@ -229,6 +236,131 @@ export const Admissao: React.FC = () => {
       INTEGRACAO_THOMSON: 'Integração Thompson Reuters',
     };
     return labels[etapa] || etapa;
+  };
+
+  // Carregar detalhes completos da admissão
+  const carregarDetalhesAdmissao = useCallback(async (admissaoId: string) => {
+    setLoadingDetalhes(true);
+    try {
+      const detalhes = await admissaoService.getById(admissaoId);
+      setAdmissaoCompleta(detalhes);
+    } catch (err: any) {
+      setError(err.message || 'Erro ao carregar detalhes da admissão');
+      console.error('Erro ao carregar detalhes:', err);
+    } finally {
+      setLoadingDetalhes(false);
+    }
+  }, []);
+
+  // Quando selecionar uma admissão, carregar detalhes
+  useEffect(() => {
+    if (admissaoSelecionada && (tabAtual === 1 || tabAtual === 2)) {
+      carregarDetalhesAdmissao(admissaoSelecionada.id);
+    }
+  }, [admissaoSelecionada, tabAtual, carregarDetalhesAdmissao]);
+
+  // Avançar etapa do workflow
+  const handleAvancarEtapa = async () => {
+    if (!admissaoSelecionada) return;
+
+    try {
+      setLoading(true);
+      setError(null);
+      await admissaoService.avancarEtapa(admissaoSelecionada.id, {});
+      await carregarDetalhesAdmissao(admissaoSelecionada.id);
+      carregarAdmissoes();
+    } catch (err: any) {
+      setError(err.message || 'Erro ao avançar etapa');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Abrir dialog de upload
+  const handleAbrirUpload = (documentoId: string) => {
+    setDocumentoSelecionado(documentoId);
+    setArquivoSelecionado(null);
+    setUploadDialogOpen(true);
+  };
+
+  // Fazer upload de documento
+  const handleUploadDocumento = async () => {
+    if (!admissaoSelecionada || !documentoSelecionado || !arquivoSelecionado) return;
+
+    try {
+      setLoading(true);
+      setError(null);
+      await admissaoService.uploadDocumento(
+        admissaoSelecionada.id,
+        documentoSelecionado,
+        arquivoSelecionado
+      );
+      setUploadDialogOpen(false);
+      await carregarDetalhesAdmissao(admissaoSelecionada.id);
+    } catch (err: any) {
+      setError(err.message || 'Erro ao fazer upload do documento');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Validar documento
+  const handleValidarDocumento = async (documentoId: string, aprovado: boolean) => {
+    if (!admissaoSelecionada) return;
+
+    try {
+      setLoading(true);
+      setError(null);
+      await admissaoService.validarDocumento(documentoId, {
+        status: aprovado ? 'APROVADO' : 'REPROVADO',
+      });
+      await carregarDetalhesAdmissao(admissaoSelecionada.id);
+    } catch (err: any) {
+      setError(err.message || 'Erro ao validar documento');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Obter índice da etapa atual no stepper
+  const getEtapaIndex = (etapa: EtapaWorkflow): number => {
+    const etapas: EtapaWorkflow[] = [
+      'SOLICITACAO_VAGA',
+      'APROVACAO',
+      'COLETA_DOCUMENTOS',
+      'VALIDACAO_DOCUMENTOS',
+      'EXAME_ADMISSIONAL',
+      'GERACAO_CONTRATO',
+      'ASSINATURA_DIGITAL',
+      'ENVIO_ESOCIAL',
+      'INTEGRACAO_THOMSON',
+    ];
+    return etapas.indexOf(etapa);
+  };
+
+  // Obter status da etapa
+  const getEtapaStatus = (etapa: EtapaWorkflow): 'completed' | 'active' | 'pending' => {
+    if (!admissaoCompleta) return 'pending';
+    const etapaAtualIndex = getEtapaIndex(admissaoCompleta.etapa_atual);
+    const etapaIndex = getEtapaIndex(etapa);
+    
+    if (etapaIndex < etapaAtualIndex) return 'completed';
+    if (etapaIndex === etapaAtualIndex) return 'active';
+    return 'pending';
+  };
+
+  // Obter cor do status do documento
+  const getDocumentoStatusColor = (status: StatusDocumento) => {
+    switch (status) {
+      case 'APROVADO':
+        return 'success';
+      case 'RECEBIDO':
+        return 'info';
+      case 'REPROVADO':
+        return 'error';
+      default:
+        return 'default';
+    }
   };
 
   return (
@@ -437,41 +569,310 @@ export const Admissao: React.FC = () => {
           )}
         </TabPanel>
 
-        {/* Aba 1: Workflow - Será implementada com detalhes da admissão selecionada */}
+        {/* Aba 1: Workflow */}
         <TabPanel value={tabAtual} index={1}>
-          {admissaoSelecionada ? (
-            <Box>
-              <Typography variant="h6" gutterBottom>
-                Workflow: {admissaoSelecionada.nome_candidato}
-              </Typography>
-              <Typography variant="body2" color="text.secondary" gutterBottom>
-                {admissaoSelecionada.cargo} - {admissaoSelecionada.departamento}
-              </Typography>
-              <Alert severity="info" sx={{ mt: 2, mb: 3 }}>
-                Detalhes do workflow serão implementados na próxima etapa
-              </Alert>
-            </Box>
-          ) : (
+          {!admissaoSelecionada ? (
             <Alert severity="info">
               Selecione uma admissão da lista para ver o workflow
+            </Alert>
+          ) : loadingDetalhes ? (
+            <Box display="flex" justifyContent="center" py={4}>
+              <CircularProgress />
+            </Box>
+          ) : admissaoCompleta ? (
+            <Box>
+              <Box mb={3} display="flex" justifyContent="space-between" alignItems="center">
+                <Box>
+                  <Typography variant="h6" gutterBottom>
+                    Workflow: {admissaoCompleta.nome_candidato}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    {admissaoCompleta.cargo} - {admissaoCompleta.departamento}
+                  </Typography>
+                  <Chip
+                    label={admissaoCompleta.status}
+                    color={getStatusColor(admissaoCompleta.status)}
+                    size="small"
+                    sx={{ mt: 1 }}
+                  />
+                </Box>
+                {admissaoCompleta.status === 'EM_ANDAMENTO' && (
+                  <GradientButton
+                    startIcon={<SendIcon />}
+                    onClick={handleAvancarEtapa}
+                    disabled={loading}
+                  >
+                    Avançar Etapa
+                  </GradientButton>
+                )}
+              </Box>
+
+              <Stepper activeStep={getEtapaIndex(admissaoCompleta.etapa_atual)} orientation="vertical">
+                {[
+                  'SOLICITACAO_VAGA',
+                  'APROVACAO',
+                  'COLETA_DOCUMENTOS',
+                  'VALIDACAO_DOCUMENTOS',
+                  'EXAME_ADMISSIONAL',
+                  'GERACAO_CONTRATO',
+                  'ASSINATURA_DIGITAL',
+                  'ENVIO_ESOCIAL',
+                  'INTEGRACAO_THOMSON',
+                ].map((etapa, index) => {
+                  const etapaKey = etapa as EtapaWorkflow;
+                  const workflowEtapa = admissaoCompleta.workflow?.find((w) => w.etapa === etapaKey);
+                  const status = getEtapaStatus(etapaKey);
+                  const isActive = status === 'active';
+                  const isCompleted = status === 'completed';
+
+                  return (
+                    <Step key={etapa} completed={isCompleted} active={isActive}>
+                      <StepLabel
+                        optional={
+                          workflowEtapa?.data_conclusao ? (
+                            <Typography variant="caption" color="text.secondary">
+                              Concluída em: {formatarData(workflowEtapa.data_conclusao)}
+                            </Typography>
+                          ) : workflowEtapa?.prazo_etapa ? (
+                            <Typography variant="caption" color="text.secondary">
+                              Prazo: {formatarData(workflowEtapa.prazo_etapa)}
+                            </Typography>
+                          ) : null
+                        }
+                      >
+                        {getEtapaLabel(etapaKey)}
+                      </StepLabel>
+                      <StepContent>
+                        <Box sx={{ mb: 2 }}>
+                          {workflowEtapa && (
+                            <Box>
+                              {workflowEtapa.responsavel_nome && (
+                                <Typography variant="body2" color="text.secondary" gutterBottom>
+                                  <strong>Responsável:</strong> {workflowEtapa.responsavel_nome}
+                                </Typography>
+                              )}
+                              {workflowEtapa.data_inicio && (
+                                <Typography variant="body2" color="text.secondary" gutterBottom>
+                                  <strong>Iniciada em:</strong> {formatarData(workflowEtapa.data_inicio)}
+                                </Typography>
+                              )}
+                              {workflowEtapa.observacoes && (
+                                <Alert severity="info" sx={{ mt: 2 }}>
+                                  {workflowEtapa.observacoes}
+                                </Alert>
+                              )}
+                            </Box>
+                          )}
+
+                          {isActive && (
+                            <Box mt={2}>
+                              <Alert severity="info">
+                                Esta etapa está em andamento. Complete as ações necessárias para avançar.
+                              </Alert>
+                            </Box>
+                          )}
+
+                          {etapaKey === 'ENVIO_ESOCIAL' && admissaoCompleta.esocial_enviado && (
+                            <Alert severity="success" sx={{ mt: 2 }}>
+                              eSocial enviado em: {formatarData(admissaoCompleta.esocial_data_envio || '')}
+                              {admissaoCompleta.esocial_evento_id && (
+                                <Typography variant="caption" display="block" sx={{ mt: 1 }}>
+                                  ID do Evento: {admissaoCompleta.esocial_evento_id}
+                                </Typography>
+                              )}
+                            </Alert>
+                          )}
+
+                          {etapaKey === 'INTEGRACAO_THOMSON' && admissaoCompleta.thomson_reuters_enviado && (
+                            <Alert severity="success" sx={{ mt: 2 }}>
+                              Dados enviados para Thompson Reuters em: {formatarData(admissaoCompleta.thomson_reuters_data_envio || '')}
+                              {admissaoCompleta.thomson_reuters_id && (
+                                <Typography variant="caption" display="block" sx={{ mt: 1 }}>
+                                  ID: {admissaoCompleta.thomson_reuters_id}
+                                </Typography>
+                              )}
+                            </Alert>
+                          )}
+                        </Box>
+                      </StepContent>
+                    </Step>
+                  );
+                })}
+              </Stepper>
+            </Box>
+          ) : (
+            <Alert severity="warning">
+              Não foi possível carregar os detalhes do workflow
             </Alert>
           )}
         </TabPanel>
 
-        {/* Aba 2: Checklist - Será implementada */}
+        {/* Aba 2: Checklist */}
         <TabPanel value={tabAtual} index={2}>
-          {admissaoSelecionada ? (
-            <Box>
-              <Typography variant="h6" gutterBottom>
-                Checklist de Documentos: {admissaoSelecionada.nome_candidato}
-              </Typography>
-              <Alert severity="info" sx={{ mt: 2 }}>
-                Checklist de documentos será implementado na próxima etapa
-              </Alert>
-            </Box>
-          ) : (
+          {!admissaoSelecionada ? (
             <Alert severity="info">
               Selecione uma admissão da lista para ver o checklist
+            </Alert>
+          ) : loadingDetalhes ? (
+            <Box display="flex" justifyContent="center" py={4}>
+              <CircularProgress />
+            </Box>
+          ) : admissaoCompleta ? (
+            <Box>
+              <Box mb={3} display="flex" justifyContent="space-between" alignItems="center">
+                <Box>
+                  <Typography variant="h6" gutterBottom>
+                    Checklist de Documentos: {admissaoCompleta.nome_candidato}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    {admissaoCompleta.documentos_aprovados || 0} de {admissaoCompleta.total_documentos || 0} documentos aprovados
+                  </Typography>
+                </Box>
+                {admissaoCompleta.documentos_pendentes && admissaoCompleta.documentos_pendentes > 0 && (
+                  <Chip
+                    label={`${admissaoCompleta.documentos_pendentes} pendente(s)`}
+                    color="warning"
+                    size="small"
+                  />
+                )}
+              </Box>
+
+              {admissaoCompleta.documentos && admissaoCompleta.documentos.length > 0 ? (
+                <TableContainer component={Paper} elevation={0}>
+                  <Table>
+                    <TableHead>
+                      <TableRow>
+                        <TableCell>Documento</TableCell>
+                        <TableCell>Status</TableCell>
+                        <TableCell>Responsável</TableCell>
+                        <TableCell>Prazo</TableCell>
+                        <TableCell>Data Recebimento</TableCell>
+                        <TableCell align="right">Ações</TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {admissaoCompleta.documentos.map((doc) => (
+                        <TableRow key={doc.id} hover>
+                          <TableCell>
+                            <Box>
+                              <Typography variant="body2" fontWeight={600}>
+                                {doc.nome_documento}
+                              </Typography>
+                              {doc.obrigatorio && (
+                                <Chip label="Obrigatório" size="small" color="error" sx={{ mt: 0.5 }} />
+                              )}
+                            </Box>
+                          </TableCell>
+                          <TableCell>
+                            <Chip
+                              label={doc.status}
+                              size="small"
+                              color={getDocumentoStatusColor(doc.status)}
+                            />
+                          </TableCell>
+                          <TableCell>
+                            {doc.responsavel_nome || '-'}
+                          </TableCell>
+                          <TableCell>
+                            {doc.prazo_entrega ? (
+                              <Typography
+                                variant="body2"
+                                color={
+                                  new Date(doc.prazo_entrega) < new Date() && doc.status === 'PENDENTE'
+                                    ? 'error'
+                                    : 'text.secondary'
+                                }
+                              >
+                                {formatarData(doc.prazo_entrega)}
+                              </Typography>
+                            ) : (
+                              '-'
+                            )}
+                          </TableCell>
+                          <TableCell>
+                            {doc.data_recebimento ? formatarData(doc.data_recebimento) : '-'}
+                          </TableCell>
+                          <TableCell align="right">
+                            {doc.status === 'PENDENTE' && (
+                              <Tooltip title="Enviar Documento">
+                                <IconButton
+                                  size="small"
+                                  color="primary"
+                                  onClick={() => handleAbrirUpload(doc.id)}
+                                >
+                                  <UploadIcon fontSize="small" />
+                                </IconButton>
+                              </Tooltip>
+                            )}
+                            {doc.status === 'RECEBIDO' && (
+                              <>
+                                <Tooltip title="Aprovar">
+                                  <IconButton
+                                    size="small"
+                                    color="success"
+                                    onClick={() => handleValidarDocumento(doc.id, true)}
+                                  >
+                                    <CheckCircleIcon fontSize="small" />
+                                  </IconButton>
+                                </Tooltip>
+                                <Tooltip title="Reprovar">
+                                  <IconButton
+                                    size="small"
+                                    color="error"
+                                    onClick={() => handleValidarDocumento(doc.id, false)}
+                                  >
+                                    <CancelIcon fontSize="small" />
+                                  </IconButton>
+                                </Tooltip>
+                              </>
+                            )}
+                            {doc.arquivo_url && (
+                              <Tooltip title="Visualizar">
+                                <IconButton
+                                  size="small"
+                                  onClick={() => window.open(doc.arquivo_url, '_blank')}
+                                >
+                                  <VisibilityIcon fontSize="small" />
+                                </IconButton>
+                              </Tooltip>
+                            )}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+              ) : (
+                <Alert severity="info">
+                  Nenhum documento cadastrado para esta admissão
+                </Alert>
+              )}
+
+              {admissaoCompleta.documentos && admissaoCompleta.documentos.some((d) => d.observacoes_validacao) && (
+                <Box mt={3}>
+                  <Typography variant="h6" gutterBottom>
+                    Observações de Validação
+                  </Typography>
+                  {admissaoCompleta.documentos
+                    .filter((d) => d.observacoes_validacao)
+                    .map((doc) => (
+                      <Alert
+                        key={doc.id}
+                        severity={doc.status === 'APROVADO' ? 'success' : 'error'}
+                        sx={{ mb: 1 }}
+                      >
+                        <Typography variant="body2" fontWeight={600}>
+                          {doc.nome_documento}:
+                        </Typography>
+                        <Typography variant="body2">{doc.observacoes_validacao}</Typography>
+                      </Alert>
+                    ))}
+                </Box>
+              )}
+            </Box>
+          ) : (
+            <Alert severity="warning">
+              Não foi possível carregar o checklist de documentos
             </Alert>
           )}
         </TabPanel>
@@ -635,6 +1036,61 @@ export const Admissao: React.FC = () => {
           <Button onClick={() => setDialogAberto(false)}>Cancelar</Button>
           <GradientButton onClick={handleSalvar} disabled={loading}>
             {loading ? <CircularProgress size={20} /> : 'Salvar'}
+          </GradientButton>
+        </DialogActions>
+      </Dialog>
+
+      {/* Dialog de Upload de Documento */}
+      <Dialog open={uploadDialogOpen} onClose={() => setUploadDialogOpen(false)} maxWidth="sm" fullWidth>
+        <DialogTitle>Enviar Documento</DialogTitle>
+        <DialogContent>
+          <Box sx={{ mt: 2 }}>
+            <input
+              accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+              style={{ display: 'none' }}
+              id="upload-documento"
+              type="file"
+              onChange={(e) => {
+                if (e.target.files && e.target.files[0]) {
+                  setArquivoSelecionado(e.target.files[0]);
+                }
+              }}
+            />
+            <label htmlFor="upload-documento">
+              <Button
+                variant="outlined"
+                component="span"
+                fullWidth
+                startIcon={<UploadIcon />}
+                sx={{ mb: 2 }}
+              >
+                Selecionar Arquivo
+              </Button>
+            </label>
+            {arquivoSelecionado && (
+              <Alert severity="success">
+                Arquivo selecionado: <strong>{arquivoSelecionado.name}</strong>
+                <br />
+                <Typography variant="caption">
+                  Tamanho: {(arquivoSelecionado.size / 1024 / 1024).toFixed(2)} MB
+                </Typography>
+              </Alert>
+            )}
+            <Alert severity="info" sx={{ mt: 2 }}>
+              Formatos aceitos: PDF, DOC, DOCX, JPG, PNG
+              <br />
+              Tamanho máximo: 10 MB
+            </Alert>
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setUploadDialogOpen(false)}>Cancelar</Button>
+          <GradientButton
+            onClick={handleUploadDocumento}
+            disabled={!arquivoSelecionado || loading}
+            startIcon={<UploadIcon />}
+          >
+            {loading ? <CircularProgress size={20} /> : 'Enviar'}
           </GradientButton>
         </DialogActions>
       </Dialog>
