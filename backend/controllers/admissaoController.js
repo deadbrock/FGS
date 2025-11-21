@@ -142,9 +142,39 @@ export const getAdmissoes = async (req, res) => {
     const countResult = await pool.query(countQuery, countParams);
     const total = parseInt(countResult.rows[0].count);
 
+    // Log dos dados retornados
+    console.log(`📋 [ADMISSOES] Dados retornados:`, {
+      total_registros: result.rows.length,
+      primeiro_registro: result.rows[0] ? {
+        id: result.rows[0].id,
+        nome_candidato: result.rows[0].nome_candidato,
+        cpf_candidato: result.rows[0].cpf_candidato,
+        email_candidato: result.rows[0].email_candidato,
+        cargo: result.rows[0].cargo,
+        departamento: result.rows[0].departamento,
+        etapa_atual: result.rows[0].etapa_atual,
+        status: result.rows[0].status,
+        esocial_enviado: result.rows[0].esocial_enviado,
+        thomson_reuters_enviado: result.rows[0].thomson_reuters_enviado,
+        created_at: result.rows[0].created_at,
+        updated_at: result.rows[0].updated_at
+      } : null
+    });
+
+    // Garantir que campos obrigatórios não sejam NULL
+    const dadosFormatados = result.rows.map(row => ({
+      ...row,
+      esocial_enviado: row.esocial_enviado ?? false,
+      thomson_reuters_enviado: row.thomson_reuters_enviado ?? false,
+      contrato_assinado_fisicamente: row.contrato_assinado_fisicamente ?? false,
+      total_documentos: row.total_documentos ?? 0,
+      documentos_pendentes: row.documentos_pendentes ?? 0,
+      documentos_aprovados: row.documentos_aprovados ?? 0
+    }));
+
     res.json({
       success: true,
-      data: result.rows,
+      data: dadosFormatados,
       pagination: {
         total,
         limit: parseInt(limit),

@@ -124,11 +124,29 @@ export const Admissao: React.FC = () => {
         limit: itensPorPagina,
         offset: pagina * itensPorPagina,
       });
-      setAdmissoes(response.data);
+      console.log('📥 [FRONTEND] Resposta recebida:', {
+        hasData: !!response.data,
+        dataLength: Array.isArray(response.data) ? response.data.length : 'não é array',
+        dataType: typeof response.data,
+        pagination: response.pagination,
+        firstItem: Array.isArray(response.data) && response.data[0] ? {
+          id: response.data[0].id,
+          nome_candidato: response.data[0].nome_candidato,
+          etapa_atual: response.data[0].etapa_atual,
+          status: response.data[0].status
+        } : null
+      });
+      
+      // Garantir que seja um array
+      const admissoesArray = Array.isArray(response.data) ? response.data : [];
+      setAdmissoes(admissoesArray);
       setTotalAdmissoes(response.pagination?.total || 0);
+      
+      console.log('📥 [FRONTEND] Admissões definidas:', admissoesArray.length);
     } catch (err: any) {
       setError(err.message || 'Erro ao carregar admissões');
-      console.error('Erro ao carregar admissões:', err);
+      console.error('❌ [FRONTEND] Erro ao carregar admissões:', err);
+      console.error('❌ [FRONTEND] Detalhes do erro:', err.response?.data || err.message);
     } finally {
       setLoading(false);
     }
