@@ -32,10 +32,34 @@ class AdmissaoService {
       const token = localStorage.getItem('@FGS:token');
       if (token) this.setAuthToken(token);
 
+      console.log('📡 [SERVICE] Fazendo requisição GET /api/admissoes com filtros:', filtros);
       const response = await this.api.get('/', { params: filtros });
+      
+      console.log('📡 [SERVICE] Resposta bruta recebida:', {
+        status: response.status,
+        hasData: !!response.data,
+        dataKeys: response.data ? Object.keys(response.data) : [],
+        dataStructure: {
+          hasData: !!response.data?.data,
+          hasPagination: !!response.data?.pagination,
+          dataIsArray: Array.isArray(response.data?.data),
+          dataLength: Array.isArray(response.data?.data) ? response.data.data.length : 'não é array'
+        },
+        firstItem: Array.isArray(response.data?.data) && response.data.data[0] ? {
+          id: response.data.data[0].id,
+          nome_candidato: response.data.data[0].nome_candidato,
+          etapa_atual: response.data.data[0].etapa_atual
+        } : null
+      });
+      
       return response.data;
     } catch (error: any) {
-      console.error('Erro ao buscar admissões:', error);
+      console.error('❌ [SERVICE] Erro ao buscar admissões:', error);
+      console.error('❌ [SERVICE] Detalhes:', {
+        message: error.message,
+        response: error.response?.data,
+        status: error.response?.status
+      });
       throw new Error(error.response?.data?.error || 'Erro ao buscar admissões');
     }
   }
