@@ -82,6 +82,14 @@ export const Admissao: React.FC = () => {
   const [totalAdmissoes, setTotalAdmissoes] = useState(0);
   const [pagina, setPagina] = useState(0);
   const [itensPorPagina, setItensPorPagina] = useState(10);
+  
+  // Log do estado de admissoes quando muda
+  useEffect(() => {
+    console.log('🔄 [STATE] Estado de admissoes atualizado:', {
+      length: admissoes.length,
+      items: admissoes.map(a => ({ id: a.id, nome: a.nome_candidato }))
+    });
+  }, [admissoes]);
   const [filtros, setFiltros] = useState({
     status: '' as StatusAdmissao | '',
     etapa_atual: '' as EtapaWorkflow | '',
