@@ -6,6 +6,15 @@ import { v4 as uuidv4 } from 'uuid';
 // =============================================
 export const receberCandidato = async (req, res) => {
   try {
+    // Log de debug para identificar problemas
+    console.log('📥 [ADMISSAO CANDIDATOS] Recebendo requisição POST /api/admissoes/candidatos');
+    console.log('📥 [ADMISSAO CANDIDATOS] Headers:', {
+      'x-api-key': req.headers['x-api-key'] ? '***' : 'ausente',
+      'authorization': req.headers['authorization'] ? '***' : 'ausente',
+      'content-type': req.headers['content-type']
+    });
+    console.log('📥 [ADMISSAO CANDIDATOS] Body recebido:', JSON.stringify(req.body, null, 2));
+
     const {
       nome,
       cpf,
@@ -70,8 +79,9 @@ export const receberCandidato = async (req, res) => {
         id, nome_candidato, cpf_candidato, email_candidato, telefone_candidato,
         cargo, departamento, tipo_contrato, salario_proposto,
         etapa_atual, status, data_solicitacao, prazo_final,
-        observacoes, vaga_id
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
+        observacoes, vaga_id, esocial_enviado, thomson_reuters_enviado,
+        contrato_enviado_dominio, contrato_assinado_fisicamente, esocial_enviado_por_dominio
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20)
       RETURNING *`,
       [
         admissaoId,
@@ -88,7 +98,12 @@ export const receberCandidato = async (req, res) => {
         dataSolicitacao,
         prazoFinal,
         `Candidato recebido do sistema "${origem || 'Trabalhe Conosco'}". Candidato ID: ${candidato_id_origem || 'N/A'}`,
-        vaga.id ? vaga.id.toString() : null
+        vaga.id ? vaga.id.toString() : null,
+        false, // esocial_enviado
+        false, // thomson_reuters_enviado
+        false, // contrato_enviado_dominio
+        false, // contrato_assinado_fisicamente
+        false  // esocial_enviado_por_dominio
       ]
     );
 
@@ -184,6 +199,15 @@ export const receberCandidato = async (req, res) => {
       `UPDATE admissoes SET etapa_atual = 'APROVACAO', updated_at = CURRENT_TIMESTAMP WHERE id = $1`,
       [admissaoId]
     );
+
+    // Log de sucesso
+    console.log('✅ [ADMISSAO CANDIDATOS] Admissão criada com sucesso:', {
+      admissao_id: admissaoId,
+      nome_candidato: nome,
+      cpf: cpf.replace(/\D/g, ''),
+      etapa_atual: 'APROVACAO',
+      status: 'EM_ANDAMENTO'
+    });
 
     res.status(201).json({
       success: true,

@@ -16,20 +16,29 @@ export const getAdmissoes = async (req, res) => {
       offset = 0
     } = req.query;
 
+    // Usar subquery para contar documentos e depois fazer JOIN para evitar problemas com GROUP BY
     let query = `
       SELECT 
         a.*,
         u_solicitado.nome as solicitado_por_nome,
         u_aprovado.nome as aprovado_por_nome,
         u_responsavel.nome as responsavel_atual_nome,
-        COUNT(DISTINCT ad.id) as total_documentos,
-        COUNT(DISTINCT CASE WHEN ad.status = 'PENDENTE' THEN ad.id END) as documentos_pendentes,
-        COUNT(DISTINCT CASE WHEN ad.status = 'APROVADO' THEN ad.id END) as documentos_aprovados
+        COALESCE(doc_stats.total_documentos, 0) as total_documentos,
+        COALESCE(doc_stats.documentos_pendentes, 0) as documentos_pendentes,
+        COALESCE(doc_stats.documentos_aprovados, 0) as documentos_aprovados
       FROM admissoes a
       LEFT JOIN users u_solicitado ON a.solicitado_por = u_solicitado.id
       LEFT JOIN users u_aprovado ON a.aprovado_por = u_aprovado.id
       LEFT JOIN users u_responsavel ON a.responsavel_atual = u_responsavel.id
-      LEFT JOIN admissao_documentos ad ON a.id = ad.admissao_id
+      LEFT JOIN (
+        SELECT 
+          admissao_id,
+          COUNT(DISTINCT id) as total_documentos,
+          COUNT(DISTINCT CASE WHEN status = 'PENDENTE' THEN id END) as documentos_pendentes,
+          COUNT(DISTINCT CASE WHEN status = 'APROVADO' THEN id END) as documentos_aprovados
+        FROM admissao_documentos
+        GROUP BY admissao_id
+      ) doc_stats ON a.id = doc_stats.admissao_id
       WHERE 1=1
     `;
 
@@ -71,12 +80,24 @@ export const getAdmissoes = async (req, res) => {
       paramIndex++;
     }
 
-    query += ` GROUP BY a.id, u_solicitado.nome, u_aprovado.nome, u_responsavel.nome`;
+    // Remover GROUP BY já que não estamos mais agregando diretamente na query principal
     query += ` ORDER BY a.data_solicitacao DESC`;
     query += ` LIMIT $${paramIndex} OFFSET $${paramIndex + 1}`;
     params.push(limit, offset);
 
     const result = await pool.query(query, params);
+
+    // Log de debug
+    console.log(`📋 [ADMISSOES] Buscando admissões. Filtros:`, {
+      status,
+      etapa_atual,
+      responsavel_id,
+      departamento,
+      search,
+      limit,
+      offset
+    });
+    console.log(`📋 [ADMISSOES] Total de registros encontrados: ${result.rows.length}`);
 
     // Contar total
     let countQuery = 'SELECT COUNT(DISTINCT a.id) FROM admissoes a WHERE 1=1';

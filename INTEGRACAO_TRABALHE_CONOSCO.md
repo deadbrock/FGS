@@ -175,12 +175,20 @@ FGS_API_KEY=sua-api-key-secreta-aqui
 FGS_API_URL=https://seu-sistema-fgs.com/api/admissoes
 ```
 
-**⚠️ IMPORTANTE**: Gere uma API key segura e única. Exemplo:
+**⚠️ IMPORTANTE**: Gere uma API key segura e única.
+
+**📖 Consulte o arquivo `GERAR_API_KEY.md` para instruções detalhadas de como gerar e configurar a API key.**
+
+**Resumo rápido:**
 ```bash
-# Gerar API key aleatória (Linux/Mac)
+# Linux/Mac
 openssl rand -hex 32
 
-# Ou usar um gerador online
+# Windows PowerShell
+[Convert]::ToBase64String((1..48 | ForEach-Object { Get-Random -Maximum 256 }))
+
+# Node.js
+node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 ```
 
 ### 2. Variáveis de Ambiente no "Trabalhe Conosco"
@@ -191,6 +199,16 @@ No Railway do sistema "Trabalhe Conosco", adicione:
 FGS_API_URL=https://seu-sistema-fgs.com/api/admissoes/candidatos
 FGS_API_KEY=sua-api-key-secreta-aqui
 ```
+
+**📖 Consulte o arquivo `OBTER_API_URL.md` para instruções detalhadas de como encontrar a URL da API do FGS.**
+
+**Resumo rápido:**
+1. Acesse o Railway Dashboard
+2. Selecione o projeto FGS Backend
+3. Vá em Settings → Public Domain
+4. Copie a URL (formato: `https://seu-projeto.up.railway.app`)
+5. Adicione o endpoint: `/api/admissoes/candidatos`
+6. URL completa: `https://seu-projeto.up.railway.app/api/admissoes/candidatos`
 
 ---
 

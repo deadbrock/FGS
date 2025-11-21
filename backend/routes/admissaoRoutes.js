@@ -38,35 +38,40 @@ const router = express.Router();
 // TODO: Adicionar middleware de autenticação
 // =============================================
 
-// Rotas principais
-router.get('/', getAdmissoes);
-router.get('/estatisticas', getEstatisticas);
-router.get('/:id', getAdmissaoById);
-router.post('/', createAdmissao);
-router.put('/:id', updateAdmissao);
-router.post('/:id/avancar-etapa', avancarEtapa);
+// IMPORTANTE: Rotas específicas devem vir ANTES de rotas com parâmetros dinâmicos
+// Rotas de integração externa (Trabalhe Conosco) - PRIMEIRO para evitar conflitos
+// Estas rotas usam autenticação via API Key
+router.post('/candidatos', apiKeyAuth, receberCandidato);
+router.get('/candidatos/cpf/:cpf', apiKeyAuth, verificarStatusPorCPF);
 
-// Rotas de documentos
+// Rotas de documentos (específicas antes de dinâmicas)
 router.get('/documentos/template', getDocumentosTemplate);
 router.post('/documentos/upload', upload.single('arquivo'), uploadDocumento);
 router.put('/documentos/:documento_id/validar', validarDocumento);
 
-// Rotas de integrações
+// Rotas de exames admissionais (específicas antes de dinâmicas)
+router.get('/clinicas/listar', getClinicas);
+router.get('/exames/calendario', getCalendarioAgendamentos);
+router.put('/exames/:exame_id', updateExame);
+
+// Rotas principais
+router.get('/', getAdmissoes);
+router.get('/estatisticas', getEstatisticas);
+router.post('/', createAdmissao);
+
+// Rotas com parâmetros dinâmicos (devem vir por último)
+router.get('/:id', getAdmissaoById);
+router.put('/:id', updateAdmissao);
+router.post('/:id/avancar-etapa', avancarEtapa);
+
+// Rotas de integrações (com parâmetros dinâmicos)
 router.post('/:admissao_id/enviar-dominio', enviarParaDominio);
 router.put('/:admissao_id/contrato-assinado', marcarContratoAssinado);
 router.put('/:admissao_id/esocial-enviado-dominio', marcarESocialEnviadoDominio);
 
-// Rotas de exames admissionais
+// Rotas de exames admissionais (com parâmetros dinâmicos)
 router.get('/:admissao_id/exames', getExamesByAdmissao);
 router.post('/:admissao_id/exames', criarAgendamento);
-router.put('/exames/:exame_id', updateExame);
-router.get('/clinicas/listar', getClinicas);
-router.get('/exames/calendario', getCalendarioAgendamentos);
-
-// Rotas de integração externa (Trabalhe Conosco)
-// Estas rotas usam autenticação via API Key
-router.post('/candidatos', apiKeyAuth, receberCandidato);
-router.get('/candidatos/cpf/:cpf', apiKeyAuth, verificarStatusPorCPF);
 
 export default router;
 
