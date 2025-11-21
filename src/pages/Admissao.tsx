@@ -123,6 +123,11 @@ export const Admissao: React.FC = () => {
   const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
   const [documentoSelecionado, setDocumentoSelecionado] = useState<string | null>(null);
   const [arquivoSelecionado, setArquivoSelecionado] = useState<File | null>(null);
+  
+  // Estados para cancelamento
+  const [cancelarDialogOpen, setCancelarDialogOpen] = useState(false);
+  const [admissaoParaCancelar, setAdmissaoParaCancelar] = useState<Admissao | null>(null);
+  const [motivoCancelamento, setMotivoCancelamento] = useState('');
 
   // Carregar admissões
   const carregarAdmissoes = useCallback(async () => {
