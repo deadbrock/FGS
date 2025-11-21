@@ -359,6 +359,32 @@ export const Admissao: React.FC = () => {
     }
   };
 
+  // Abrir dialog de cancelamento
+  const handleAbrirCancelamento = (admissao: Admissao) => {
+    setAdmissaoParaCancelar(admissao);
+    setMotivoCancelamento('');
+    setCancelarDialogOpen(true);
+  };
+
+  // Cancelar admissão
+  const handleCancelarAdmissao = async () => {
+    if (!admissaoParaCancelar) return;
+
+    try {
+      setLoading(true);
+      setError(null);
+      await admissaoService.cancelar(admissaoParaCancelar.id, motivoCancelamento);
+      setCancelarDialogOpen(false);
+      setAdmissaoParaCancelar(null);
+      setMotivoCancelamento('');
+      carregarAdmissoes();
+    } catch (err: any) {
+      setError(err.message || 'Erro ao cancelar admissão');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Obter índice da etapa atual no stepper
   const getEtapaIndex = (etapa: EtapaWorkflow): number => {
     const etapas: EtapaWorkflow[] = [
