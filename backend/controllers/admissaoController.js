@@ -524,22 +524,28 @@ export const cancelarAdmissao = async (req, res) => {
       });
     }
 
+    // Preparar observações com motivo do cancelamento
+    let observacoesAtualizadas = 'Admissão cancelada';
+    if (motivo_cancelamento) {
+      observacoesAtualizadas += `: ${motivo_cancelamento}`;
+    }
+    
+    // Buscar observações atuais
+    const observacoesAtuais = admissao.observacoes || '';
+    if (observacoesAtuais) {
+      observacoesAtualizadas = `${observacoesAtuais}\n\n${observacoesAtualizadas}`;
+    }
+
     // Atualizar status para CANCELADA
     const updateResult = await pool.query(
       `UPDATE admissoes 
       SET status = 'CANCELADA', 
           data_conclusao = CURRENT_TIMESTAMP,
-          observacoes = COALESCE(observacoes || '', '') || CASE 
-            WHEN observacoes IS NOT NULL AND observacoes != '' THEN E'\n\n' 
-            ELSE '' 
-          END || 'Admissão cancelada' || CASE 
-            WHEN $1 IS NOT NULL THEN ': ' || $1 
-            ELSE '' 
-          END,
+          observacoes = $1,
           updated_at = CURRENT_TIMESTAMP
       WHERE id = $2
       RETURNING *`,
-      [motivo_cancelamento || null, id]
+      [observacoesAtualizadas, id]
     );
 
     // Atualizar etapa atual do workflow para CANCELADA
@@ -547,8 +553,8 @@ export const cancelarAdmissao = async (req, res) => {
       `UPDATE admissao_workflow 
       SET status_etapa = 'CANCELADA', 
           data_conclusao = CURRENT_TIMESTAMP,
-          observacoes = COALESCE(observacoes || '', '') || CASE 
-            WHEN observacoes IS NOT NULL AND observacoes != '' THEN E'\n\n' 
+          observacoes = COALESCE(observacoes, '') || CASE 
+            WHEN observacoes IS NOT NULL AND observacoes != '' THEN '\n\n' 
             ELSE '' 
           END || 'Etapa cancelada devido ao cancelamento da admissão'
       WHERE admissao_id = $1 AND status_etapa = 'EM_ANDAMENTO'`,
