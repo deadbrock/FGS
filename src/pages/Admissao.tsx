@@ -139,6 +139,16 @@ export const Admissao: React.FC = () => {
       
       // Garantir que seja um array
       const admissoesArray = Array.isArray(response.data) ? response.data : [];
+      console.log('📥 [FRONTEND] Antes de setAdmissoes:', {
+        admissoesArrayLength: admissoesArray.length,
+        primeiroItem: admissoesArray[0] ? {
+          id: admissoesArray[0].id,
+          nome_candidato: admissoesArray[0].nome_candidato,
+          etapa_atual: admissoesArray[0].etapa_atual,
+          status: admissoesArray[0].status
+        } : null
+      });
+      
       setAdmissoes(admissoesArray);
       setTotalAdmissoes(response.pagination?.total || 0);
       
@@ -493,6 +503,17 @@ export const Admissao: React.FC = () => {
                   </TableRow>
                 </TableHead>
                 <TableBody>
+                  {(() => {
+                    console.log('🎨 [RENDER] Renderizando tabela:', {
+                      admissoesLength: admissoes.length,
+                      loading,
+                      primeiroItem: admissoes[0] ? {
+                        id: admissoes[0].id,
+                        nome_candidato: admissoes[0].nome_candidato
+                      } : null
+                    });
+                    return null;
+                  })()}
                   {admissoes.length === 0 ? (
                     <TableRow>
                       <TableCell colSpan={7} align="center" sx={{ py: 4 }}>
