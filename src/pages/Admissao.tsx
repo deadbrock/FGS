@@ -531,36 +531,49 @@ export const Admissao: React.FC = () => {
                       </TableCell>
                     </TableRow>
                   ) : (
-                    admissoes.map((admissao) => (
-                      <TableRow key={admissao.id} hover>
-                        <TableCell>
-                          <Box>
-                            <Typography variant="body2" fontWeight={600}>
-                              {admissao.nome_candidato}
-                            </Typography>
-                            <Typography variant="caption" color="text.secondary">
-                              {admissao.email_candidato}
-                            </Typography>
-                          </Box>
-                        </TableCell>
-                        <TableCell>{admissao.cargo}</TableCell>
-                        <TableCell>{admissao.departamento}</TableCell>
-                        <TableCell>
-                          <Chip
-                            label={getEtapaLabel(admissao.etapa_atual)}
-                            size="small"
-                            color="primary"
-                            variant="outlined"
-                          />
-                        </TableCell>
-                        <TableCell>
-                          <Chip
-                            label={admissao.status}
-                            size="small"
-                            color={getStatusColor(admissao.status)}
-                          />
-                        </TableCell>
-                        <TableCell>{formatarData(admissao.data_solicitacao)}</TableCell>
+                    admissoes.map((admissao) => {
+                      try {
+                        console.log('🎨 [RENDER] Renderizando linha da tabela:', {
+                          id: admissao.id,
+                          nome: admissao.nome_candidato,
+                          temEmail: !!admissao.email_candidato,
+                          temCargo: !!admissao.cargo,
+                          temDepartamento: !!admissao.departamento,
+                          temEtapa: !!admissao.etapa_atual,
+                          temStatus: !!admissao.status,
+                          temDataSolicitacao: !!admissao.data_solicitacao
+                        });
+                        
+                        return (
+                          <TableRow key={admissao.id} hover>
+                            <TableCell>
+                              <Box>
+                                <Typography variant="body2" fontWeight={600}>
+                                  {admissao.nome_candidato || 'N/A'}
+                                </Typography>
+                                <Typography variant="caption" color="text.secondary">
+                                  {admissao.email_candidato || 'N/A'}
+                                </Typography>
+                              </Box>
+                            </TableCell>
+                            <TableCell>{admissao.cargo || 'N/A'}</TableCell>
+                            <TableCell>{admissao.departamento || 'N/A'}</TableCell>
+                            <TableCell>
+                              <Chip
+                                label={getEtapaLabel(admissao.etapa_atual)}
+                                size="small"
+                                color="primary"
+                                variant="outlined"
+                              />
+                            </TableCell>
+                            <TableCell>
+                              <Chip
+                                label={admissao.status || 'N/A'}
+                                size="small"
+                                color={getStatusColor(admissao.status)}
+                              />
+                            </TableCell>
+                            <TableCell>{admissao.data_solicitacao ? formatarData(admissao.data_solicitacao) : 'N/A'}</TableCell>
                         <TableCell align="right">
                           <Tooltip title="Ver Detalhes">
                             <IconButton
