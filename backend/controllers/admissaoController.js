@@ -486,6 +486,107 @@ export const updateAdmissao = async (req, res) => {
 };
 
 // =============================================
+// CANCELAR ADMISSÃO
+// =============================================
+export const cancelarAdmissao = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { motivo_cancelamento } = req.body;
+
+    // Verificar se a admissão existe
+    const admissaoResult = await pool.query(
+      `SELECT id, status, nome_candidato FROM admissoes WHERE id = $1`,
+      [id]
+    );
+
+    if (admissaoResult.rows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        error: 'Admissão não encontrada'
+      });
+    }
+
+    const admissao = admissaoResult.rows[0];
+
+    // Verificar se já está cancelada
+    if (admissao.status === 'CANCELADA') {
+      return res.status(400).json({
+        success: false,
+        error: 'Admissão já está cancelada'
+      });
+    }
+
+    // Verificar se já está concluída
+    if (admissao.status === 'CONCLUIDA') {
+      return res.status(400).json({
+        success: false,
+        error: 'Não é possível cancelar uma admissão já concluída'
+      });
+    }
+
+    // Atualizar status para CANCELADA
+    const updateResult = await pool.query(
+      `UPDATE admissoes 
+      SET status = 'CANCELADA', 
+          data_conclusao = CURRENT_TIMESTAMP,
+          observacoes = COALESCE(observacoes || '', '') || CASE 
+            WHEN observacoes IS NOT NULL AND observacoes != '' THEN E'\n\n' 
+            ELSE '' 
+          END || 'Admissão cancelada' || CASE 
+            WHEN $1 IS NOT NULL THEN ': ' || $1 
+            ELSE '' 
+          END,
+          updated_at = CURRENT_TIMESTAMP
+      WHERE id = $2
+      RETURNING *`,
+      [motivo_cancelamento || null, id]
+    );
+
+    // Atualizar etapa atual do workflow para CANCELADA
+    await pool.query(
+      `UPDATE admissao_workflow 
+      SET status_etapa = 'CANCELADA', 
+          data_conclusao = CURRENT_TIMESTAMP,
+          observacoes = COALESCE(observacoes || '', '') || CASE 
+            WHEN observacoes IS NOT NULL AND observacoes != '' THEN E'\n\n' 
+            ELSE '' 
+          END || 'Etapa cancelada devido ao cancelamento da admissão'
+      WHERE admissao_id = $1 AND status_etapa = 'EM_ANDAMENTO'`,
+      [id]
+    );
+
+    // Criar registro no workflow para cancelamento
+    await pool.query(
+      `INSERT INTO admissao_workflow (
+        id, admissao_id, etapa, status_etapa, data_inicio, data_conclusao, observacoes
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+      [
+        uuidv4(),
+        id,
+        'CANCELAMENTO',
+        'CONCLUIDA',
+        new Date(),
+        new Date(),
+        motivo_cancelamento ? `Motivo: ${motivo_cancelamento}` : 'Admissão cancelada'
+      ]
+    );
+
+    res.json({
+      success: true,
+      message: 'Admissão cancelada com sucesso',
+      data: updateResult.rows[0]
+    });
+  } catch (error) {
+    console.error('Erro ao cancelar admissão:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Erro ao cancelar admissão',
+      message: error.message
+    });
+  }
+};
+
+// =============================================
 // AVANÇAR ETAPA DO WORKFLOW
 // =============================================
 export const avancarEtapa = async (req, res) => {

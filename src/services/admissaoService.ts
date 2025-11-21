@@ -217,6 +217,22 @@ class AdmissaoService {
       throw new Error(error.response?.data?.error || 'Erro ao enviar para Thompson Reuters');
     }
   }
+
+  // Cancelar admissão
+  async cancelar(id: string, motivo?: string): Promise<Admissao> {
+    try {
+      const token = localStorage.getItem('@FGS:token');
+      if (token) this.setAuthToken(token);
+
+      const response = await this.api.put(`/${id}/cancelar`, {
+        motivo_cancelamento: motivo
+      });
+      return response.data.data;
+    } catch (error: any) {
+      console.error('Erro ao cancelar admissão:', error);
+      throw new Error(error.response?.data?.error || 'Erro ao cancelar admissão');
+    }
+  }
 }
 
 export default new AdmissaoService();

@@ -5,7 +5,8 @@ import {
   createAdmissao,
   updateAdmissao,
   avancarEtapa,
-  getEstatisticas
+  getEstatisticas,
+  cancelarAdmissao
 } from '../controllers/admissaoController.js';
 import {
   uploadDocumento,
@@ -62,6 +63,7 @@ router.post('/', createAdmissao);
 // Rotas com parâmetros dinâmicos (devem vir por último)
 router.get('/:id', getAdmissaoById);
 router.put('/:id', updateAdmissao);
+router.put('/:id/cancelar', cancelarAdmissao);
 router.post('/:id/avancar-etapa', avancarEtapa);
 
 // Rotas de integrações (com parâmetros dinâmicos)

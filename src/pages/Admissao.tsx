@@ -24,6 +24,7 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
+  DialogContentText,
   Stepper,
   Step,
   StepLabel,
@@ -45,6 +46,7 @@ import {
   Timeline as TimelineIcon,
   Description as DescriptionIcon,
   Assessment as AssessmentIcon,
+  Block as BlockIcon,
 } from '@mui/icons-material';
 import { useNavigationLog } from '../hooks/useNavigationLog';
 import { PageHeader, GradientButton, AnimatedCard, StatCard } from '../components';
@@ -601,6 +603,17 @@ export const Admissao: React.FC = () => {
                               <EditIcon fontSize="small" />
                             </IconButton>
                           </Tooltip>
+                          {admissao.status !== 'CANCELADA' && admissao.status !== 'CONCLUIDA' && (
+                            <Tooltip title="Cancelar Admissão">
+                              <IconButton 
+                                size="small" 
+                                onClick={() => handleAbrirCancelamento(admissao)}
+                                color="error"
+                              >
+                                <BlockIcon fontSize="small" />
+                              </IconButton>
+                            </Tooltip>
+                          )}
                         </TableCell>
                       </TableRow>
                         );
@@ -1118,6 +1131,38 @@ export const Admissao: React.FC = () => {
           <GradientButton onClick={handleSalvar} disabled={loading}>
             {loading ? <CircularProgress size={20} /> : 'Salvar'}
           </GradientButton>
+        </DialogActions>
+      </Dialog>
+
+      {/* Dialog de Cancelamento */}
+      <Dialog open={cancelarDialogOpen} onClose={() => setCancelarDialogOpen(false)} maxWidth="sm" fullWidth>
+        <DialogTitle>Cancelar Admissão</DialogTitle>
+        <DialogContent>
+          <DialogContentText sx={{ mb: 2 }}>
+            Tem certeza que deseja cancelar a admissão de <strong>{admissaoParaCancelar?.nome_candidato}</strong>?
+            Esta ação não pode ser desfeita.
+          </DialogContentText>
+          <TextField
+            fullWidth
+            label="Motivo do Cancelamento (Opcional)"
+            multiline
+            rows={4}
+            value={motivoCancelamento}
+            onChange={(e) => setMotivoCancelamento(e.target.value)}
+            placeholder="Descreva o motivo do cancelamento..."
+            sx={{ mt: 2 }}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setCancelarDialogOpen(false)}>Não Cancelar</Button>
+          <Button 
+            onClick={handleCancelarAdmissao} 
+            color="error" 
+            variant="contained"
+            disabled={loading}
+          >
+            {loading ? <CircularProgress size={20} /> : 'Sim, Cancelar Admissão'}
+          </Button>
         </DialogActions>
       </Dialog>
 
