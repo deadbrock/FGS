@@ -31,23 +31,38 @@ export const receberCandidato = async (req, res) => {
 
     // Validações obrigatórias
     if (!nome || !cpf || !email || !vaga) {
+      console.error('❌ [ADMISSAO CANDIDATOS] Validação falhou. Campos obrigatórios faltando:', {
+        nome: !!nome,
+        cpf: !!cpf,
+        email: !!email,
+        vaga: !!vaga
+      });
       return res.status(400).json({
         success: false,
         error: 'Campos obrigatórios: nome, cpf, email, vaga'
       });
     }
 
+    const cpfLimpo = cpf.replace(/\D/g, '');
+    console.log('🔍 [ADMISSAO CANDIDATOS] Verificando se já existe admissão para CPF:', cpfLimpo);
+
     // Verificar se já existe admissão para este CPF
     const admissaoExistente = await pool.query(
       `SELECT id, status, etapa_atual FROM admissoes WHERE cpf_candidato = $1`,
-      [cpf.replace(/\D/g, '')]
+      [cpfLimpo]
     );
+
+    console.log('🔍 [ADMISSAO CANDIDATOS] Resultado da verificação:', {
+      encontradas: admissaoExistente.rows.length,
+      admissao: admissaoExistente.rows[0] || null
+    });
 
     if (admissaoExistente.rows.length > 0) {
       const admissao = admissaoExistente.rows[0];
       
       // Se já existe e está em andamento, retornar a existente
       if (admissao.status === 'EM_ANDAMENTO') {
+        console.log('ℹ️ [ADMISSAO CANDIDATOS] Admissão já existe e está em andamento');
         return res.json({
           success: true,
           message: 'Candidato já possui admissão em andamento',
@@ -67,21 +82,32 @@ export const receberCandidato = async (req, res) => {
     const tipo_contrato = vaga.tipo_contrato || 'CLT';
     const salario_proposto = vaga.salario || null;
 
+    console.log('📝 [ADMISSAO CANDIDATOS] Dados extraídos:', {
+      cargo,
+      departamento,
+      tipo_contrato,
+      salario_proposto
+    });
+
     // Criar admissão automaticamente
     const admissaoId = uuidv4();
     const dataSolicitacao = data_cadastro ? new Date(data_cadastro) : new Date();
     const prazoFinal = new Date();
     prazoFinal.setDate(prazoFinal.getDate() + 30); // 30 dias para conclusão
 
+    console.log('📝 [ADMISSAO CANDIDATOS] Criando admissão com ID:', admissaoId);
+
     // Inserir admissão
+    console.log('💾 [ADMISSAO CANDIDATOS] Inserindo admissão no banco...');
+    
     const admissaoResult = await pool.query(
       `INSERT INTO admissoes (
         id, nome_candidato, cpf_candidato, email_candidato, telefone_candidato,
         cargo, departamento, tipo_contrato, salario_proposto,
         etapa_atual, status, data_solicitacao, prazo_final,
         observacoes, vaga_id, esocial_enviado, thomson_reuters_enviado,
-        contrato_enviado_dominio, contrato_assinado_fisicamente, esocial_enviado_por_dominio
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20)
+        contrato_assinado_fisicamente
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)
       RETURNING *`,
       [
         admissaoId,
@@ -101,25 +127,33 @@ export const receberCandidato = async (req, res) => {
         vaga.id ? vaga.id.toString() : null,
         false, // esocial_enviado
         false, // thomson_reuters_enviado
-        false, // contrato_enviado_dominio
-        false, // contrato_assinado_fisicamente
-        false  // esocial_enviado_por_dominio
+        false  // contrato_assinado_fisicamente
       ]
     );
 
     const admissao = admissaoResult.rows[0];
+    console.log('✅ [ADMISSAO CANDIDATOS] Admissão inserida com sucesso:', {
+      id: admissao.id,
+      nome: admissao.nome_candidato,
+      status: admissao.status,
+      etapa_atual: admissao.etapa_atual
+    });
 
     // Criar documentos obrigatórios baseados no template
+    console.log('📄 [ADMISSAO CANDIDATOS] Buscando templates de documentos...');
     const templatesResult = await pool.query(
       `SELECT * FROM admissao_documentos_template WHERE ativo = true ORDER BY ordem`
     );
 
+    console.log(`📄 [ADMISSAO CANDIDATOS] Encontrados ${templatesResult.rows.length} templates de documentos`);
+    
     const documentosCriados = [];
     for (const template of templatesResult.rows) {
       const docId = uuidv4();
       const prazoEntrega = new Date();
       prazoEntrega.setDate(prazoEntrega.getDate() + (template.prazo_dias || 7));
 
+      console.log(`📄 [ADMISSAO CANDIDATOS] Criando documento: ${template.nome_documento}`);
       await pool.query(
         `INSERT INTO admissao_documentos (
           id, admissao_id, tipo_documento, nome_documento, obrigatorio,
@@ -226,11 +260,13 @@ export const receberCandidato = async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Erro ao receber candidato:', error);
+    console.error('❌ [ADMISSAO CANDIDATOS] Erro ao receber candidato:', error);
+    console.error('❌ [ADMISSAO CANDIDATOS] Stack trace:', error.stack);
     res.status(500).json({
       success: false,
       error: 'Erro ao processar candidato',
-      message: error.message
+      message: error.message,
+      ...(process.env.NODE_ENV === 'development' && { stack: error.stack })
     });
   }
 };
