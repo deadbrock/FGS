@@ -603,7 +603,21 @@ export const Admissao: React.FC = () => {
                           </Tooltip>
                         </TableCell>
                       </TableRow>
-                    ))
+                        );
+                      } catch (error) {
+                        console.error('❌ [RENDER] Erro ao renderizar linha:', error, admissao);
+                        return (
+                          <TableRow key={admissao.id}>
+                            <TableCell colSpan={7} align="center">
+                              <Typography color="error">
+                                Erro ao renderizar admissão {admissao.id}
+                              </Typography>
+                            </TableCell>
+                          </TableRow>
+                        );
+                      }
+                    });
+                    })()
                   )}
                 </TableBody>
               </Table>
