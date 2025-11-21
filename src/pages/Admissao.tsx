@@ -522,6 +522,14 @@ export const Admissao: React.FC = () => {
                     });
                     return null;
                   })()}
+                  {(() => {
+                    console.log('🔍 [RENDER] Verificando condição:', {
+                      admissoesLength: admissoes.length,
+                      isZero: admissoes.length === 0,
+                      admissoesArray: admissoes
+                    });
+                    return null;
+                  })()}
                   {admissoes.length === 0 ? (
                     <TableRow>
                       <TableCell colSpan={7} align="center" sx={{ py: 4 }}>
@@ -531,7 +539,9 @@ export const Admissao: React.FC = () => {
                       </TableCell>
                     </TableRow>
                   ) : (
-                    admissoes.map((admissao) => {
+                    (() => {
+                      console.log('✅ [RENDER] Entrando no map, total de admissoes:', admissoes.length);
+                      return admissoes.map((admissao) => {
                       try {
                         console.log('🎨 [RENDER] Renderizando linha da tabela:', {
                           id: admissao.id,
