@@ -199,11 +199,10 @@ INSERT INTO admissao_documentos_template (tipo_documento, nome_documento, descri
   ('CTPS', 'Carteira de Trabalho', 'Carteira de Trabalho e Previdência Social', true, 'DP', 3, 3),
   ('COMPROVANTE_RESIDENCIA', 'Comprovante de Residência', 'Conta de luz, água ou telefone', true, 'DP', 5, 4),
   ('TITULO_ELEITOR', 'Título de Eleitor', 'Título de Eleitor atualizado', true, 'DP', 5, 5),
-  ('PIS', 'PIS/PASEP', 'Programa de Integração Social', true, 'DP', 5, 6),
-  ('CERTIDAO_NASCIMENTO', 'Certidão de Nascimento', 'Certidão de Nascimento atualizada', false, 'DP', 7, 7),
-  ('CERTIDAO_CASAMENTO', 'Certidão de Casamento', 'Certidão de Casamento (se casado)', false, 'DP', 7, 8),
-  ('ASO', 'ASO - Atestado de Saúde Ocupacional', 'Exame admissional', true, 'SST', 7, 9),
-  ('FOTO_3X4', 'Foto 3x4', 'Foto para crachá', true, 'RH', 3, 10)
+  ('CERTIDAO_NASCIMENTO', 'Certidão de Nascimento', 'Certidão de Nascimento atualizada', false, 'DP', 7, 6),
+  ('CERTIDAO_CASAMENTO', 'Certidão de Casamento', 'Certidão de Casamento (se casado)', false, 'DP', 7, 7),
+  ('ASO', 'ASO - Atestado de Saúde Ocupacional', 'Exame admissional', true, 'SST', 7, 8),
+  ('FOTO_3X4', 'Foto 3x4', 'Foto para crachá', true, 'RH', 3, 9)
 ON CONFLICT (tipo_documento) DO NOTHING;
 
 -- Trigger para atualizar updated_at
