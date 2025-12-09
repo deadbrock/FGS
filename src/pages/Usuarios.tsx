@@ -406,12 +406,17 @@ export const Usuarios: React.FC = () => {
           />
 
           <TextField
-            label="Departamento"
+            label="Departamento *"
+            select
             fullWidth
             margin="normal"
             value={formData.departamento}
             onChange={(e) => setFormData({ ...formData, departamento: e.target.value })}
-          />
+          >
+            <MenuItem value="Recursos Humanos">Recursos Humanos</MenuItem>
+            <MenuItem value="Departamento Pessoal">Departamento Pessoal</MenuItem>
+            <MenuItem value="Segurança do Trabalho">Segurança do Trabalho</MenuItem>
+          </TextField>
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setDialogOpen(false)} disabled={saving}>
