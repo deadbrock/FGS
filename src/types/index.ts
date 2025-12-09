@@ -1,10 +1,9 @@
 // Tipos de perfis de usuário
 export enum UserRole {
   ADMINISTRADOR = 'ADMINISTRADOR',
-  RH = 'RH',
   GESTOR = 'GESTOR',
   COLABORADOR = 'COLABORADOR',
-  SEGURANCA_TRABALHO = 'SEGURANCA_TRABALHO',
+  USUARIO = 'USUARIO',
 }
 
 // Interface de usuário

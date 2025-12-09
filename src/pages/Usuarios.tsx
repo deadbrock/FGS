@@ -391,10 +391,9 @@ export const Usuarios: React.FC = () => {
             onChange={(e) => setFormData({ ...formData, role: e.target.value as UserRole })}
           >
             <MenuItem value={UserRole.ADMINISTRADOR}>Administrador</MenuItem>
-            <MenuItem value={UserRole.RH}>RH</MenuItem>
             <MenuItem value={UserRole.GESTOR}>Gestor</MenuItem>
             <MenuItem value={UserRole.COLABORADOR}>Colaborador</MenuItem>
-            <MenuItem value={UserRole.SEGURANCA_TRABALHO}>Segurança do Trabalho</MenuItem>
+            <MenuItem value={UserRole.USUARIO}>Usuário</MenuItem>
           </TextField>
 
           <TextField

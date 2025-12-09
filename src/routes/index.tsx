@@ -45,21 +45,21 @@ export const AppRoutes: React.FC = () => {
           {/* Dashboard - acessível para todos os perfis autenticados */}
           <Route path="/dashboard" element={<Dashboard />} />
 
-          {/* Usuários - apenas Admin e RH */}
+          {/* Usuários - apenas Admin */}
           <Route
             path="/usuarios"
             element={
-              <PrivateRoute allowedRoles={[UserRole.ADMINISTRADOR, UserRole.RH]}>
+              <PrivateRoute allowedRoles={[UserRole.ADMINISTRADOR]}>
                 <Usuarios />
               </PrivateRoute>
             }
           />
 
-          {/* Prontuário - Admin, RH e Gestor */}
+          {/* Prontuário - Admin e Gestor */}
           <Route
             path="/prontuario"
             element={
-              <PrivateRoute allowedRoles={[UserRole.ADMINISTRADOR, UserRole.RH, UserRole.GESTOR]}>
+              <PrivateRoute allowedRoles={[UserRole.ADMINISTRADOR, UserRole.GESTOR]}>
                 <Prontuario />
               </PrivateRoute>
             }
@@ -67,77 +67,77 @@ export const AppRoutes: React.FC = () => {
           <Route
             path="/prontuario/:id"
             element={
-              <PrivateRoute allowedRoles={[UserRole.ADMINISTRADOR, UserRole.RH, UserRole.GESTOR]}>
+              <PrivateRoute allowedRoles={[UserRole.ADMINISTRADOR, UserRole.GESTOR]}>
                 <Prontuario />
               </PrivateRoute>
             }
           />
 
-          {/* Admissão - Admin, RH e Gestor */}
+          {/* Admissão - Admin e Gestor */}
           <Route
             path="/admissao"
             element={
-              <PrivateRoute allowedRoles={[UserRole.ADMINISTRADOR, UserRole.RH, UserRole.GESTOR]}>
+              <PrivateRoute allowedRoles={[UserRole.ADMINISTRADOR, UserRole.GESTOR]}>
                 <Admissao />
               </PrivateRoute>
             }
           />
 
-          {/* Treinamentos - Admin, RH, Gestor e Segurança do Trabalho */}
+          {/* Treinamentos - Admin e Gestor */}
           <Route
             path="/treinamentos"
             element={
-              <PrivateRoute allowedRoles={[UserRole.ADMINISTRADOR, UserRole.RH, UserRole.GESTOR, UserRole.SEGURANCA_TRABALHO]}>
+              <PrivateRoute allowedRoles={[UserRole.ADMINISTRADOR, UserRole.GESTOR]}>
                 <Treinamentos />
               </PrivateRoute>
             }
           />
 
-          {/* Ponto e Frequência - Admin, RH e Gestor */}
+          {/* Ponto e Frequência - Admin e Gestor */}
           <Route
             path="/ponto"
             element={
-              <PrivateRoute allowedRoles={[UserRole.ADMINISTRADOR, UserRole.RH, UserRole.GESTOR]}>
+              <PrivateRoute allowedRoles={[UserRole.ADMINISTRADOR, UserRole.GESTOR]}>
                 <Ponto />
               </PrivateRoute>
             }
           />
 
-          {/* Benefícios - Admin, RH e Gestor */}
+          {/* Benefícios - Admin e Gestor */}
           <Route
             path="/beneficios"
             element={
-              <PrivateRoute allowedRoles={[UserRole.ADMINISTRADOR, UserRole.RH, UserRole.GESTOR]}>
+              <PrivateRoute allowedRoles={[UserRole.ADMINISTRADOR, UserRole.GESTOR]}>
                 <Beneficios />
               </PrivateRoute>
             }
           />
 
-          {/* Comunicação - Admin, RH e Gestor */}
+          {/* Comunicação - Admin e Gestor */}
           <Route
             path="/comunicacao"
             element={
-              <PrivateRoute allowedRoles={[UserRole.ADMINISTRADOR, UserRole.RH, UserRole.GESTOR]}>
+              <PrivateRoute allowedRoles={[UserRole.ADMINISTRADOR, UserRole.GESTOR]}>
                 <Comunicacao />
               </PrivateRoute>
             }
           />
 
-          {/* Relatórios - Admin, RH e Gestor */}
+          {/* Relatórios - Admin e Gestor */}
           <Route
             path="/relatorios"
             element={
-              <PrivateRoute allowedRoles={[UserRole.ADMINISTRADOR, UserRole.RH, UserRole.GESTOR]}>
+              <PrivateRoute allowedRoles={[UserRole.ADMINISTRADOR, UserRole.GESTOR]}>
                 <Relatorios />
               </PrivateRoute>
             }
           />
 
-          {/* Regionais - Admin, RH e Gestor */}
+          {/* Regionais - Admin e Gestor */}
           <Route
             path="/regionais"
             element={
-              <PrivateRoute allowedRoles={[UserRole.ADMINISTRADOR, UserRole.RH, UserRole.GESTOR]}>
+              <PrivateRoute allowedRoles={[UserRole.ADMINISTRADOR, UserRole.GESTOR]}>
                 <Regionais />
               </PrivateRoute>
             }
