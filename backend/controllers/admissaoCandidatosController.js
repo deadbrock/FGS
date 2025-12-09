@@ -147,38 +147,77 @@ export const receberCandidato = async (req, res) => {
 
     console.log(`📄 [ADMISSAO CANDIDATOS] Encontrados ${templatesResult.rows.length} templates de documentos`);
     
+    // Mapear documentos recebidos do Trabalhe Conosco para os tipos do sistema
+    const documentosRecebidos = documentos || {};
+    const mapeamentoDocumentos = {
+      'curriculo_url': 'CURRICULO',
+      'foto_url': 'FOTO_3X4',
+      'rg_frente_url': 'RG_FRENTE',
+      'rg_verso_url': 'RG_VERSO',
+      'cpf_url': 'CPF',
+      'ctps_url': 'CTPS_DIGITAL',
+      'comprovante_residencia_url': 'COMPROVANTE_RESIDENCIA',
+      'titulo_eleitor_url': 'TITULO_ELEITOR',
+      'certidao_nascimento_url': 'CERTIDAO_NASCIMENTO_CASAMENTO',
+      'certidao_casamento_url': 'CERTIDAO_NASCIMENTO_CASAMENTO',
+      'reservista_url': 'RESERVISTA',
+      'antecedentes_criminais_url': 'ANTECEDENTES_CRIMINAIS',
+      'certidao_dependente_url': 'CERTIDAO_DEPENDENTE',
+      'cpf_dependente_url': 'CPF_DEPENDENTE'
+    };
+
     const documentosCriados = [];
     for (const template of templatesResult.rows) {
       const docId = uuidv4();
       const prazoEntrega = new Date();
       prazoEntrega.setDate(prazoEntrega.getDate() + (template.prazo_dias || 7));
 
-      console.log(`📄 [ADMISSAO CANDIDATOS] Criando documento: ${template.nome_documento}`);
+      // Verificar se o documento foi enviado do Trabalhe Conosco
+      let status = 'PENDENTE';
+      let arquivo_url = null;
+      let data_recebimento = null;
+
+      // Procurar se existe URL para este tipo de documento
+      for (const [chave, tipoDoc] of Object.entries(mapeamentoDocumentos)) {
+        if (tipoDoc === template.tipo_documento && documentosRecebidos[chave]) {
+          status = 'RECEBIDO';
+          arquivo_url = documentosRecebidos[chave];
+          data_recebimento = new Date();
+          console.log(`✅ [ADMISSAO CANDIDATOS] Documento ${template.nome_documento} recebido do Trabalhe Conosco`);
+          break;
+        }
+      }
+
+      console.log(`📄 [ADMISSAO CANDIDATOS] Criando documento: ${template.nome_documento} [${status}]`);
       await pool.query(
         `INSERT INTO admissao_documentos (
           id, admissao_id, tipo_documento, nome_documento, obrigatorio,
-          status, prazo_entrega, responsavel_id
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+          status, prazo_entrega, responsavel_id, arquivo_url, data_recebimento
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
         [
           docId,
           admissaoId,
           template.tipo_documento,
           template.nome_documento,
           template.obrigatorio,
-          'PENDENTE',
+          status,
           prazoEntrega,
-          template.responsavel_padrao_id || null
+          template.responsavel_padrao_id || null,
+          arquivo_url,
+          data_recebimento
         ]
       );
 
       documentosCriados.push({
         id: docId,
         tipo_documento: template.tipo_documento,
-        nome_documento: template.nome_documento
+        nome_documento: template.nome_documento,
+        status: status,
+        recebido: status === 'RECEBIDO'
       });
     }
 
-    // Se houver currículo no documento, criar documento adicional
+    // Se houver currículo no documento, criar documento adicional (se não estiver na lista)
     if (documentos?.curriculo_url) {
       const curriculoId = uuidv4();
       await pool.query(
@@ -196,6 +235,23 @@ export const receberCandidato = async (req, res) => {
           documentos.curriculo_url,
           new Date()
         ]
+      );
+      
+      documentosCriados.push({
+        id: curriculoId,
+        tipo_documento: 'CURRICULO',
+        nome_documento: 'Currículo',
+        status: 'RECEBIDO',
+        recebido: true
+      });
+    }
+
+    const documentosRecebidosCount = documentosCriados.filter(d => d.recebido).length;
+    console.log(`✅ [ADMISSAO CANDIDATOS] ${documentosCriados.length} documentos criados (${documentosRecebidosCount} recebidos do Trabalhe Conosco)`);
+    
+    if (documentosRecebidosCount > 0) {
+      console.log('📄 [ADMISSAO CANDIDATOS] Documentos recebidos:', 
+        documentosCriados.filter(d => d.recebido).map(d => d.nome_documento).join(', ')
       );
     }
 
