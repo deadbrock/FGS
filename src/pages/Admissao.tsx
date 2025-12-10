@@ -128,6 +128,11 @@ export const Admissao: React.FC = () => {
   const [cancelarDialogOpen, setCancelarDialogOpen] = useState(false);
   const [admissaoParaCancelar, setAdmissaoParaCancelar] = useState<Admissao | null>(null);
   const [motivoCancelamento, setMotivoCancelamento] = useState('');
+  
+  // Estados para reprovação de documento
+  const [reprovarDialogOpen, setReprovarDialogOpen] = useState(false);
+  const [documentoParaReprovar, setDocumentoParaReprovar] = useState<string | null>(null);
+  const [motivoReprovacao, setMotivoReprovacao] = useState('');
 
   // Carregar admissões
   const carregarAdmissoes = useCallback(async () => {
@@ -346,8 +351,15 @@ export const Admissao: React.FC = () => {
     }
   };
 
-  // Validar documento
-  const handleValidarDocumento = async (documentoId: string, aprovado: boolean) => {
+  // Abrir dialog de reprovação
+  const handleAbrirReprovacao = (documentoId: string) => {
+    setDocumentoParaReprovar(documentoId);
+    setMotivoReprovacao('');
+    setReprovarDialogOpen(true);
+  };
+
+  // Validar documento (aprovar ou reprovar)
+  const handleValidarDocumento = async (documentoId: string, aprovado: boolean, observacoes?: string) => {
     if (!admissaoSelecionada) return;
 
     try {
@@ -355,13 +367,33 @@ export const Admissao: React.FC = () => {
       setError(null);
       await admissaoService.validarDocumento(documentoId, {
         status: aprovado ? 'APROVADO' : 'REPROVADO',
+        observacoes_validacao: observacoes,
       });
       await carregarDetalhesAdmissao(admissaoSelecionada.id);
+      
+      // Fechar dialog de reprovação se estiver aberto
+      if (reprovarDialogOpen) {
+        setReprovarDialogOpen(false);
+        setDocumentoParaReprovar(null);
+        setMotivoReprovacao('');
+      }
     } catch (err: any) {
       setError(err.message || 'Erro ao validar documento');
     } finally {
       setLoading(false);
     }
+  };
+
+  // Reprovar documento com motivo
+  const handleReprovarDocumento = async () => {
+    if (!documentoParaReprovar) return;
+    
+    if (!motivoReprovacao.trim()) {
+      setError('Por favor, informe o motivo da reprovação');
+      return;
+    }
+
+    await handleValidarDocumento(documentoParaReprovar, false, motivoReprovacao);
   };
 
   // Abrir dialog de cancelamento
@@ -944,7 +976,7 @@ export const Admissao: React.FC = () => {
                                   <IconButton
                                     size="small"
                                     color="error"
-                                    onClick={() => handleValidarDocumento(doc.id, false)}
+                                    onClick={() => handleAbrirReprovacao(doc.id)}
                                   >
                                     <CancelIcon fontSize="small" />
                                   </IconButton>
@@ -1249,6 +1281,40 @@ export const Admissao: React.FC = () => {
           >
             {loading ? <CircularProgress size={20} /> : 'Enviar'}
           </GradientButton>
+        </DialogActions>
+      </Dialog>
+
+      {/* Dialog de Reprovação de Documento */}
+      <Dialog open={reprovarDialogOpen} onClose={() => setReprovarDialogOpen(false)} maxWidth="sm" fullWidth>
+        <DialogTitle>Reprovar Documento</DialogTitle>
+        <DialogContent>
+          <DialogContentText sx={{ mb: 2 }}>
+            Por favor, informe o motivo da reprovação do documento. Esta informação será enviada para o RH.
+          </DialogContentText>
+          <TextField
+            fullWidth
+            label="Motivo da Reprovação *"
+            multiline
+            rows={4}
+            value={motivoReprovacao}
+            onChange={(e) => setMotivoReprovacao(e.target.value)}
+            placeholder="Ex: Documento ilegível, data vencida, informações incompletas..."
+            sx={{ mt: 2 }}
+            required
+            error={!motivoReprovacao.trim() && error !== null}
+            helperText={!motivoReprovacao.trim() && error !== null ? 'Campo obrigatório' : ''}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setReprovarDialogOpen(false)}>Cancelar</Button>
+          <Button 
+            onClick={handleReprovarDocumento} 
+            color="error" 
+            variant="contained"
+            disabled={loading || !motivoReprovacao.trim()}
+          >
+            {loading ? <CircularProgress size={20} /> : 'Reprovar Documento'}
+          </Button>
         </DialogActions>
       </Dialog>
     </Box>

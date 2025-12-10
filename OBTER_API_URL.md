@@ -21,7 +21,7 @@ A URL da API do FGS é o endereço base onde o backend está hospedado. Ela é n
 4. **Vá em Settings (Configurações)**
    - No menu lateral, clique em **Settings**
 
-5. **Encontre a URL**
+5. **Encontre a URL**                                                                                                                                      
    - Procure por **"Public Domain"** ou **"Custom Domain"**
    - A URL estará no formato: `https://seu-projeto.up.railway.app`
    - **OU** se você configurou um domínio customizado: `https://api.seudominio.com`

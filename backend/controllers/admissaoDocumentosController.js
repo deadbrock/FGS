@@ -94,6 +94,13 @@ export const validarDocumento = async (req, res) => {
     const { documento_id } = req.params;
     const { status, observacoes_validacao } = req.body;
 
+    console.log('📋 [VALIDAR DOCUMENTO] Requisição recebida:', {
+      documento_id,
+      status,
+      observacoes_validacao,
+      user: req.user?.id
+    });
+
     if (!status || !['APROVADO', 'REPROVADO'].includes(status)) {
       return res.status(400).json({
         success: false,
@@ -101,8 +108,35 @@ export const validarDocumento = async (req, res) => {
       });
     }
 
+    // Se for reprovação, observações são obrigatórias
+    if (status === 'REPROVADO' && !observacoes_validacao) {
+      return res.status(400).json({
+        success: false,
+        error: 'Motivo da reprovação é obrigatório'
+      });
+    }
+
     const validadoPor = req.user?.id;
 
+    // Buscar informações do documento e da admissão
+    const docInfo = await pool.query(
+      `SELECT ad.*, a.nome_candidato, a.cargo, a.departamento, a.email_candidato
+       FROM admissao_documentos ad
+       JOIN admissoes a ON ad.admissao_id = a.id
+       WHERE ad.id = $1`,
+      [documento_id]
+    );
+
+    if (docInfo.rows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        error: 'Documento não encontrado'
+      });
+    }
+
+    const documento = docInfo.rows[0];
+
+    // Atualizar documento
     const result = await pool.query(
       `UPDATE admissao_documentos
       SET status = $1,
@@ -115,20 +149,50 @@ export const validarDocumento = async (req, res) => {
       [status, validadoPor, observacoes_validacao || null, documento_id]
     );
 
-    if (result.rows.length === 0) {
-      return res.status(404).json({
-        success: false,
-        error: 'Documento não encontrado'
-      });
+    // Se foi reprovado, criar notificação para usuários do RH
+    if (status === 'REPROVADO') {
+      console.log('🔔 [NOTIFICAÇÃO] Documento reprovado, criando notificações para o RH...');
+      
+      // Buscar todos os usuários do RH (Recursos Humanos e Departamento Pessoal)
+      const usuariosRH = await pool.query(
+        `SELECT id, nome, email FROM users 
+         WHERE departamento IN ('Recursos Humanos', 'Departamento Pessoal')
+         AND role IN ('ADMINISTRADOR', 'GESTOR', 'USUARIO')`
+      );
+
+      console.log(`📧 [NOTIFICAÇÃO] Encontrados ${usuariosRH.rows.length} usuários do RH`);
+
+      // Criar notificações para cada usuário do RH
+      for (const usuario of usuariosRH.rows) {
+        await pool.query(
+          `INSERT INTO admissao_notificacoes (
+            id, admissao_id, tipo, titulo, mensagem, destinatario_id, lida
+          ) VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+          [
+            require('uuid').v4(),
+            documento.admissao_id,
+            'DOCUMENTO_REPROVADO',
+            '⚠️ Documento Reprovado',
+            `O documento "${documento.nome_documento}" da admissão de ${documento.nome_candidato} (${documento.cargo}) foi reprovado.\n\nMotivo: ${observacoes_validacao}`,
+            usuario.id,
+            false
+          ]
+        );
+        
+        console.log(`✅ [NOTIFICAÇÃO] Criada para ${usuario.nome} (${usuario.email})`);
+      }
+
+      console.log('✅ [NOTIFICAÇÃO] Todas as notificações foram criadas com sucesso');
     }
 
     res.json({
       success: true,
       message: `Documento ${status.toLowerCase()} com sucesso`,
-      data: result.rows[0]
+      data: result.rows[0],
+      notificacoes_enviadas: status === 'REPROVADO'
     });
   } catch (error) {
-    console.error('Erro ao validar documento:', error);
+    console.error('❌ [VALIDAR DOCUMENTO] Erro:', error);
     res.status(500).json({
       success: false,
       error: 'Erro ao validar documento',
