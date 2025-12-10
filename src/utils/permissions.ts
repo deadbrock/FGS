@@ -1,13 +1,66 @@
-import { UserRole } from '../types';
+import { UserRole, Departamento, User } from '../types';
 
-// Define as permissões de cada rota
+// Verifica se o usuário tem acesso a uma rota específica
+export const hasRouteAccess = (user: User | null, route: string): boolean => {
+  if (!user) return false;
+
+  const { role, departamento } = user;
+
+  // ADMINISTRADOR tem acesso total
+  if (role === UserRole.ADMINISTRADOR) return true;
+
+  // Mapeamento de acessos por perfil e departamento
+  const accessMap: Record<string, boolean> = {
+    // GESTOR do Departamento Pessoal
+    [`GESTOR_${Departamento.DEPARTAMENTO_PESSOAL}_/dashboard`]: true,
+    [`GESTOR_${Departamento.DEPARTAMENTO_PESSOAL}_/prontuario`]: true,
+    [`GESTOR_${Departamento.DEPARTAMENTO_PESSOAL}_/admissao`]: true,
+    [`GESTOR_${Departamento.DEPARTAMENTO_PESSOAL}_/ponto`]: true,
+    [`GESTOR_${Departamento.DEPARTAMENTO_PESSOAL}_/beneficios`]: true,
+    [`GESTOR_${Departamento.DEPARTAMENTO_PESSOAL}_/relatorios`]: true,
+    [`GESTOR_${Departamento.DEPARTAMENTO_PESSOAL}_/usuarios`]: true,
+    [`GESTOR_${Departamento.DEPARTAMENTO_PESSOAL}_/regionais`]: true,
+
+    // USUARIO do Departamento Pessoal
+    [`USUARIO_${Departamento.DEPARTAMENTO_PESSOAL}_/dashboard`]: true,
+    [`USUARIO_${Departamento.DEPARTAMENTO_PESSOAL}_/admissao`]: true,
+    [`USUARIO_${Departamento.DEPARTAMENTO_PESSOAL}_/ponto`]: true,
+    [`USUARIO_${Departamento.DEPARTAMENTO_PESSOAL}_/beneficios`]: true,
+
+    // GESTOR de outros departamentos (acesso padrão)
+    [`GESTOR_${Departamento.RECURSOS_HUMANOS}_/dashboard`]: true,
+    [`GESTOR_${Departamento.RECURSOS_HUMANOS}_/prontuario`]: true,
+    [`GESTOR_${Departamento.RECURSOS_HUMANOS}_/admissao`]: true,
+    [`GESTOR_${Departamento.RECURSOS_HUMANOS}_/treinamentos`]: true,
+    [`GESTOR_${Departamento.RECURSOS_HUMANOS}_/ponto`]: true,
+    [`GESTOR_${Departamento.RECURSOS_HUMANOS}_/beneficios`]: true,
+    [`GESTOR_${Departamento.RECURSOS_HUMANOS}_/comunicacao`]: true,
+    [`GESTOR_${Departamento.RECURSOS_HUMANOS}_/relatorios`]: true,
+    [`GESTOR_${Departamento.RECURSOS_HUMANOS}_/regionais`]: true,
+    [`GESTOR_${Departamento.RECURSOS_HUMANOS}_/colaboradores`]: true,
+
+    [`GESTOR_${Departamento.SEGURANCA_TRABALHO}_/dashboard`]: true,
+    [`GESTOR_${Departamento.SEGURANCA_TRABALHO}_/treinamentos`]: true,
+    [`GESTOR_${Departamento.SEGURANCA_TRABALHO}_/admissao`]: true,
+
+    // COLABORADOR (acesso básico)
+    [`COLABORADOR_/dashboard`]: true,
+  };
+
+  // Construir chave de acesso
+  const accessKey = `${role}_${departamento || ''}_${route}`;
+  
+  return accessMap[accessKey] || false;
+};
+
+// Define as permissões de cada rota (mantido para compatibilidade)
 export const routePermissions: Record<string, UserRole[]> = {
   '/dashboard': [UserRole.ADMINISTRADOR, UserRole.GESTOR, UserRole.COLABORADOR, UserRole.USUARIO],
-  '/usuarios': [UserRole.ADMINISTRADOR],
+  '/usuarios': [UserRole.ADMINISTRADOR, UserRole.GESTOR],
   '/prontuario': [UserRole.ADMINISTRADOR, UserRole.GESTOR],
   '/treinamentos': [UserRole.ADMINISTRADOR, UserRole.GESTOR],
-  '/ponto': [UserRole.ADMINISTRADOR, UserRole.GESTOR],
-  '/beneficios': [UserRole.ADMINISTRADOR, UserRole.GESTOR],
+  '/ponto': [UserRole.ADMINISTRADOR, UserRole.GESTOR, UserRole.USUARIO],
+  '/beneficios': [UserRole.ADMINISTRADOR, UserRole.GESTOR, UserRole.USUARIO],
   '/comunicacao': [UserRole.ADMINISTRADOR, UserRole.GESTOR],
   '/relatorios': [UserRole.ADMINISTRADOR, UserRole.GESTOR],
   '/regionais': [UserRole.ADMINISTRADOR, UserRole.GESTOR],
@@ -15,6 +68,7 @@ export const routePermissions: Record<string, UserRole[]> = {
   '/integracoes': [UserRole.ADMINISTRADOR],
   '/configuracoes': [UserRole.ADMINISTRADOR],
   '/colaboradores': [UserRole.ADMINISTRADOR, UserRole.GESTOR],
+  '/admissao': [UserRole.ADMINISTRADOR, UserRole.GESTOR, UserRole.USUARIO],
 };
 
 // Verifica se o usuário tem permissão para acessar uma rota

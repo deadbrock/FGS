@@ -35,7 +35,8 @@ import {
 import { RoleBadge } from '../components/RoleBadge';
 import { useNavigationLog } from '../hooks/useNavigationLog';
 import { useAuth } from '../hooks/useAuth';
-import { UserRole, User } from '../types';
+import { UserRole, User, Departamento } from '../types';
+import { canCreateUser } from '../utils/permissions';
 import usuariosService, { CreateUsuarioDTO, UpdateUsuarioDTO } from '../services/usuariosService';
 
 interface FormData {
@@ -98,7 +99,18 @@ export const Usuarios: React.FC = () => {
   const handleAddUser = () => {
     logAction('Botão Adicionar Usuário clicado');
     setEditingUser(null);
-    setFormData(initialFormData);
+    
+    // Se for Gestor DP, pré-definir valores
+    if (isGestorDP) {
+      setFormData({
+        ...initialFormData,
+        role: UserRole.USUARIO,
+        departamento: Departamento.DEPARTAMENTO_PESSOAL,
+      });
+    } else {
+      setFormData(initialFormData);
+    }
+    
     setError('');
     setDialogOpen(true);
   };
@@ -213,8 +225,11 @@ export const Usuarios: React.FC = () => {
     }
   };
 
-  // Verificar se o usuário atual é administrador
+  // Verificar se o usuário atual é administrador ou gestor DP
   const isAdmin = currentUser?.role === UserRole.ADMINISTRADOR;
+  const isGestorDP = currentUser?.role === UserRole.GESTOR && 
+                      currentUser?.departamento === Departamento.DEPARTAMENTO_PESSOAL;
+  const canManageUsers = isAdmin || isGestorDP;
 
   return (
     <Box>
@@ -252,7 +267,7 @@ export const Usuarios: React.FC = () => {
               }}
               sx={{ flex: 1 }}
             />
-            {isAdmin && (
+            {canManageUsers && (
               <GradientButton
                 startIcon={<AddIcon />}
                 onClick={handleAddUser}
@@ -288,7 +303,7 @@ export const Usuarios: React.FC = () => {
                     <TableCell>Perfil</TableCell>
                     <TableCell>Cargo</TableCell>
                     <TableCell>Departamento</TableCell>
-                    {isAdmin && <TableCell align="center">Ações</TableCell>}
+                    {canManageUsers && <TableCell align="center">Ações</TableCell>}
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -315,15 +330,19 @@ export const Usuarios: React.FC = () => {
                       </TableCell>
                       <TableCell>{user.cargo || '-'}</TableCell>
                       <TableCell>{user.departamento || '-'}</TableCell>
-                      {isAdmin && (
+                      {canManageUsers && (
                         <TableCell>
                           <Box sx={{ display: 'flex', gap: 1, justifyContent: 'center' }}>
-                            <ActionButton
-                              icon={<EditIcon />}
-                              tooltip="Editar"
-                              onClick={() => handleEditUser(user)}
-                            />
-                            {user.email !== 'admin@fgs.com' && (
+                            {/* Gestor DP só pode editar usuários do DP */}
+                            {(isAdmin || (isGestorDP && user.departamento === Departamento.DEPARTAMENTO_PESSOAL)) && (
+                              <ActionButton
+                                icon={<EditIcon />}
+                                tooltip="Editar"
+                                onClick={() => handleEditUser(user)}
+                              />
+                            )}
+                            {/* Só admin pode deletar, e não pode deletar admin principal */}
+                            {isAdmin && user.email !== 'admin@fgs.com' && (
                               <ActionButton
                                 icon={<DeleteIcon />}
                                 tooltip="Excluir"
@@ -389,10 +408,11 @@ export const Usuarios: React.FC = () => {
             margin="normal"
             value={formData.role}
             onChange={(e) => setFormData({ ...formData, role: e.target.value as UserRole })}
+            disabled={isGestorDP} // Gestor DP só pode criar USUARIO
           >
-            <MenuItem value={UserRole.ADMINISTRADOR}>Administrador</MenuItem>
-            <MenuItem value={UserRole.GESTOR}>Gestor</MenuItem>
-            <MenuItem value={UserRole.COLABORADOR}>Colaborador</MenuItem>
+            {isAdmin && <MenuItem value={UserRole.ADMINISTRADOR}>Administrador</MenuItem>}
+            {isAdmin && <MenuItem value={UserRole.GESTOR}>Gestor</MenuItem>}
+            {isAdmin && <MenuItem value={UserRole.COLABORADOR}>Colaborador</MenuItem>}
             <MenuItem value={UserRole.USUARIO}>Usuário</MenuItem>
           </TextField>
 
@@ -411,10 +431,11 @@ export const Usuarios: React.FC = () => {
             margin="normal"
             value={formData.departamento}
             onChange={(e) => setFormData({ ...formData, departamento: e.target.value })}
+            disabled={isGestorDP} // Gestor DP só pode criar usuários do DP
           >
-            <MenuItem value="Recursos Humanos">Recursos Humanos</MenuItem>
+            {isAdmin && <MenuItem value="Recursos Humanos">Recursos Humanos</MenuItem>}
             <MenuItem value="Departamento Pessoal">Departamento Pessoal</MenuItem>
-            <MenuItem value="Segurança do Trabalho">Segurança do Trabalho</MenuItem>
+            {isAdmin && <MenuItem value="Segurança do Trabalho">Segurança do Trabalho</MenuItem>}
           </TextField>
         </DialogContent>
         <DialogActions>

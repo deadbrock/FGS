@@ -50,7 +50,8 @@ import { useAuth } from '../hooks/useAuth';
 import { useNavigationLog } from '../hooks/useNavigationLog';
 import { useTheme } from '../hooks/useTheme';
 import { useResponsive } from '../hooks/useResponsive';
-import { UserRole } from '../types';
+import { UserRole, Departamento } from '../types';
+import { hasRouteAccess } from '../utils/permissions';
 
 const DRAWER_WIDTH = 280;
 const DRAWER_WIDTH_MOBILE = 240;
@@ -198,8 +199,10 @@ export const DashboardLayout: React.FC = () => {
 
   // Filtra itens do menu baseado no role do usuário
   const filteredMenuItems = menuItems.filter((item) => {
-    if (!item.allowedRoles || !user) return true;
-    return item.allowedRoles.includes(user.role);
+    if (!user) return false;
+    
+    // Usa a nova função de verificação de acesso baseada em perfil e departamento
+    return hasRouteAccess(user, item.path);
   });
 
   return (

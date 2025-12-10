@@ -1,8 +1,8 @@
 import React from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { UserRole } from '../types';
-import { hasPermission } from '../utils/permissions';
+import { hasPermission, hasRouteAccess } from '../utils/permissions';
 import { Box, Typography, Button } from '@mui/material';
 import LockIcon from '@mui/icons-material/Lock';
 
@@ -39,9 +39,11 @@ export const PrivateRoute: React.FC<PrivateRouteProps> = ({
     return <Navigate to={redirectTo} replace />;
   }
 
-  // Verifica permissões se houver restrição de roles
-  if (allowedRoles && user) {
-    const hasAccess = allowedRoles.includes(user.role);
+  // Verifica permissões baseadas em perfil e departamento
+  const location = useLocation();
+  if (user) {
+    const currentPath = location.pathname;
+    const hasAccess = hasRouteAccess(user, currentPath);
 
     if (!hasAccess) {
       return (

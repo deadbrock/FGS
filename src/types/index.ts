@@ -17,6 +17,13 @@ export interface User {
   cargo?: string;
 }
 
+// Tipos de departamentos
+export enum Departamento {
+  RECURSOS_HUMANOS = 'Recursos Humanos',
+  DEPARTAMENTO_PESSOAL = 'Departamento Pessoal',
+  SEGURANCA_TRABALHO = 'Segurança do Trabalho',
+}
+
 // Interface de dados de login
 export interface LoginCredentials {
   email: string;
