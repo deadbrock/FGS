@@ -271,16 +271,17 @@ export const Admissao: React.FC = () => {
   };
 
   // Função para obter label da etapa
+  // NOVO FLUXO: SST antes do DP
   const getEtapaLabel = (etapa: EtapaWorkflow) => {
     const labels: Record<EtapaWorkflow, string> = {
-      SOLICITACAO_VAGA: 'Solicitação de Vaga',
-      APROVACAO: 'Aprovação',
-      COLETA_DOCUMENTOS: 'Coleta de Documentos',
-      VALIDACAO_DOCUMENTOS: 'Validação de Documentos (DP)',
-      EXAME_ADMISSIONAL: 'Exame Admissional (SST)',
-      GERACAO_CONTRATO: 'Enviado para Domínio Web',
-      ASSINATURA_DIGITAL: 'Contrato Assinado Fisicamente',
-      ENVIO_ESOCIAL: 'Enviado pela Domínio Web',
+      SOLICITACAO_VAGA: '1. Solicitação de Vaga (Gestor)',
+      APROVACAO: '2. Aprovação (RH)',
+      COLETA_DOCUMENTOS: '3. Coleta de Documentos (Candidato)',
+      EXAME_ADMISSIONAL: '4. Exame Admissional (SST)',
+      VALIDACAO_DOCUMENTOS: '5. Validação de Documentos (DP)',
+      GERACAO_CONTRATO: '6. Geração de Contrato (DP)',
+      ASSINATURA_DIGITAL: '7. Assinatura Digital',
+      ENVIO_ESOCIAL: '8. Envio eSocial',
     };
     return labels[etapa] || etapa;
   };
@@ -423,16 +424,17 @@ export const Admissao: React.FC = () => {
   };
 
   // Obter índice da etapa atual no stepper
+  // NOVO FLUXO: Exame Admissional (SST) ANTES de Validação de Documentos (DP)
   const getEtapaIndex = (etapa: EtapaWorkflow): number => {
     const etapas: EtapaWorkflow[] = [
-      'SOLICITACAO_VAGA',
-      'APROVACAO',
-      'COLETA_DOCUMENTOS',
-      'VALIDACAO_DOCUMENTOS',
-      'EXAME_ADMISSIONAL',
-      'GERACAO_CONTRATO',
-      'ASSINATURA_DIGITAL',
-      'ENVIO_ESOCIAL',
+      'SOLICITACAO_VAGA',      // 1. Gestor solicita vaga
+      'APROVACAO',             // 2. RH aprova
+      'COLETA_DOCUMENTOS',     // 3. Candidato envia documentos
+      'EXAME_ADMISSIONAL',     // 4. SST realiza exame (ANTES da validação do DP)
+      'VALIDACAO_DOCUMENTOS',  // 5. DP valida documentos (DEPOIS do exame SST)
+      'GERACAO_CONTRATO',      // 6. DP gera contrato
+      'ASSINATURA_DIGITAL',    // 7. Colaborador assina
+      'ENVIO_ESOCIAL',         // 8. Sistema envia para eSocial
     ];
     return etapas.indexOf(etapa);
   };
@@ -531,15 +533,14 @@ export const Admissao: React.FC = () => {
                   onChange={(e) => setFiltros({ ...filtros, etapa_atual: e.target.value as EtapaWorkflow | '' })}
                 >
                   <MenuItem value="">Todas</MenuItem>
-                  <MenuItem value="SOLICITACAO_VAGA">Solicitação de Vaga</MenuItem>
-                  <MenuItem value="APROVACAO">Aprovação</MenuItem>
-                  <MenuItem value="COLETA_DOCUMENTOS">Coleta de Documentos</MenuItem>
-                  <MenuItem value="VALIDACAO_DOCUMENTOS">Validação de Documentos</MenuItem>
-                  <MenuItem value="EXAME_ADMISSIONAL">Exame Admissional</MenuItem>
-                  <MenuItem value="GERACAO_CONTRATO">Geração de Contrato</MenuItem>
-                  <MenuItem value="ASSINATURA_DIGITAL">Assinatura Digital</MenuItem>
-                  <MenuItem value="ENVIO_ESOCIAL">Envio eSocial</MenuItem>
-                  <MenuItem value="INTEGRACAO_THOMSON">Integração Thompson</MenuItem>
+                  <MenuItem value="SOLICITACAO_VAGA">1. Solicitação de Vaga</MenuItem>
+                  <MenuItem value="APROVACAO">2. Aprovação</MenuItem>
+                  <MenuItem value="COLETA_DOCUMENTOS">3. Coleta de Documentos</MenuItem>
+                  <MenuItem value="EXAME_ADMISSIONAL">4. Exame Admissional (SST)</MenuItem>
+                  <MenuItem value="VALIDACAO_DOCUMENTOS">5. Validação de Documentos (DP)</MenuItem>
+                  <MenuItem value="GERACAO_CONTRATO">6. Geração de Contrato</MenuItem>
+                  <MenuItem value="ASSINATURA_DIGITAL">7. Assinatura Digital</MenuItem>
+                  <MenuItem value="ENVIO_ESOCIAL">8. Envio eSocial</MenuItem>
                 </TextField>
               </Grid>
               <Grid item xs={12} md={2}>
@@ -767,14 +768,14 @@ export const Admissao: React.FC = () => {
 
               <Stepper activeStep={getEtapaIndex(admissaoCompleta.etapa_atual)} orientation="vertical">
                 {[
-                  'SOLICITACAO_VAGA',
-                  'APROVACAO',
-                  'COLETA_DOCUMENTOS',
-                  'VALIDACAO_DOCUMENTOS',
-                  'EXAME_ADMISSIONAL',
-                  'GERACAO_CONTRATO',
-                  'ASSINATURA_DIGITAL',
-                  'ENVIO_ESOCIAL',
+                  'SOLICITACAO_VAGA',      // 1. Gestor solicita vaga
+                  'APROVACAO',             // 2. RH aprova
+                  'COLETA_DOCUMENTOS',     // 3. Candidato envia documentos
+                  'EXAME_ADMISSIONAL',     // 4. SST realiza exame (ANTES da validação do DP)
+                  'VALIDACAO_DOCUMENTOS',  // 5. DP valida documentos (DEPOIS do exame SST)
+                  'GERACAO_CONTRATO',      // 6. DP gera contrato
+                  'ASSINATURA_DIGITAL',    // 7. Colaborador assina
+                  'ENVIO_ESOCIAL',         // 8. Sistema envia para eSocial
                 ].map((etapa, index) => {
                   const etapaKey = etapa as EtapaWorkflow;
                   const workflowEtapa = admissaoCompleta.workflow?.find((w) => w.etapa === etapaKey);

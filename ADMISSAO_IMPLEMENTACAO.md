@@ -93,17 +93,18 @@ THOMSON_REUTERS_API_KEY=sua_api_key_aqui
 - Status de envio
 - Links para upload
 
-## 🎯 WORKFLOW COMPLETO
+## 🎯 WORKFLOW COMPLETO (ATUALIZADO)
 
 1. **SOLICITACAO_VAGA** - Gestor solicita vaga
 2. **APROVACAO** - RH/Diretoria aprova
 3. **COLETA_DOCUMENTOS** - Candidato envia documentos
-4. **VALIDACAO_DOCUMENTOS** - DP valida documentos
-5. **EXAME_ADMISSIONAL** - SST realiza exame
+4. **EXAME_ADMISSIONAL** - SST realiza exame ⚠️ **ANTES** da validação do DP
+5. **VALIDACAO_DOCUMENTOS** - DP valida documentos ⚠️ **DEPOIS** do exame SST
 6. **GERACAO_CONTRATO** - DP gera contrato
 7. **ASSINATURA_DIGITAL** - Colaborador assina
 8. **ENVIO_ESOCIAL** - Sistema envia S-2200
-9. **INTEGRACAO_THOMSON** - Sistema envia para Thompson Reuters
+
+**IMPORTANTE:** O fluxo foi ajustado para que a Segurança do Trabalho (SST) realize o exame admissional **ANTES** do Departamento Pessoal (DP) validar os documentos.
 
 ## ✅ CHECKLIST DE DOCUMENTOS PADRÃO
 

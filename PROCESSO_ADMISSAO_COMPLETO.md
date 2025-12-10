@@ -6,7 +6,7 @@ O sistema de Admissão de Colaboradores automatiza todo o processo desde a solic
 
 ---
 
-## 🔄 WORKFLOW COMPLETO - 9 ETAPAS
+## 🔄 WORKFLOW COMPLETO - 8 ETAPAS
 
 ### **ETAPA 1: Solicitação de Vaga** 👤
 **Responsável:** Gestor do Departamento  
@@ -20,7 +20,7 @@ O sistema de Admissão de Colaboradores automatiza todo o processo desde a solic
   - Salário Proposto, Data de Início Prevista
 - Sistema cria automaticamente:
   - Registro da admissão
-  - 10 documentos obrigatórios no checklist
+  - Documentos obrigatórios no checklist
   - Primeira etapa do workflow marcada como concluída
   - Próxima etapa (Aprovação) criada como pendente
 
@@ -60,54 +60,34 @@ O sistema de Admissão de Colaboradores automatiza todo o processo desde a solic
   - Prazos de entrega
 - Candidato acessa link e faz upload dos documentos:
   - RG, CPF, CTPS, Comprovante de Residência
-  - Título de Eleitor, PIS/PASEP
+  - Título de Eleitor
   - Certidões (se aplicável)
   - Foto 3x4
 - Sistema atualiza status de cada documento:
   - **PENDENTE** → **RECEBIDO** (após upload)
 
-**Checklist de Documentos (10 tipos padrão):**
-1. ✅ RG - Carteira de Identidade (Obrigatório, Prazo: 3 dias)
-2. ✅ CPF (Obrigatório, Prazo: 3 dias)
-3. ✅ CTPS - Carteira de Trabalho (Obrigatório, Prazo: 3 dias)
-4. ✅ Comprovante de Residência (Obrigatório, Prazo: 5 dias)
-5. ✅ Título de Eleitor (Obrigatório, Prazo: 5 dias)
-6. ✅ PIS/PASEP (Obrigatório, Prazo: 5 dias)
-7. ⚪ Certidão de Nascimento (Opcional, Prazo: 7 dias)
-8. ⚪ Certidão de Casamento (Opcional, Prazo: 7 dias)
-9. ✅ ASO - Atestado de Saúde Ocupacional (Obrigatório, Prazo: 7 dias)
-10. ✅ Foto 3x4 (Obrigatório, Prazo: 3 dias)
+**Checklist de Documentos:**
+1. ✅ Foto 3x4 (Obrigatório, Prazo: 3 dias)
+2. ✅ CTPS Digital (Obrigatório, Prazo: 3 dias)
+3. ✅ RG Frente (Obrigatório, Prazo: 3 dias)
+4. ✅ RG Verso (Obrigatório, Prazo: 3 dias)
+5. ✅ Comprovante de Residência (Obrigatório, Prazo: 5 dias)
+6. ⚪ Certidão Nascimento/Casamento (Opcional, Prazo: 7 dias)
+7. ⚪ Reservista (Opcional, Prazo: 7 dias)
+8. ✅ Título de Eleitor (Obrigatório, Prazo: 5 dias)
+9. ⚪ Antecedentes Criminais (Opcional, Prazo: 7 dias)
+10. ⚪ Certidão de Dependente (Opcional, Prazo: 7 dias)
+11. ⚪ CPF de Dependente (Opcional, Prazo: 7 dias)
 
-**Resultado:** Todos os documentos obrigatórios recebidos → Avança para "VALIDACAO_DOCUMENTOS"
-
----
-
-### **ETAPA 4: Validação de Documentos** 🔍
-**Responsável:** Departamento Pessoal (DP)  
-**Status:** PENDENTE → EM_ANDAMENTO → CONCLUIDA
-
-**O que acontece:**
-- DP acessa a aba "Checklist" da admissão
-- Visualiza todos os documentos enviados
-- Valida cada documento:
-  - **Aprovar:** Documento válido e correto
-  - **Reprovar:** Documento com problemas (adiciona observações)
-- Sistema atualiza status:
-  - **RECEBIDO** → **APROVADO** ou **REPROVADO**
-
-**Validações realizadas:**
-- Verificação de autenticidade
-- Conferência de dados (CPF, RG, etc.)
-- Verificação de validade (se aplicável)
-- Qualidade do arquivo enviado
-
-**Resultado:** Todos os documentos obrigatórios aprovados → Avança para "EXAME_ADMISSIONAL"
+**Resultado:** Todos os documentos obrigatórios recebidos → Avança para "EXAME_ADMISSIONAL"
 
 ---
 
-### **ETAPA 5: Exame Admissional** 🏥
+### **ETAPA 4: Exame Admissional** 🏥
 **Responsável:** Segurança do Trabalho (SST)  
 **Status:** PENDENTE → EM_ANDAMENTO → CONCLUIDA
+
+**⚠️ MUDANÇA IMPORTANTE:** Esta etapa agora ocorre **ANTES** da validação de documentos pelo DP.
 
 **O que acontece:**
 - SST agenda exame médico admissional
@@ -116,10 +96,36 @@ O sistema de Admissão de Colaboradores automatiza todo o processo desde a solic
 - Marca etapa como concluída
 
 **Documentos gerados:**
-- ASO Admissional (já está no checklist)
+- ASO Admissional
 - Laudos médicos (se necessário)
 
-**Resultado:** ASO aprovado → Avança para "GERACAO_CONTRATO"
+**Resultado:** ASO aprovado → Avança para "VALIDACAO_DOCUMENTOS"
+
+---
+
+### **ETAPA 5: Validação de Documentos** 🔍
+**Responsável:** Departamento Pessoal (DP)  
+**Status:** PENDENTE → EM_ANDAMENTO → CONCLUIDA
+
+**⚠️ MUDANÇA IMPORTANTE:** Esta etapa agora ocorre **DEPOIS** do exame admissional (SST).
+
+**O que acontece:**
+- DP acessa a aba "Checklist" da admissão
+- Visualiza todos os documentos enviados
+- Valida cada documento:
+  - **Aprovar:** Documento válido e correto
+  - **Reprovar:** Documento com problemas (motivo obrigatório)
+- Sistema atualiza status:
+  - **RECEBIDO** → **APROVADO** ou **REPROVADO**
+- **Se reprovar:** Sistema notifica automaticamente todos os usuários do RH com o motivo
+
+**Validações realizadas:**
+- Verificação de autenticidade
+- Conferência de dados (CPF, RG, etc.)
+- Verificação de validade (se aplicável)
+- Qualidade do arquivo enviado
+
+**Resultado:** Todos os documentos obrigatórios aprovados → Avança para "GERACAO_CONTRATO"
 
 ---
 
