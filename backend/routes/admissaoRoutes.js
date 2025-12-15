@@ -30,13 +30,13 @@ import {
   verificarStatusPorCPF
 } from '../controllers/admissaoCandidatosController.js';
 import { apiKeyAuth } from '../middleware/apiKeyAuth.js';
+import { authenticateToken } from '../middleware/auth.js';
 import upload from '../config/multer.js';
 
 const router = express.Router();
 
 // =============================================
-// ROTAS PÚBLICAS (sem autenticação por enquanto)
-// TODO: Adicionar middleware de autenticação
+// ROTAS COM AUTENTICAÇÃO
 // =============================================
 
 // IMPORTANTE: Rotas específicas devem vir ANTES de rotas com parâmetros dinâmicos
@@ -45,35 +45,35 @@ const router = express.Router();
 router.post('/candidatos', apiKeyAuth, receberCandidato);
 router.get('/candidatos/cpf/:cpf', apiKeyAuth, verificarStatusPorCPF);
 
-// Rotas de documentos (específicas antes de dinâmicas)
-router.get('/documentos/template', getDocumentosTemplate);
-router.post('/documentos/upload', upload.single('arquivo'), uploadDocumento);
-router.put('/documentos/:documento_id/validar', validarDocumento);
+// Rotas de documentos (específicas antes de dinâmicas) - REQUEREM AUTENTICAÇÃO JWT
+router.get('/documentos/template', authenticateToken, getDocumentosTemplate);
+router.post('/documentos/upload', authenticateToken, upload.single('arquivo'), uploadDocumento);
+router.put('/documentos/:documento_id/validar', authenticateToken, validarDocumento);
 
-// Rotas de exames admissionais (específicas antes de dinâmicas)
-router.get('/clinicas/listar', getClinicas);
-router.get('/exames/calendario', getCalendarioAgendamentos);
-router.put('/exames/:exame_id', updateExame);
+// Rotas de exames admissionais (específicas antes de dinâmicas) - REQUEREM AUTENTICAÇÃO JWT
+router.get('/clinicas/listar', authenticateToken, getClinicas);
+router.get('/exames/calendario', authenticateToken, getCalendarioAgendamentos);
+router.put('/exames/:exame_id', authenticateToken, updateExame);
 
-// Rotas principais
-router.get('/', getAdmissoes);
-router.get('/estatisticas', getEstatisticas);
-router.post('/', createAdmissao);
+// Rotas principais - REQUEREM AUTENTICAÇÃO JWT
+router.get('/', authenticateToken, getAdmissoes);
+router.get('/estatisticas', authenticateToken, getEstatisticas);
+router.post('/', authenticateToken, createAdmissao);
 
-// Rotas com parâmetros dinâmicos (devem vir por último)
-router.get('/:id', getAdmissaoById);
-router.put('/:id', updateAdmissao);
-router.put('/:id/cancelar', cancelarAdmissao);
-router.post('/:id/avancar-etapa', avancarEtapa);
+// Rotas com parâmetros dinâmicos (devem vir por último) - REQUEREM AUTENTICAÇÃO JWT
+router.get('/:id', authenticateToken, getAdmissaoById);
+router.put('/:id', authenticateToken, updateAdmissao);
+router.put('/:id/cancelar', authenticateToken, cancelarAdmissao);
+router.post('/:id/avancar-etapa', authenticateToken, avancarEtapa);
 
-// Rotas de integrações (com parâmetros dinâmicos)
-router.post('/:admissao_id/enviar-dominio', enviarParaDominio);
-router.put('/:admissao_id/contrato-assinado', marcarContratoAssinado);
-router.put('/:admissao_id/esocial-enviado-dominio', marcarESocialEnviadoDominio);
+// Rotas de integrações (com parâmetros dinâmicos) - REQUEREM AUTENTICAÇÃO JWT
+router.post('/:admissao_id/enviar-dominio', authenticateToken, enviarParaDominio);
+router.put('/:admissao_id/contrato-assinado', authenticateToken, marcarContratoAssinado);
+router.put('/:admissao_id/esocial-enviado-dominio', authenticateToken, marcarESocialEnviadoDominio);
 
-// Rotas de exames admissionais (com parâmetros dinâmicos)
-router.get('/:admissao_id/exames', getExamesByAdmissao);
-router.post('/:admissao_id/exames', criarAgendamento);
+// Rotas de exames admissionais (com parâmetros dinâmicos) - REQUEREM AUTENTICAÇÃO JWT
+router.get('/:admissao_id/exames', authenticateToken, getExamesByAdmissao);
+router.post('/:admissao_id/exames', authenticateToken, criarAgendamento);
 
 export default router;
 
