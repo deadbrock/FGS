@@ -1,0 +1,45 @@
+# Railway Ignore File
+# Arquivos e pastas que não devem ser incluídos no deploy
+
+# Frontend build (não necessário no backend)
+dist/
+build/
+.next/
+out/
+
+# Node modules (será reinstalado)
+node_modules/
+
+# Cache
+.cache/
+.parcel-cache/
+.eslintcache
+
+# IDE
+.vscode/
+.idea/
+
+# Git
+.git/
+
+# Documentation
+*.md
+!README.md
+docs/
+
+# Logs
+logs/
+*.log
+
+# Environment (usar variáveis do Railway)
+.env
+.env.local
+
+# Tests
+coverage/
+.nyc_output/
+
+# Misc
+.DS_Store
+*.pem
+
