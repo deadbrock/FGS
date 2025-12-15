@@ -11,6 +11,14 @@ export const hasRouteAccess = (user: User | null, route: string): boolean => {
 
   // Construir chave de acesso
   const accessKey = `${role}_${departamento || ''}_${route}`;
+  
+  console.log('🔍 [PERMISSÕES DEBUG]', {
+    role,
+    departamento,
+    route,
+    accessKey,
+    departamentoEnum: Departamento.SEGURANCA_TRABALHO,
+  });
 
   // Mapeamento de acessos por perfil e departamento
   const accessMap: Record<string, boolean> = {
@@ -71,7 +79,10 @@ export const hasRouteAccess = (user: User | null, route: string): boolean => {
     [`COLABORADOR_/dashboard`]: true,
   };
   
-  return accessMap[accessKey] || false;
+  const hasAccess = accessMap[accessKey] || false;
+  console.log('✅ [PERMISSÕES RESULTADO]', { accessKey, hasAccess });
+  
+  return hasAccess;
 };
 
 // Define as permissões de cada rota (mantido para compatibilidade)
