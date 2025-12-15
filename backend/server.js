@@ -85,6 +85,7 @@ import segurancaRoutes from './routes/segurancaRoutes.js';
 import integracoesRoutes from './routes/integracoesRoutes.js';
 import admissaoRoutes from './routes/admissaoRoutes.js';
 import solicitacoesRoutes from './routes/solicitacoesRoutes.js';
+import epiRoutes from './routes/epiRoutes.js';
 
 app.use('/api/usuarios', usuariosRoutes);
 app.use('/api/auth', authRoutes);
@@ -99,6 +100,7 @@ app.use('/api/seguranca', segurancaRoutes);
 app.use('/api/integracoes', integracoesRoutes);
 app.use('/api/admissoes', admissaoRoutes);
 app.use('/api/solicitacoes', solicitacoesRoutes);
+app.use('/api/epis', epiRoutes);
 
 // Debug: Log de rotas registradas
 console.log('✅ Rotas registradas:');
@@ -112,6 +114,13 @@ console.log('      - GET    /api/solicitacoes/clinicas');
 console.log('      - POST   /api/solicitacoes/clinicas');
 console.log('      - PUT    /api/solicitacoes/clinicas/:id');
 console.log('      - DELETE /api/solicitacoes/clinicas/:id');
+console.log('   🦺 Gestão de EPIs:');
+console.log('      - GET    /api/epis/');
+console.log('      - POST   /api/epis/');
+console.log('      - GET    /api/epis/estatisticas');
+console.log('      - GET    /api/epis/entregas');
+console.log('      - POST   /api/epis/entregas');
+console.log('      - PUT    /api/epis/entregas/:id/devolver');
 
 // Rota de health check
 app.get('/health', (req, res) => {

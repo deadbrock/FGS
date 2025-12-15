@@ -23,6 +23,7 @@ import { RetornoTrabalho } from '../pages/solicitacoes/RetornoTrabalho';
 import { MudancaRisco } from '../pages/solicitacoes/MudancaRisco';
 import { Demissional } from '../pages/solicitacoes/Demissional';
 import { CadastroClinicas } from '../pages/solicitacoes/CadastroClinicas';
+import { EPIs } from '../pages/EPIs';
 import { UserRole } from '../types';
 
 // Componente de rotas da aplicação
@@ -204,6 +205,16 @@ export const AppRoutes: React.FC = () => {
             element={
               <PrivateRoute allowedRoles={[UserRole.ADMINISTRADOR, UserRole.GESTOR, UserRole.USUARIO]}>
                 <CadastroClinicas />
+              </PrivateRoute>
+            }
+          />
+
+          {/* EPIs - Segurança do Trabalho */}
+          <Route
+            path="/epis"
+            element={
+              <PrivateRoute allowedRoles={[UserRole.ADMINISTRADOR, UserRole.GESTOR, UserRole.USUARIO]}>
+                <EPIs />
               </PrivateRoute>
             }
           />

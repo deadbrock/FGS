@@ -41,6 +41,7 @@ import PublicIcon from '@mui/icons-material/Public';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import SearchIcon from '@mui/icons-material/Search';
 import MedicalServicesIcon from '@mui/icons-material/MedicalServices';
+import HealthAndSafetyIcon from '@mui/icons-material/HealthAndSafety';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import Brightness4Icon from '@mui/icons-material/Brightness4';
 import Brightness7Icon from '@mui/icons-material/Brightness7';
@@ -128,6 +129,12 @@ const menuItems: MenuItem[] = [
     title: 'Solicitações SST',
     path: '/solicitacoes',
     icon: <MedicalServicesIcon />,
+    allowedRoles: [UserRole.ADMINISTRADOR, UserRole.GESTOR, UserRole.USUARIO],
+  },
+  {
+    title: 'Gestão de EPIs',
+    path: '/epis',
+    icon: <HealthAndSafetyIcon />,
     allowedRoles: [UserRole.ADMINISTRADOR, UserRole.GESTOR, UserRole.USUARIO],
   },
   {
