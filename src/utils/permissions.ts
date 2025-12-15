@@ -9,6 +9,10 @@ export const hasRouteAccess = (user: User | null, route: string): boolean => {
   // ADMINISTRADOR tem acesso total
   if (role === UserRole.ADMINISTRADOR) return true;
 
+  // Construir chave de acesso
+  const accessKey = `${role}_${departamento || ''}_${route}`;
+  console.log('🔍 [PERMISSÕES] Verificando acesso:', { role, departamento, route, accessKey });
+
   // Mapeamento de acessos por perfil e departamento
   const accessMap: Record<string, boolean> = {
     // GESTOR do Departamento Pessoal
@@ -53,10 +57,10 @@ export const hasRouteAccess = (user: User | null, route: string): boolean => {
     [`COLABORADOR_/dashboard`]: true,
   };
 
-  // Construir chave de acesso
-  const accessKey = `${role}_${departamento || ''}_${route}`;
+  const hasAccess = accessMap[accessKey] || false;
+  console.log('✅ [PERMISSÕES] Resultado:', { accessKey, hasAccess, accessMapKeys: Object.keys(accessMap).filter(k => k.includes(route)) });
   
-  return accessMap[accessKey] || false;
+  return hasAccess;
 };
 
 // Define as permissões de cada rota (mantido para compatibilidade)
