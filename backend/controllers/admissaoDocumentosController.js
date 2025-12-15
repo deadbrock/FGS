@@ -137,11 +137,12 @@ export const validarDocumento = async (req, res) => {
     const documento = docInfo.rows[0];
 
     // Atualizar documento
+    // Usar CAST para evitar erro de tipo inconsistente no PostgreSQL
     const result = await pool.query(
       `UPDATE admissao_documentos
-      SET status = $1,
+      SET status = $1::VARCHAR,
           validado_por = $2,
-          data_aprovacao = CASE WHEN $1 = 'APROVADO' THEN CURRENT_TIMESTAMP ELSE NULL END,
+          data_aprovacao = CASE WHEN $1::VARCHAR = 'APROVADO' THEN CURRENT_TIMESTAMP ELSE NULL END,
           observacoes_validacao = $3,
           updated_at = CURRENT_TIMESTAMP
       WHERE id = $4
