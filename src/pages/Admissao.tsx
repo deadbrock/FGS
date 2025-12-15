@@ -271,7 +271,7 @@ export const Admissao: React.FC = () => {
   };
 
   // Função para obter label da etapa
-  // NOVO FLUXO: SST antes do DP
+  // FLUXO ATUALIZADO: Envio para Domínio Web após validação de documentos
   const getEtapaLabel = (etapa: EtapaWorkflow) => {
     const labels: Record<EtapaWorkflow, string> = {
       SOLICITACAO_VAGA: '1. Solicitação de Vaga (Gestor)',
@@ -279,9 +279,10 @@ export const Admissao: React.FC = () => {
       COLETA_DOCUMENTOS: '3. Coleta de Documentos (Candidato)',
       EXAME_ADMISSIONAL: '4. Exame Admissional (SST)',
       VALIDACAO_DOCUMENTOS: '5. Validação de Documentos (DP)',
-      GERACAO_CONTRATO: '6. Geração de Contrato (DP)',
-      ASSINATURA_DIGITAL: '7. Assinatura Digital',
-      ENVIO_ESOCIAL: '8. Envio eSocial',
+      ENVIO_DOMINIO_WEB: '6. Envio para Domínio Web (DP)',
+      GERACAO_CONTRATO: '7. Geração de Contrato (Domínio Web)',
+      ASSINATURA_DIGITAL: '8. Assinatura Digital',
+      ENVIO_ESOCIAL: '9. Envio eSocial',
     };
     return labels[etapa] || etapa;
   };
@@ -424,17 +425,18 @@ export const Admissao: React.FC = () => {
   };
 
   // Obter índice da etapa atual no stepper
-  // NOVO FLUXO: Exame Admissional (SST) ANTES de Validação de Documentos (DP)
+  // FLUXO ATUALIZADO: Envio para Domínio Web após validação de documentos
   const getEtapaIndex = (etapa: EtapaWorkflow): number => {
     const etapas: EtapaWorkflow[] = [
       'SOLICITACAO_VAGA',      // 1. Gestor solicita vaga
       'APROVACAO',             // 2. RH aprova
       'COLETA_DOCUMENTOS',     // 3. Candidato envia documentos
-      'EXAME_ADMISSIONAL',     // 4. SST realiza exame (ANTES da validação do DP)
-      'VALIDACAO_DOCUMENTOS',  // 5. DP valida documentos (DEPOIS do exame SST)
-      'GERACAO_CONTRATO',      // 6. DP gera contrato
-      'ASSINATURA_DIGITAL',    // 7. Colaborador assina
-      'ENVIO_ESOCIAL',         // 8. Sistema envia para eSocial
+      'EXAME_ADMISSIONAL',     // 4. SST realiza exame
+      'VALIDACAO_DOCUMENTOS',  // 5. DP valida documentos
+      'ENVIO_DOMINIO_WEB',     // 6. DP envia para Domínio Web (NOVA ETAPA)
+      'GERACAO_CONTRATO',      // 7. Domínio Web gera contrato
+      'ASSINATURA_DIGITAL',    // 8. Colaborador assina
+      'ENVIO_ESOCIAL',         // 9. Sistema envia para eSocial
     ];
     return etapas.indexOf(etapa);
   };
@@ -538,9 +540,10 @@ export const Admissao: React.FC = () => {
                   <MenuItem value="COLETA_DOCUMENTOS">3. Coleta de Documentos</MenuItem>
                   <MenuItem value="EXAME_ADMISSIONAL">4. Exame Admissional (SST)</MenuItem>
                   <MenuItem value="VALIDACAO_DOCUMENTOS">5. Validação de Documentos (DP)</MenuItem>
-                  <MenuItem value="GERACAO_CONTRATO">6. Geração de Contrato</MenuItem>
-                  <MenuItem value="ASSINATURA_DIGITAL">7. Assinatura Digital</MenuItem>
-                  <MenuItem value="ENVIO_ESOCIAL">8. Envio eSocial</MenuItem>
+                  <MenuItem value="ENVIO_DOMINIO_WEB">6. Envio para Domínio Web (DP)</MenuItem>
+                  <MenuItem value="GERACAO_CONTRATO">7. Geração de Contrato</MenuItem>
+                  <MenuItem value="ASSINATURA_DIGITAL">8. Assinatura Digital</MenuItem>
+                  <MenuItem value="ENVIO_ESOCIAL">9. Envio eSocial</MenuItem>
                 </TextField>
               </Grid>
               <Grid item xs={12} md={2}>
@@ -771,11 +774,12 @@ export const Admissao: React.FC = () => {
                   'SOLICITACAO_VAGA',      // 1. Gestor solicita vaga
                   'APROVACAO',             // 2. RH aprova
                   'COLETA_DOCUMENTOS',     // 3. Candidato envia documentos
-                  'EXAME_ADMISSIONAL',     // 4. SST realiza exame (ANTES da validação do DP)
-                  'VALIDACAO_DOCUMENTOS',  // 5. DP valida documentos (DEPOIS do exame SST)
-                  'GERACAO_CONTRATO',      // 6. DP gera contrato
-                  'ASSINATURA_DIGITAL',    // 7. Colaborador assina
-                  'ENVIO_ESOCIAL',         // 8. Sistema envia para eSocial
+                  'EXAME_ADMISSIONAL',     // 4. SST realiza exame
+                  'VALIDACAO_DOCUMENTOS',  // 5. DP valida documentos
+                  'ENVIO_DOMINIO_WEB',     // 6. DP envia para Domínio Web (NOVA ETAPA)
+                  'GERACAO_CONTRATO',      // 7. Domínio Web gera contrato
+                  'ASSINATURA_DIGITAL',    // 8. Colaborador assina
+                  'ENVIO_ESOCIAL',         // 9. Sistema envia para eSocial
                 ].map((etapa, index) => {
                   const etapaKey = etapa as EtapaWorkflow;
                   const workflowEtapa = admissaoCompleta.workflow?.find((w) => w.etapa === etapaKey);

@@ -668,16 +668,17 @@ export const avancarEtapa = async (req, res) => {
 
 // Função auxiliar para determinar próxima etapa
 function getProximaEtapa(etapaAtual) {
-  // NOVO FLUXO: Exame Admissional (SST) ANTES de Validação de Documentos (DP)
+  // FLUXO ATUALIZADO: Envio para Domínio Web após validação de documentos
   const etapas = [
     'SOLICITACAO_VAGA',      // 1. Gestor solicita vaga
     'APROVACAO',             // 2. RH aprova
     'COLETA_DOCUMENTOS',     // 3. Candidato envia documentos
-    'EXAME_ADMISSIONAL',     // 4. SST realiza exame (ANTES da validação do DP)
-    'VALIDACAO_DOCUMENTOS',  // 5. DP valida documentos (DEPOIS do exame SST)
-    'GERACAO_CONTRATO',      // 6. DP gera contrato
-    'ASSINATURA_DIGITAL',    // 7. Colaborador assina
-    'ENVIO_ESOCIAL'          // 8. Sistema envia para eSocial
+    'EXAME_ADMISSIONAL',     // 4. SST realiza exame
+    'VALIDACAO_DOCUMENTOS',  // 5. DP valida documentos
+    'ENVIO_DOMINIO_WEB',     // 6. DP envia para Domínio Web (NOVA ETAPA)
+    'GERACAO_CONTRATO',      // 7. Domínio Web gera contrato
+    'ASSINATURA_DIGITAL',    // 8. Colaborador assina
+    'ENVIO_ESOCIAL'          // 9. Sistema envia para eSocial
   ];
 
   const indexAtual = etapas.indexOf(etapaAtual);

@@ -6,7 +6,7 @@ O sistema de Admissão de Colaboradores automatiza todo o processo desde a solic
 
 ---
 
-## 🔄 WORKFLOW COMPLETO - 8 ETAPAS
+## 🔄 WORKFLOW COMPLETO - 9 ETAPAS
 
 ### **ETAPA 1: Solicitação de Vaga** 👤
 **Responsável:** Gestor do Departamento  
@@ -125,48 +125,80 @@ O sistema de Admissão de Colaboradores automatiza todo o processo desde a solic
 - Verificação de validade (se aplicável)
 - Qualidade do arquivo enviado
 
-**Resultado:** Todos os documentos obrigatórios aprovados → Avança para "GERACAO_CONTRATO"
+**Resultado:** Todos os documentos obrigatórios aprovados → Avança para "ENVIO_DOMINIO_WEB"
 
 ---
 
-### **ETAPA 6: Geração de Contrato** 📝
+### **ETAPA 6: Envio para Domínio Web** 🌐
 **Responsável:** Departamento Pessoal (DP)  
 **Status:** PENDENTE → EM_ANDAMENTO → CONCLUIDA
 
+**⭐ NOVA ETAPA:** Após validação de documentos, DP envia dados para o sistema Domínio Web.
+
 **O que acontece:**
-- DP gera contrato de trabalho baseado em:
+- DP acessa a admissão e clica em "Enviar para Domínio Web"
+- Sistema prepara dados do candidato:
+  - Dados pessoais (nome, CPF, RG, data nascimento)
+  - Dados contratuais (cargo, departamento, salário, tipo contrato)
+  - Dados de contato (email, telefone, endereço)
+  - Documentos validados
+- Sistema envia para API do Domínio Web
+- Recebe confirmação e ID no sistema Domínio Web
+- Registra data/hora do envio
+
+**Dados enviados:**
+- Nome completo, CPF, RG
+- Data de nascimento, gênero
+- Email, telefone
+- Endereço completo
+- Cargo, departamento
+- Tipo de contrato, salário
+- Data de início prevista
+- Documentos anexados
+
+**Resultado:** Dados enviados com sucesso → Avança para "GERACAO_CONTRATO"
+
+---
+
+### **ETAPA 7: Geração de Contrato** 📝
+**Responsável:** Sistema Domínio Web  
+**Status:** PENDENTE → EM_ANDAMENTO → CONCLUIDA
+
+**O que acontece:**
+- Sistema Domínio Web recebe os dados
+- Gera contrato de trabalho automaticamente baseado em:
   - Dados do candidato
   - Tipo de contrato (CLT, PJ, Estágio, Temporário)
   - Salário proposto
   - Jornada de trabalho
   - Data de início
-- Contrato é gerado automaticamente (futuro: template configurável)
 - Contrato fica disponível para assinatura
+- Sistema FGS recebe notificação de contrato gerado
 
-**Resultado:** Contrato gerado → Avança para "ASSINATURA_DIGITAL"
+**Resultado:** Contrato gerado no Domínio Web → Avança para "ASSINATURA_DIGITAL"
 
 ---
 
-### **ETAPA 7: Assinatura Digital** ✍️
+### **ETAPA 8: Assinatura Digital** ✍️
 **Responsável:** Colaborador (Novo Funcionário)  
 **Status:** PENDENTE → EM_ANDAMENTO → CONCLUIDA
 
 **O que acontece:**
-- Sistema envia link de assinatura digital ao colaborador (futuro)
+- Domínio Web envia link de assinatura digital ao colaborador
 - Colaborador acessa link e assina digitalmente
 - Sistema registra assinatura e data/hora
 - Contrato assinado fica arquivado no sistema
+- DP marca no FGS que contrato foi assinado fisicamente (alternativa)
 
-**Tecnologias (futuro):**
-- Integração com plataforma de assinatura digital (DocuSign, ClickSign, etc.)
-- Certificado digital ICP-Brasil
-- Validação jurídica
+**Tecnologias:**
+- Assinatura digital via Domínio Web
+- Ou assinatura física registrada no FGS
 
 **Resultado:** Contrato assinado → Avança para "ENVIO_ESOCIAL"
 
 ---
 
-### **ETAPA 8: Envio eSocial** 📤
+### **ETAPA 9: Envio eSocial** 📤
 **Responsável:** Sistema Automático  
 **Status:** PENDENTO → EM_ANDAMENTO → CONCLUIDA
 
@@ -194,37 +226,7 @@ ESOCIAL_AMBIENTE=2  # 1=Produção, 2=Teste
 ESOCIAL_CNPJ=12345678000190
 ```
 
-**Resultado:** Evento S-2200 enviado com sucesso → Avança para "INTEGRACAO_THOMSON"
-
----
-
-### **ETAPA 9: Integração Thompson Reuters** 🌐
-**Responsável:** Sistema Automático  
-**Status:** PENDENTE → EM_ANDAMENTO → CONCLUIDA
-
-**O que acontece:**
-- Sistema prepara dados do novo colaborador
-- Envia para API do Thompson Reuters (domínio web):
-  - Dados pessoais
-  - Dados contratuais
-  - Dados de contato
-- Recebe confirmação e ID no sistema Thompson Reuters
-- Registra data/hora do envio
-
-**Dados enviados:**
-- Nome, CPF, E-mail, Telefone
-- Data de Nascimento, Gênero
-- Cargo, Departamento
-- Data de Admissão, Salário
-- Endereço completo
-
-**Configuração necessária:**
-```env
-THOMSON_REUTERS_API_URL=https://api.thomsonreuters.com/v1/employees
-THOMSON_REUTERS_API_KEY=sua_api_key_aqui
-```
-
-**Resultado:** Dados enviados com sucesso → Admissão CONCLUÍDA ✅
+**Resultado:** Evento S-2200 enviado com sucesso → Admissão CONCLUÍDA ✅
 
 ---
 

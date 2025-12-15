@@ -98,13 +98,16 @@ THOMSON_REUTERS_API_KEY=sua_api_key_aqui
 1. **SOLICITACAO_VAGA** - Gestor solicita vaga
 2. **APROVACAO** - RH/Diretoria aprova
 3. **COLETA_DOCUMENTOS** - Candidato envia documentos
-4. **EXAME_ADMISSIONAL** - SST realiza exame ⚠️ **ANTES** da validação do DP
-5. **VALIDACAO_DOCUMENTOS** - DP valida documentos ⚠️ **DEPOIS** do exame SST
-6. **GERACAO_CONTRATO** - DP gera contrato
-7. **ASSINATURA_DIGITAL** - Colaborador assina
-8. **ENVIO_ESOCIAL** - Sistema envia S-2200
+4. **EXAME_ADMISSIONAL** - SST realiza exame
+5. **VALIDACAO_DOCUMENTOS** - DP valida documentos
+6. **ENVIO_DOMINIO_WEB** - DP envia para Domínio Web ⭐ **NOVA ETAPA**
+7. **GERACAO_CONTRATO** - Domínio Web gera contrato
+8. **ASSINATURA_DIGITAL** - Colaborador assina
+9. **ENVIO_ESOCIAL** - Sistema envia S-2200
 
-**IMPORTANTE:** O fluxo foi ajustado para que a Segurança do Trabalho (SST) realize o exame admissional **ANTES** do Departamento Pessoal (DP) validar os documentos.
+**IMPORTANTE:** 
+- SST realiza exame admissional **ANTES** do DP validar documentos
+- Após validação, DP envia dados para **Domínio Web** que gera o contrato
 
 ## ✅ CHECKLIST DE DOCUMENTOS PADRÃO
 
