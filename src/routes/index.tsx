@@ -150,11 +150,11 @@ export const AppRoutes: React.FC = () => {
             }
           />
 
-          {/* Solicitações SST - Admin e Gestor */}
+          {/* Solicitações SST - Admin, Gestor e Usuário SST */}
           <Route
             path="/solicitacoes"
             element={
-              <PrivateRoute allowedRoles={[UserRole.ADMINISTRADOR, UserRole.GESTOR]}>
+              <PrivateRoute allowedRoles={[UserRole.ADMINISTRADOR, UserRole.GESTOR, UserRole.USUARIO]}>
                 <Solicitacoes />
               </PrivateRoute>
             }
@@ -162,7 +162,7 @@ export const AppRoutes: React.FC = () => {
           <Route
             path="/solicitacoes/aso-admissional"
             element={
-              <PrivateRoute allowedRoles={[UserRole.ADMINISTRADOR, UserRole.GESTOR]}>
+              <PrivateRoute allowedRoles={[UserRole.ADMINISTRADOR, UserRole.GESTOR, UserRole.USUARIO]}>
                 <ASOAdmissional />
               </PrivateRoute>
             }
@@ -170,7 +170,7 @@ export const AppRoutes: React.FC = () => {
           <Route
             path="/solicitacoes/periodicos"
             element={
-              <PrivateRoute allowedRoles={[UserRole.ADMINISTRADOR, UserRole.GESTOR]}>
+              <PrivateRoute allowedRoles={[UserRole.ADMINISTRADOR, UserRole.GESTOR, UserRole.USUARIO]}>
                 <Periodicos />
               </PrivateRoute>
             }
@@ -178,7 +178,7 @@ export const AppRoutes: React.FC = () => {
           <Route
             path="/solicitacoes/retorno-trabalho"
             element={
-              <PrivateRoute allowedRoles={[UserRole.ADMINISTRADOR, UserRole.GESTOR]}>
+              <PrivateRoute allowedRoles={[UserRole.ADMINISTRADOR, UserRole.GESTOR, UserRole.USUARIO]}>
                 <RetornoTrabalho />
               </PrivateRoute>
             }
@@ -186,7 +186,7 @@ export const AppRoutes: React.FC = () => {
           <Route
             path="/solicitacoes/mudanca-risco"
             element={
-              <PrivateRoute allowedRoles={[UserRole.ADMINISTRADOR, UserRole.GESTOR]}>
+              <PrivateRoute allowedRoles={[UserRole.ADMINISTRADOR, UserRole.GESTOR, UserRole.USUARIO]}>
                 <MudancaRisco />
               </PrivateRoute>
             }
@@ -194,7 +194,7 @@ export const AppRoutes: React.FC = () => {
           <Route
             path="/solicitacoes/demissional"
             element={
-              <PrivateRoute allowedRoles={[UserRole.ADMINISTRADOR, UserRole.GESTOR]}>
+              <PrivateRoute allowedRoles={[UserRole.ADMINISTRADOR, UserRole.GESTOR, UserRole.USUARIO]}>
                 <Demissional />
               </PrivateRoute>
             }
@@ -202,7 +202,7 @@ export const AppRoutes: React.FC = () => {
           <Route
             path="/solicitacoes/clinicas"
             element={
-              <PrivateRoute allowedRoles={[UserRole.ADMINISTRADOR, UserRole.GESTOR]}>
+              <PrivateRoute allowedRoles={[UserRole.ADMINISTRADOR, UserRole.GESTOR, UserRole.USUARIO]}>
                 <CadastroClinicas />
               </PrivateRoute>
             }

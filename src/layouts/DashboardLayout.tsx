@@ -128,7 +128,7 @@ const menuItems: MenuItem[] = [
     title: 'Solicitações SST',
     path: '/solicitacoes',
     icon: <MedicalServicesIcon />,
-    allowedRoles: [UserRole.ADMINISTRADOR, UserRole.GESTOR],
+    allowedRoles: [UserRole.ADMINISTRADOR, UserRole.GESTOR, UserRole.USUARIO],
   },
   {
     title: 'Segurança',

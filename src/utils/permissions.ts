@@ -42,6 +42,12 @@ export const hasRouteAccess = (user: User | null, route: string): boolean => {
     [`GESTOR_${Departamento.SEGURANCA_TRABALHO}_/dashboard`]: true,
     [`GESTOR_${Departamento.SEGURANCA_TRABALHO}_/treinamentos`]: true,
     [`GESTOR_${Departamento.SEGURANCA_TRABALHO}_/admissao`]: true,
+    [`GESTOR_${Departamento.SEGURANCA_TRABALHO}_/solicitacoes`]: true,
+
+    // USUARIO do Segurança do Trabalho
+    [`USUARIO_${Departamento.SEGURANCA_TRABALHO}_/dashboard`]: true,
+    [`USUARIO_${Departamento.SEGURANCA_TRABALHO}_/solicitacoes`]: true,
+    [`USUARIO_${Departamento.SEGURANCA_TRABALHO}_/admissao`]: true,
 
     // COLABORADOR (acesso básico)
     [`COLABORADOR_/dashboard`]: true,
@@ -69,6 +75,7 @@ export const routePermissions: Record<string, UserRole[]> = {
   '/configuracoes': [UserRole.ADMINISTRADOR],
   '/colaboradores': [UserRole.ADMINISTRADOR, UserRole.GESTOR],
   '/admissao': [UserRole.ADMINISTRADOR, UserRole.GESTOR, UserRole.USUARIO],
+  '/solicitacoes': [UserRole.ADMINISTRADOR, UserRole.GESTOR, UserRole.USUARIO],
 };
 
 // Verifica se o usuário tem permissão para acessar uma rota
