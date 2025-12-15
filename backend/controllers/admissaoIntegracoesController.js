@@ -85,7 +85,7 @@ export const enviarParaDominio = async (req, res) => {
 
       const contratoId = response.data?.id || response.data?.contractId || uuidv4();
 
-      // Atualizar admissão - marcar como enviado para domínio
+      // Atualizar admissão - marcar como enviado para domínio e avançar etapa
       await pool.query(
         `UPDATE admissoes
         SET contrato_enviado_dominio = true,
@@ -95,6 +95,13 @@ export const enviarParaDominio = async (req, res) => {
             updated_at = CURRENT_TIMESTAMP
         WHERE id = $2`,
         [contratoId, admissao_id]
+      );
+
+      // Registrar no workflow
+      await pool.query(
+        `INSERT INTO admissao_workflow (id, admissao_id, etapa, status_etapa, data_inicio, data_conclusao, observacoes)
+         VALUES ($1, $2, 'ENVIO_DOMINIO_WEB', 'CONCLUIDA', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'Enviado para Domínio Web com sucesso')`,
+        [uuidv4(), admissao_id]
       );
 
       res.json({

@@ -133,6 +133,9 @@ export const Admissao: React.FC = () => {
   const [reprovarDialogOpen, setReprovarDialogOpen] = useState(false);
   const [documentoParaReprovar, setDocumentoParaReprovar] = useState<string | null>(null);
   const [motivoReprovacao, setMotivoReprovacao] = useState('');
+  
+  // Estados para envio Domínio Web
+  const [enviarDominioDialogOpen, setEnviarDominioDialogOpen] = useState(false);
 
   // Carregar admissões
   const carregarAdmissoes = useCallback(async () => {
@@ -396,6 +399,24 @@ export const Admissao: React.FC = () => {
     }
 
     await handleValidarDocumento(documentoParaReprovar, false, motivoReprovacao);
+  };
+
+  // Enviar para Domínio Web
+  const handleEnviarParaDominioWeb = async () => {
+    if (!admissaoSelecionada) return;
+
+    try {
+      setLoading(true);
+      setError(null);
+      await admissaoService.enviarParaDominioWeb(admissaoSelecionada.id);
+      setEnviarDominioDialogOpen(false);
+      await carregarDetalhesAdmissao(admissaoSelecionada.id);
+      carregarAdmissoes();
+    } catch (err: any) {
+      setError(err.message || 'Erro ao enviar para Domínio Web');
+    } finally {
+      setLoading(false);
+    }
   };
 
   // Abrir dialog de cancelamento
@@ -758,15 +779,33 @@ export const Admissao: React.FC = () => {
                     sx={{ mt: 1 }}
                   />
                 </Box>
-                {admissaoCompleta.status === 'EM_ANDAMENTO' && (
-                  <GradientButton
-                    startIcon={<SendIcon />}
-                    onClick={handleAvancarEtapa}
-                    disabled={loading}
-                  >
-                    Avançar Etapa
-                  </GradientButton>
-                )}
+                <Box display="flex" gap={2}>
+                  {/* Botão específico para enviar para Domínio Web */}
+                  {admissaoCompleta.status === 'EM_ANDAMENTO' && 
+                   admissaoCompleta.etapa_atual === 'ENVIO_DOMINIO_WEB' && 
+                   !admissaoCompleta.contrato_enviado_dominio && (
+                    <GradientButton
+                      startIcon={<SendIcon />}
+                      onClick={() => setEnviarDominioDialogOpen(true)}
+                      disabled={loading}
+                      gradient="primary"
+                    >
+                      Enviar para Domínio Web
+                    </GradientButton>
+                  )}
+                  
+                  {/* Botão genérico para avançar etapa */}
+                  {admissaoCompleta.status === 'EM_ANDAMENTO' && 
+                   admissaoCompleta.etapa_atual !== 'ENVIO_DOMINIO_WEB' && (
+                    <GradientButton
+                      startIcon={<SendIcon />}
+                      onClick={handleAvancarEtapa}
+                      disabled={loading}
+                    >
+                      Avançar Etapa
+                    </GradientButton>
+                  )}
+                </Box>
               </Box>
 
               <Stepper activeStep={getEtapaIndex(admissaoCompleta.etapa_atual)} orientation="vertical">
@@ -1320,6 +1359,45 @@ export const Admissao: React.FC = () => {
           >
             {loading ? <CircularProgress size={20} /> : 'Reprovar Documento'}
           </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Dialog de Envio para Domínio Web */}
+      <Dialog open={enviarDominioDialogOpen} onClose={() => setEnviarDominioDialogOpen(false)} maxWidth="sm" fullWidth>
+        <DialogTitle>Enviar para Domínio Web</DialogTitle>
+        <DialogContent>
+          <DialogContentText sx={{ mb: 2 }}>
+            Confirma o envio dos dados de <strong>{admissaoSelecionada?.nome_candidato}</strong> para o sistema Domínio Web?
+          </DialogContentText>
+          <Alert severity="info" sx={{ mt: 2 }}>
+            <Typography variant="body2" gutterBottom>
+              <strong>Dados que serão enviados:</strong>
+            </Typography>
+            <Typography variant="body2" component="div">
+              • Dados pessoais (nome, CPF, email, telefone)
+              <br />
+              • Dados contratuais (cargo, departamento, salário)
+              <br />
+              • Endereço completo
+              <br />
+              • Documentos validados
+            </Typography>
+          </Alert>
+          <Alert severity="warning" sx={{ mt: 2 }}>
+            <Typography variant="body2">
+              Após o envio, o Domínio Web irá gerar automaticamente o contrato de trabalho.
+            </Typography>
+          </Alert>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setEnviarDominioDialogOpen(false)}>Cancelar</Button>
+          <GradientButton 
+            onClick={handleEnviarParaDominioWeb} 
+            disabled={loading}
+            startIcon={<SendIcon />}
+          >
+            {loading ? <CircularProgress size={20} /> : 'Confirmar Envio'}
+          </GradientButton>
         </DialogActions>
       </Dialog>
     </Box>

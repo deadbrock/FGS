@@ -204,6 +204,20 @@ class AdmissaoService {
     }
   }
 
+  // Enviar para Domínio Web
+  async enviarParaDominioWeb(admissaoId: string): Promise<any> {
+    try {
+      const token = localStorage.getItem('@FGS:token');
+      if (token) this.setAuthToken(token);
+
+      const response = await this.api.post(`/${admissaoId}/enviar-dominio`);
+      return response.data;
+    } catch (error: any) {
+      console.error('Erro ao enviar para Domínio Web:', error);
+      throw new Error(error.response?.data?.error || 'Erro ao enviar para Domínio Web');
+    }
+  }
+
   // Enviar para Thompson Reuters
   async enviarThompsonReuters(admissaoId: string): Promise<any> {
     try {
