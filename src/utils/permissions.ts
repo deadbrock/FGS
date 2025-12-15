@@ -11,7 +11,6 @@ export const hasRouteAccess = (user: User | null, route: string): boolean => {
 
   // Construir chave de acesso
   const accessKey = `${role}_${departamento || ''}_${route}`;
-  console.log('🔍 [PERMISSÕES] Verificando acesso:', { role, departamento, route, accessKey });
 
   // Mapeamento de acessos por perfil e departamento
   const accessMap: Record<string, boolean> = {
@@ -52,15 +51,27 @@ export const hasRouteAccess = (user: User | null, route: string): boolean => {
     [`USUARIO_${Departamento.SEGURANCA_TRABALHO}_/dashboard`]: true,
     [`USUARIO_${Departamento.SEGURANCA_TRABALHO}_/solicitacoes`]: true,
     [`USUARIO_${Departamento.SEGURANCA_TRABALHO}_/admissao`]: true,
+    
+    // Permitir navegação nas subpáginas de Solicitações para SST
+    [`GESTOR_${Departamento.SEGURANCA_TRABALHO}_/solicitacoes/aso-admissional`]: true,
+    [`GESTOR_${Departamento.SEGURANCA_TRABALHO}_/solicitacoes/periodicos`]: true,
+    [`GESTOR_${Departamento.SEGURANCA_TRABALHO}_/solicitacoes/retorno-trabalho`]: true,
+    [`GESTOR_${Departamento.SEGURANCA_TRABALHO}_/solicitacoes/mudanca-risco`]: true,
+    [`GESTOR_${Departamento.SEGURANCA_TRABALHO}_/solicitacoes/demissional`]: true,
+    [`GESTOR_${Departamento.SEGURANCA_TRABALHO}_/solicitacoes/clinicas`]: true,
+    
+    [`USUARIO_${Departamento.SEGURANCA_TRABALHO}_/solicitacoes/aso-admissional`]: true,
+    [`USUARIO_${Departamento.SEGURANCA_TRABALHO}_/solicitacoes/periodicos`]: true,
+    [`USUARIO_${Departamento.SEGURANCA_TRABALHO}_/solicitacoes/retorno-trabalho`]: true,
+    [`USUARIO_${Departamento.SEGURANCA_TRABALHO}_/solicitacoes/mudanca-risco`]: true,
+    [`USUARIO_${Departamento.SEGURANCA_TRABALHO}_/solicitacoes/demissional`]: true,
+    [`USUARIO_${Departamento.SEGURANCA_TRABALHO}_/solicitacoes/clinicas`]: true,
 
     // COLABORADOR (acesso básico)
     [`COLABORADOR_/dashboard`]: true,
   };
-
-  const hasAccess = accessMap[accessKey] || false;
-  console.log('✅ [PERMISSÕES] Resultado:', { accessKey, hasAccess, accessMapKeys: Object.keys(accessMap).filter(k => k.includes(route)) });
   
-  return hasAccess;
+  return accessMap[accessKey] || false;
 };
 
 // Define as permissões de cada rota (mantido para compatibilidade)
