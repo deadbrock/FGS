@@ -16,6 +16,13 @@ import { Seguranca } from '../pages/Seguranca';
 import { Integracoes } from '../pages/Integracoes';
 import { Regionais } from '../pages/Regionais';
 import { Admissao } from '../pages/Admissao';
+import { Solicitacoes } from '../pages/Solicitacoes';
+import { ASOAdmissional } from '../pages/solicitacoes/ASOAdmissional';
+import { Periodicos } from '../pages/solicitacoes/Periodicos';
+import { RetornoTrabalho } from '../pages/solicitacoes/RetornoTrabalho';
+import { MudancaRisco } from '../pages/solicitacoes/MudancaRisco';
+import { Demissional } from '../pages/solicitacoes/Demissional';
+import { CadastroClinicas } from '../pages/solicitacoes/CadastroClinicas';
 import { UserRole } from '../types';
 
 // Componente de rotas da aplicação
@@ -139,6 +146,64 @@ export const AppRoutes: React.FC = () => {
             element={
               <PrivateRoute allowedRoles={[UserRole.ADMINISTRADOR, UserRole.GESTOR]}>
                 <Regionais />
+              </PrivateRoute>
+            }
+          />
+
+          {/* Solicitações SST - Admin e Gestor */}
+          <Route
+            path="/solicitacoes"
+            element={
+              <PrivateRoute allowedRoles={[UserRole.ADMINISTRADOR, UserRole.GESTOR]}>
+                <Solicitacoes />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/solicitacoes/aso-admissional"
+            element={
+              <PrivateRoute allowedRoles={[UserRole.ADMINISTRADOR, UserRole.GESTOR]}>
+                <ASOAdmissional />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/solicitacoes/periodicos"
+            element={
+              <PrivateRoute allowedRoles={[UserRole.ADMINISTRADOR, UserRole.GESTOR]}>
+                <Periodicos />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/solicitacoes/retorno-trabalho"
+            element={
+              <PrivateRoute allowedRoles={[UserRole.ADMINISTRADOR, UserRole.GESTOR]}>
+                <RetornoTrabalho />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/solicitacoes/mudanca-risco"
+            element={
+              <PrivateRoute allowedRoles={[UserRole.ADMINISTRADOR, UserRole.GESTOR]}>
+                <MudancaRisco />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/solicitacoes/demissional"
+            element={
+              <PrivateRoute allowedRoles={[UserRole.ADMINISTRADOR, UserRole.GESTOR]}>
+                <Demissional />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/solicitacoes/clinicas"
+            element={
+              <PrivateRoute allowedRoles={[UserRole.ADMINISTRADOR, UserRole.GESTOR]}>
+                <CadastroClinicas />
               </PrivateRoute>
             }
           />

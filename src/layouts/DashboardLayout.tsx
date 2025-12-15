@@ -40,6 +40,7 @@ import IntegrationInstructionsIcon from '@mui/icons-material/IntegrationInstruct
 import PublicIcon from '@mui/icons-material/Public';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import SearchIcon from '@mui/icons-material/Search';
+import MedicalServicesIcon from '@mui/icons-material/MedicalServices';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import Brightness4Icon from '@mui/icons-material/Brightness4';
 import Brightness7Icon from '@mui/icons-material/Brightness7';
@@ -121,6 +122,12 @@ const menuItems: MenuItem[] = [
     title: 'Regionais',
     path: '/regionais',
     icon: <PublicIcon />,
+    allowedRoles: [UserRole.ADMINISTRADOR, UserRole.GESTOR],
+  },
+  {
+    title: 'Solicitações SST',
+    path: '/solicitacoes',
+    icon: <MedicalServicesIcon />,
     allowedRoles: [UserRole.ADMINISTRADOR, UserRole.GESTOR],
   },
   {

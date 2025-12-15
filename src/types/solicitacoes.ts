@@ -33,6 +33,7 @@ export interface SolicitacaoExame {
   colaborador_email?: string;
   colaborador_telefone?: string;
   cargo: string;
+  cargo_anterior?: string; // Para mudança de risco
   departamento: string;
   setor: string;
   admissao_id?: string; // Se for ASO Admissional
@@ -41,6 +42,11 @@ export interface SolicitacaoExame {
   solicitado_por: string;
   solicitado_por_nome?: string;
   observacoes?: string;
+  // Campos específicos
+  motivo_afastamento?: string; // Para retorno ao trabalho
+  data_afastamento?: string; // Para retorno ao trabalho
+  data_desligamento?: string; // Para demissional
+  motivo_desligamento?: string; // Para demissional
   // Agendamento
   clinica_id?: string;
   clinica_nome?: string;
@@ -68,7 +74,7 @@ export interface Clinica {
   telefone: string;
   email: string;
   endereco: {
-    rua: string;
+    logradouro: string;
     numero: string;
     complemento?: string;
     bairro: string;
@@ -76,13 +82,14 @@ export interface Clinica {
     estado: string;
     cep: string;
   };
-  contato_responsavel?: string;
-  telefone_responsavel?: string;
-  especialidades: string[]; // Tipos de exames que realiza
+  responsavel_nome?: string;
+  responsavel_telefone?: string;
+  responsavel_email?: string;
+  especialidades?: string[]; // Tipos de exames que realiza
   observacoes?: string;
   ativo: boolean;
-  created_at: string;
-  updated_at: string;
+  created_at?: string;
+  updated_at?: string;
 }
 
 // Agendamento
@@ -113,10 +120,38 @@ export interface CreateSolicitacaoDTO {
   colaborador_email?: string;
   colaborador_telefone?: string;
   cargo: string;
+  cargo_anterior?: string; // Para mudança de risco
   departamento: string;
   setor: string;
   admissao_id?: string;
+  motivo_afastamento?: string; // Para retorno ao trabalho
+  data_afastamento?: string; // Para retorno ao trabalho
+  data_desligamento?: string; // Para demissional
+  motivo_desligamento?: string; // Para demissional
   observacoes?: string;
+}
+
+export interface UpdateClinicaDTO {
+  nome?: string;
+  cnpj?: string;
+  razao_social?: string;
+  telefone?: string;
+  email?: string;
+  endereco?: {
+    logradouro: string;
+    numero: string;
+    complemento?: string;
+    bairro: string;
+    cidade: string;
+    estado: string;
+    cep: string;
+  };
+  responsavel_nome?: string;
+  responsavel_telefone?: string;
+  responsavel_email?: string;
+  especialidades?: string[];
+  observacoes?: string;
+  ativo?: boolean;
 }
 
 export interface CreateClinicaDTO {
@@ -126,7 +161,7 @@ export interface CreateClinicaDTO {
   telefone: string;
   email: string;
   endereco: {
-    rua: string;
+    logradouro: string;
     numero: string;
     complemento?: string;
     bairro: string;
@@ -134,10 +169,12 @@ export interface CreateClinicaDTO {
     estado: string;
     cep: string;
   };
-  contato_responsavel?: string;
-  telefone_responsavel?: string;
-  especialidades: string[];
+  responsavel_nome?: string;
+  responsavel_telefone?: string;
+  responsavel_email?: string;
+  especialidades?: string[];
   observacoes?: string;
+  ativo?: boolean;
 }
 
 export interface CreateAgendamentoDTO {
