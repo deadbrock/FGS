@@ -84,6 +84,7 @@ import documentosRoutes from './routes/documentosRoutes.js';
 import segurancaRoutes from './routes/segurancaRoutes.js';
 import integracoesRoutes from './routes/integracoesRoutes.js';
 import admissaoRoutes from './routes/admissaoRoutes.js';
+import solicitacoesRoutes from './routes/solicitacoesRoutes.js';
 
 app.use('/api/usuarios', usuariosRoutes);
 app.use('/api/auth', authRoutes);
@@ -97,6 +98,7 @@ app.use('/api/documentos', documentosRoutes);
 app.use('/api/seguranca', segurancaRoutes);
 app.use('/api/integracoes', integracoesRoutes);
 app.use('/api/admissoes', admissaoRoutes);
+app.use('/api/solicitacoes', solicitacoesRoutes);
 
 // Debug: Log de rotas registradas
 console.log('✅ Rotas de segurança registradas:');
