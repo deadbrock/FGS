@@ -12,6 +12,9 @@ router.use(authenticateToken);
 // ROTAS DE SOLICITAÇÕES
 // =============================================
 
+// Estatísticas (deve vir ANTES das rotas com :id)
+router.get('/estatisticas', solicitacoesController.getEstatisticas);
+
 // Listar solicitações
 router.get('/', solicitacoesController.getAll);
 
@@ -23,9 +26,6 @@ router.post('/agendamento', solicitacoesController.createAgendamento);
 
 // Atualizar resultado
 router.put('/:id/resultado', solicitacoesController.atualizarResultado);
-
-// Estatísticas
-router.get('/estatisticas', solicitacoesController.getEstatisticas);
 
 // =============================================
 // ROTAS DE CLÍNICAS

@@ -101,11 +101,17 @@ app.use('/api/admissoes', admissaoRoutes);
 app.use('/api/solicitacoes', solicitacoesRoutes);
 
 // Debug: Log de rotas registradas
-console.log('✅ Rotas de segurança registradas:');
-console.log('   - GET /api/seguranca/estatisticas');
-console.log('   - GET /api/seguranca/usuarios');
-console.log('   - GET /api/seguranca/logs-acesso');
-console.log('   - GET /api/seguranca/logs-alteracoes');
+console.log('✅ Rotas registradas:');
+console.log('   📋 Solicitações SST:');
+console.log('      - GET    /api/solicitacoes/');
+console.log('      - POST   /api/solicitacoes/');
+console.log('      - GET    /api/solicitacoes/estatisticas');
+console.log('      - POST   /api/solicitacoes/agendamento');
+console.log('      - PUT    /api/solicitacoes/:id/resultado');
+console.log('      - GET    /api/solicitacoes/clinicas');
+console.log('      - POST   /api/solicitacoes/clinicas');
+console.log('      - PUT    /api/solicitacoes/clinicas/:id');
+console.log('      - DELETE /api/solicitacoes/clinicas/:id');
 
 // Rota de health check
 app.get('/health', (req, res) => {
