@@ -2,7 +2,15 @@
  * Utilitário para enviar erros para o FGS Error Logger
  */
 
-const ERROR_LOGGER_URL = import.meta.env.VITE_ERROR_LOGGER_URL || 'http://localhost:4000/api/errors/log';
+// URL do Error Logger (produção ou desenvolvimento)
+const ERROR_LOGGER_URL = import.meta.env.VITE_ERROR_LOGGER_URL || 
+  (import.meta.env.PROD 
+    ? 'https://fgs-error-logger-production.up.railway.app/api/errors/log' 
+    : 'http://localhost:4000/api/errors/log');
+
+// Debug
+console.log('🔧 Error Logger URL configurada:', ERROR_LOGGER_URL);
+console.log('🔧 Ambiente:', import.meta.env.MODE);
 
 interface ErrorData {
   tipo: 'FRONTEND' | 'BACKEND' | 'API';

@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { logAPIError } from '../utils/errorLogger';
 
 // URL base da API (configurável via variável de ambiente)
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3333/api';
@@ -27,10 +28,24 @@ api.interceptors.request.use(
   }
 );
 
-// Interceptor para tratar erros de autenticação
+// Interceptor para tratar erros de autenticação e logar erros
 api.interceptors.response.use(
   (response) => response,
   (error) => {
+    // Capturar usuário do localStorage
+    const userStr = localStorage.getItem('@FGS:user');
+    const user = userStr ? JSON.parse(userStr) : null;
+    
+    // Logar erro na API de logs (apenas erros 4xx e 5xx)
+    if (error.response && error.response.status >= 400) {
+      logAPIError(
+        error,
+        error.config?.url || 'unknown',
+        error.config?.method?.toUpperCase() || 'GET',
+        user
+      );
+    }
+    
     if (error.response?.status === 401) {
       // Token inválido ou expirado
       localStorage.removeItem('@FGS:token');
