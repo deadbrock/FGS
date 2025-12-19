@@ -649,6 +649,18 @@ export const avancarEtapa = async (req, res) => {
       [proximaEtapa, responsavel_id || admissao.responsavel_atual, id]
     );
 
+    // 🔥 INTEGRAÇÃO AUTOMÁTICA COM SST
+    // Se a próxima etapa for EXAME_ADMISSIONAL, criar solicitação automaticamente
+    if (proximaEtapa === 'EXAME_ADMISSIONAL') {
+      try {
+        await criarSolicitacaoSSTAutomatica(id, admissao, req.user?.id);
+        console.log(`✅ [SST] Solicitação ASO criada automaticamente para admissão ${id}`);
+      } catch (sstError) {
+        console.error(`⚠️ [SST] Erro ao criar solicitação automática:`, sstError.message);
+        // Não bloqueia o avanço da etapa, apenas loga o erro
+      }
+    }
+
     res.json({
       success: true,
       message: 'Etapa avançada com sucesso',
@@ -772,4 +784,98 @@ export const getEstatisticas = async (req, res) => {
     });
   }
 };
+
+// =============================================
+// INTEGRAÇÃO AUTOMÁTICA COM SST
+// =============================================
+
+/**
+ * Cria automaticamente uma solicitação de ASO ADMISSIONAL no módulo SST
+ * quando uma admissão chega na etapa EXAME_ADMISSIONAL
+ */
+async function criarSolicitacaoSSTAutomatica(admissaoId, admissao, usuarioId) {
+  try {
+    // Verificar se já existe uma solicitação para esta admissão
+    const solicitacaoExistente = await pool.query(
+      `SELECT id FROM sst_solicitacoes_exames 
+       WHERE admissao_id = $1 AND tipo_exame = 'ASO_ADMISSIONAL'`,
+      [admissaoId]
+    );
+
+    if (solicitacaoExistente.rows.length > 0) {
+      console.log(`ℹ️ [SST] Solicitação já existe para admissão ${admissaoId}`);
+      return solicitacaoExistente.rows[0];
+    }
+
+    // Buscar dados do colaborador
+    const colaboradorResult = await pool.query(
+      `SELECT id, nome, cpf, data_nascimento, cargo, setor, regional
+       FROM colaboradores 
+       WHERE cpf = $1 
+       LIMIT 1`,
+      [admissao.cpf_candidato]
+    );
+
+    let colaboradorId = null;
+    let colaboradorNome = admissao.nome_candidato;
+    let cargo = admissao.cargo;
+    let setor = admissao.departamento || 'Não especificado';
+
+    // Se o colaborador já existe no sistema, usar seus dados
+    if (colaboradorResult.rows.length > 0) {
+      const colab = colaboradorResult.rows[0];
+      colaboradorId = colab.id;
+      colaboradorNome = colab.nome;
+      cargo = colab.cargo || admissao.cargo;
+      setor = colab.setor || setor;
+    }
+
+    // Criar a solicitação de exame
+    const solicitacaoId = uuidv4();
+    const result = await pool.query(
+      `INSERT INTO sst_solicitacoes_exames (
+        id,
+        tipo_exame,
+        colaborador_id,
+        colaborador_nome,
+        colaborador_cpf,
+        cargo,
+        setor,
+        data_solicitacao,
+        status,
+        prioridade,
+        observacoes,
+        solicitante_id,
+        admissao_id,
+        created_at,
+        updated_at
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
+      RETURNING *`,
+      [
+        solicitacaoId,
+        'ASO_ADMISSIONAL',
+        colaboradorId,
+        colaboradorNome,
+        admissao.cpf_candidato,
+        cargo,
+        setor,
+        new Date(),
+        'PENDENTE',
+        'ALTA', // ASO Admissional sempre tem prioridade alta
+        `Solicitação criada automaticamente pela admissão ${admissaoId}`,
+        usuarioId,
+        admissaoId,
+        new Date(),
+        new Date()
+      ]
+    );
+
+    console.log(`✅ [SST] Solicitação ASO criada: ${solicitacaoId} para ${colaboradorNome}`);
+    return result.rows[0];
+
+  } catch (error) {
+    console.error('❌ [SST] Erro ao criar solicitação automática:', error);
+    throw error;
+  }
+}
 

@@ -780,6 +780,18 @@ export const Admissao: React.FC = () => {
                   />
                 </Box>
                 <Box display="flex" gap={2}>
+                  {/* Botão para acessar SST quando na etapa de Exame Admissional */}
+                  {admissaoCompleta.etapa_atual === 'EXAME_ADMISSIONAL' && (
+                    <GradientButton
+                      startIcon={<AssessmentIcon />}
+                      onClick={() => window.open('/solicitacoes?tipo=ASO_ADMISSIONAL', '_blank')}
+                      gradient="success"
+                      sx={{ mr: 1 }}
+                    >
+                      Acessar Módulo SST
+                    </GradientButton>
+                  )}
+
                   {/* Botão específico para enviar para Domínio Web */}
                   {admissaoCompleta.status === 'EM_ANDAMENTO' && 
                    admissaoCompleta.etapa_atual === 'ENVIO_DOMINIO_WEB' && 
@@ -871,6 +883,23 @@ export const Admissao: React.FC = () => {
                                 Esta etapa está em andamento. Complete as ações necessárias para avançar.
                               </Alert>
                             </Box>
+                          )}
+
+                          {etapaKey === 'EXAME_ADMISSIONAL' && isActive && (
+                            <Alert severity="success" sx={{ mt: 2 }}>
+                              <Typography variant="body2" gutterBottom>
+                                ✅ Uma solicitação de ASO ADMISSIONAL foi criada automaticamente no módulo SST.
+                              </Typography>
+                              <Button
+                                size="small"
+                                variant="outlined"
+                                startIcon={<AssessmentIcon />}
+                                onClick={() => window.open('/solicitacoes?tipo=ASO_ADMISSIONAL', '_blank')}
+                                sx={{ mt: 1 }}
+                              >
+                                Acessar Módulo SST
+                              </Button>
+                            </Alert>
                           )}
 
                           {etapaKey === 'ENVIO_ESOCIAL' && admissaoCompleta.esocial_enviado && (
