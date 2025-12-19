@@ -18,7 +18,7 @@ class SolicitacoesService {
 
   constructor() {
     this.api = axios.create({
-      baseURL: `${API_URL}/api/solicitacoes`,
+      baseURL: `${API_URL}/solicitacoes`,
       headers: {
         'Content-Type': 'application/json',
       },
