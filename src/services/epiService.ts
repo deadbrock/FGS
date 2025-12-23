@@ -18,14 +18,14 @@ import {
   HistoricoColaborador,
 } from '../types/epi';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3333/api';
+import { API_ENDPOINTS } from '../config/api';
 
 class EPIService {
   private api: AxiosInstance;
 
   constructor() {
     this.api = axios.create({
-      baseURL: `${API_URL}/api/epis`,
+      baseURL: API_ENDPOINTS.epis,
       headers: {
         'Content-Type': 'application/json',
       },
