@@ -11,14 +11,14 @@ import {
   EstatisticasSolicitacoes,
 } from '../types/solicitacoes';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3333/api';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3333';
 
 class SolicitacoesService {
   private api: AxiosInstance;
 
   constructor() {
     this.api = axios.create({
-      baseURL: `${API_URL}/solicitacoes`,
+      baseURL: `${API_URL}/api/solicitacoes`,
       headers: {
         'Content-Type': 'application/json',
       },
