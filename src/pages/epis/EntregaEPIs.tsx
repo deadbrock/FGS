@@ -190,10 +190,11 @@ export const EntregaEPIs: React.FC = () => {
         {/* Formulário de Entrega */}
         <Grid item xs={12} md={8}>
           <AnimatedCard>
-            <Typography variant="h6" gutterBottom>
-              Nova Entrega de EPI
-            </Typography>
-            <Divider sx={{ mb: 3 }} />
+            <Box sx={{ p: 3 }}>
+              <Typography variant="h6" gutterBottom>
+                Nova Entrega de EPI
+              </Typography>
+              <Divider sx={{ mb: 3 }} />
 
             <Grid container spacing={2}>
               {/* Buscar Colaborador */}
@@ -377,16 +378,18 @@ export const EntregaEPIs: React.FC = () => {
                 </Box>
               </Grid>
             </Grid>
+            </Box>
           </AnimatedCard>
         </Grid>
 
         {/* Entregas Recentes */}
         <Grid item xs={12} md={4}>
           <AnimatedCard>
-            <Typography variant="h6" gutterBottom>
-              Entregas Recentes
-            </Typography>
-            <Divider sx={{ mb: 2 }} />
+            <Box sx={{ p: 3 }}>
+              <Typography variant="h6" gutterBottom>
+                Entregas Recentes
+              </Typography>
+              <Divider sx={{ mb: 2 }} />
 
             {entregasRecentes.length === 0 ? (
               <Typography variant="body2" color="text.secondary" align="center" sx={{ py: 3 }}>
@@ -420,6 +423,7 @@ export const EntregaEPIs: React.FC = () => {
                 ))}
               </Box>
             )}
+            </Box>
           </AnimatedCard>
         </Grid>
       </Grid>
