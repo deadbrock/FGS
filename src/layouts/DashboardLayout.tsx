@@ -135,7 +135,7 @@ const menuItems: MenuItem[] = [
     title: 'Gestão de EPIs',
     path: '/epis',
     icon: <HealthAndSafetyIcon />,
-    allowedRoles: [UserRole.ADMINISTRADOR, UserRole.GESTOR, UserRole.USUARIO],
+    allowedRoles: [UserRole.ADMINISTRADOR, UserRole.GESTOR, UserRole.USUARIO], // SST only via permissions.ts
   },
   {
     title: 'Segurança',

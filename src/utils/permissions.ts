@@ -54,11 +54,13 @@ export const hasRouteAccess = (user: User | null, route: string): boolean => {
     [`GESTOR_${Departamento.SEGURANCA_TRABALHO}_/treinamentos`]: true,
     [`GESTOR_${Departamento.SEGURANCA_TRABALHO}_/admissao`]: true,
     [`GESTOR_${Departamento.SEGURANCA_TRABALHO}_/solicitacoes`]: true,
+    [`GESTOR_${Departamento.SEGURANCA_TRABALHO}_/epis`]: true, // Gestão de EPIs
 
     // USUARIO do Segurança do Trabalho
     [`USUARIO_${Departamento.SEGURANCA_TRABALHO}_/dashboard`]: true,
     [`USUARIO_${Departamento.SEGURANCA_TRABALHO}_/solicitacoes`]: true,
     [`USUARIO_${Departamento.SEGURANCA_TRABALHO}_/admissao`]: true,
+    [`USUARIO_${Departamento.SEGURANCA_TRABALHO}_/epis`]: true, // Gestão de EPIs
     
     // Permitir navegação nas subpáginas de Solicitações para SST
     [`GESTOR_${Departamento.SEGURANCA_TRABALHO}_/solicitacoes/aso-admissional`]: true,
