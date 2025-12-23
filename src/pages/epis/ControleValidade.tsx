@@ -5,12 +5,14 @@ import { AnimatedCard } from '../../components';
 export const ControleValidade: React.FC = () => {
   return (
     <AnimatedCard>
-      <Typography variant="h6" gutterBottom>
-        Controle de Validade
-      </Typography>
-      <Typography variant="body2" color="text.secondary">
-        Página em desenvolvimento - Dashboard de EPIs vencidos e a vencer
-      </Typography>
+      <Box sx={{ p: 3 }}>
+        <Typography variant="h6" gutterBottom>
+          Controle de Validade
+        </Typography>
+        <Typography variant="body2" color="text.secondary">
+          Página em desenvolvimento - Dashboard de EPIs vencidos e a vencer
+        </Typography>
+      </Box>
     </AnimatedCard>
   );
 };
