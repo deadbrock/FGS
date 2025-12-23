@@ -10,15 +10,14 @@ import {
   FiltrosSolicitacoes,
   EstatisticasSolicitacoes,
 } from '../types/solicitacoes';
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3333';
+import { API_ENDPOINTS } from '../config/api';
 
 class SolicitacoesService {
   private api: AxiosInstance;
 
   constructor() {
     this.api = axios.create({
-      baseURL: `${API_URL}/api/solicitacoes`,
+      baseURL: API_ENDPOINTS.solicitacoes,
       headers: {
         'Content-Type': 'application/json',
       },
